@@ -1,104 +1,108 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { IonContent, IonPage, IonHeader, IonIcon } from '@ionic/react';
+import React, { useState, useEffect } from 'react';
+import { IonContent, IonPage, IonIcon, IonSpinner, useIonViewWillEnter } from '@ionic/react';
 import {
   searchOutline,
   downloadOutline,
   peopleOutline,
   closeOutline,
+  checkmarkDoneOutline,
+  createOutline,
+  trashOutline,
 } from 'ionicons/icons';
-import Navigation from '../../components/Navigation/Navigation';
 import LeadCard from '../../components/LeadCard/LeadCard';
 import LeadForm from '../../components/LeadForm/LeadForm';
 import { Lead, LeadFormInput } from '../../types/lead';
-import { databaseService } from '../../services/database';
+import { useLeads } from '../../hooks/useLeads';
 import { exportLeadsToExcel } from '../../services/export';
 import './CRM.css';
 
-type DateFilter = 'all' | 'today' | 'yesterday' | 'week' | 'month';
-
 const CRM: React.FC = () => {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
-  const [homeTypeFilter, setHomeTypeFilter] = useState<string>('all');
+  const {
+    filteredLeads,
+    loading,
+    searchQuery,
+    setSearchQuery,
+    dateFilter,
+    setDateFilter,
+    fetchLeads,
+    updateLead,
+    deleteLead,
+    deleteLeads,
+  } = useLeads();
+
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
-  const loadLeadsData = async () => {
-    setLoading(true);
-    const data = await databaseService.getLeads();
-    setLeads(data);
-    setLoading(false);
-  };
+  const isSelectionMode = selectedIds.length > 0;
 
+  // Set 'today' as default filter & refresh leads on entry
+  useIonViewWillEnter(() => {
+    setDateFilter('today');
+    setSelectedIds([]);
+    fetchLeads();
+  });
+
+  // Body scroll lock when any modal is open
   useEffect(() => {
-    loadLeadsData();
-  }, []);
+    const modalActive = Boolean(editingLead || showBulkDeleteModal);
+    document.body.style.overflow = modalActive ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [editingLead, showBulkDeleteModal]);
 
-  const handleDeleteLead = async (id: number) => {
-    if (await CapacitorNativeOrWebDelete(id)) {
-      await loadLeadsData();
+  // Keyboard Escape listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showBulkDeleteModal) {
+          setShowBulkDeleteModal(false);
+        } else if (editingLead) {
+          setEditingLead(null);
+        } else if (isSelectionMode) {
+          setSelectedIds([]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editingLead, showBulkDeleteModal, isSelectionMode]);
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleLongPress = (id: number) => {
+    if (!selectedIds.includes(id)) {
+      setSelectedIds((prev) => [...prev, id]);
     }
   };
 
-  const CapacitorNativeOrWebDelete = async (id: number) => {
-    try {
-      const allLeads = await databaseService.getLeads();
-      const updated = allLeads.filter((l) => l.id !== id);
-      localStorage.setItem('offline_crm_leads_v1', JSON.stringify(updated));
-      await loadLeadsData();
-      return true;
-    } catch {
-      return false;
+  const handleSelectAll = () => {
+    const allFilteredIds = filteredLeads.map((l) => l.id);
+    if (selectedIds.length === allFilteredIds.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(allFilteredIds);
     }
   };
 
-  // Filtered Leads Calculation
-  const filteredLeads = useMemo(() => {
-    return leads.filter((lead) => {
-      // 1. Search Query Filter
-      const query = searchQuery.trim().toLowerCase();
-      if (query) {
-        const matchName = lead.name.toLowerCase().includes(query);
-        const matchPhone = lead.phone.includes(query) || (lead.country_code && lead.country_code.includes(query));
-        const matchEmail = (lead.email || '').toLowerCase().includes(query);
-        const matchNotes = (lead.notes || '').toLowerCase().includes(query);
+  const handleEditSingleSelected = () => {
+    if (selectedIds.length !== 1) return;
+    const targetLead = filteredLeads.find((l) => l.id === selectedIds[0]);
+    if (targetLead) {
+      setEditingLead(targetLead);
+    }
+  };
 
-        if (!matchName && !matchPhone && !matchEmail && !matchNotes) {
-          return false;
-        }
-      }
-
-      // 2. Home Type Filter
-      if (homeTypeFilter !== 'all' && lead.home_type !== homeTypeFilter) {
-        return false;
-      }
-
-      // 3. Date Filter
-      if (dateFilter !== 'all') {
-        const leadDate = new Date(lead.created_at);
-        const now = new Date();
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        if (dateFilter === 'today') {
-          if (leadDate < startOfToday) return false;
-        } else if (dateFilter === 'yesterday') {
-          const startOfYesterday = new Date(startOfToday);
-          startOfYesterday.setDate(startOfYesterday.getDate() - 1);
-          if (leadDate < startOfYesterday || leadDate >= startOfToday) return false;
-        } else if (dateFilter === 'week') {
-          const startOfWeek = new Date(startOfToday);
-          startOfWeek.setDate(startOfWeek.getDate() - 7);
-          if (leadDate < startOfWeek) return false;
-        } else if (dateFilter === 'month') {
-          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          if (leadDate < startOfMonth) return false;
-        }
-      }
-
-      return true;
-    });
-  }, [leads, searchQuery, dateFilter, homeTypeFilter]);
+  const handleConfirmBulkDelete = async () => {
+    setShowBulkDeleteModal(false);
+    await deleteLeads(selectedIds);
+    setSelectedIds([]);
+  };
 
   const handleExport = () => {
     exportLeadsToExcel(filteredLeads);
@@ -106,80 +110,126 @@ const CRM: React.FC = () => {
 
   const handleSaveEditedLead = async (input: LeadFormInput) => {
     if (!editingLead) return;
-    try {
-      const allLeads = await databaseService.getLeads();
-      const idx = allLeads.findIndex((l) => l.id === editingLead.id);
-      if (idx !== -1) {
-        allLeads[idx] = {
-          ...allLeads[idx],
-          name: input.name,
-          phone: input.phone,
-          country_code: input.country_code,
-          home_type: input.home_type,
-          email: input.email || '',
-          notes: input.notes || '',
-          updated_at: new Date().toISOString(),
-        };
-        localStorage.setItem('offline_crm_leads_v1', JSON.stringify(allLeads));
-      }
+    const res = await updateLead(editingLead.id, input);
+    if (res.success) {
       setEditingLead(null);
-      await loadLeadsData();
-    } catch (err) {
-      console.error('Error editing lead:', err);
+      setSelectedIds([]);
+    } else {
+      alert(res.error || 'Failed to update lead');
     }
   };
 
   return (
     <IonPage>
-      <IonHeader className="ion-no-border">
-        <Navigation />
-      </IonHeader>
-
       <IonContent fullscreen className="home-content">
         <div className="crm-page-wrapper">
-          {/* Header Row */}
+          {/* Header Row: Swaps in-place during selection mode (Google Photos / Gmail pattern - zero layout jump!) */}
           <div className="crm-header-row">
-            <div className="crm-title-group">
-              <h1 className="crm-page-title">CRM Dashboard</h1>
-              <span className="crm-count-badge">
-                {filteredLeads.length} {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
-              </span>
-            </div>
+            {isSelectionMode ? (
+              <>
+                <div className="crm-title-group">
+                  <span className="selection-count-title tabular-nums">
+                    {selectedIds.length} Selected
+                  </span>
+                </div>
 
-            <button
-              type="button"
-              className="btn-export-excel"
-              onClick={handleExport}
-              disabled={filteredLeads.length === 0}
-            >
-              <IonIcon icon={downloadOutline} style={{ fontSize: 18 }} />
-              <span>Export Excel</span>
-            </button>
+                <div className="selection-toolbar-actions">
+                  <button
+                    type="button"
+                    className="btn-toolbar-action"
+                    onClick={handleSelectAll}
+                  >
+                    <IonIcon icon={checkmarkDoneOutline} />
+                    <span className="action-label">
+                      {selectedIds.length === filteredLeads.length
+                        ? 'Deselect All'
+                        : 'Select All'}
+                    </span>
+                  </button>
+
+                  {/* Single Selection Action: Edit */}
+                  {selectedIds.length === 1 && (
+                    <button
+                      type="button"
+                      className="btn-toolbar-action"
+                      onClick={handleEditSingleSelected}
+                    >
+                      <IonIcon icon={createOutline} />
+                      <span className="action-label">Edit</span>
+                    </button>
+                  )}
+
+                  {/* Delete Action */}
+                  <button
+                    type="button"
+                    className="btn-toolbar-action danger-btn"
+                    onClick={() => setShowBulkDeleteModal(true)}
+                  >
+                    <IonIcon icon={trashOutline} />
+                    <span className="action-label">Delete</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-toolbar-action"
+                    onClick={() => setSelectedIds([])}
+                  >
+                    <IonIcon icon={closeOutline} />
+                    <span className="action-label">Cancel</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="crm-title-group">
+                <h1 className="crm-page-title">CRM Dashboard</h1>
+                <span className="crm-count-badge tabular-nums">
+                  {filteredLeads.length}{' '}
+                  {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Controls Section: Search & Filters */}
+          {/* Controls Section: Inlined Search + Export */}
           <div className="crm-controls-section">
-            {/* Search Bar */}
-            <div className="crm-search-bar">
-              <IonIcon icon={searchOutline} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search name, phone, email, notes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="crm-search-input"
-              />
-            </div>
+            <div className="search-export-row">
+              {/* Search Bar */}
+              <div className="crm-search-bar">
+                <IonIcon icon={searchOutline} className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search name, phone, email, notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="crm-search-input"
+                />
+                {searchQuery.length > 0 && (
+                  <button
+                    type="button"
+                    className="search-clear-btn"
+                    onClick={() => setSearchQuery('')}
+                    title="Clear search"
+                  >
+                    <IonIcon icon={closeOutline} />
+                  </button>
+                )}
+              </div>
 
-            {/* Date Filters */}
-            <div className="filter-pills-row">
+              {/* Inlined Export Button */}
               <button
                 type="button"
-                className={`filter-pill ${dateFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setDateFilter('all')}
+                className="btn-export-inline"
+                onClick={handleExport}
+                disabled={filteredLeads.length === 0}
+                title="Export filtered leads to Excel"
               >
-                All Time
+                <IonIcon icon={downloadOutline} style={{ fontSize: 18 }} />
+                <span className="export-btn-text">Export</span>
               </button>
+            </div>
+
+            {/* Time Filters Only */}
+            <div className="filter-pills-row">
               <button
                 type="button"
                 className={`filter-pill ${dateFilter === 'today' ? 'active' : ''}`}
@@ -189,7 +239,9 @@ const CRM: React.FC = () => {
               </button>
               <button
                 type="button"
-                className={`filter-pill ${dateFilter === 'yesterday' ? 'active' : ''}`}
+                className={`filter-pill ${
+                  dateFilter === 'yesterday' ? 'active' : ''
+                }`}
                 onClick={() => setDateFilter('yesterday')}
               >
                 Yesterday
@@ -203,68 +255,113 @@ const CRM: React.FC = () => {
               </button>
               <button
                 type="button"
-                className={`filter-pill ${dateFilter === 'month' ? 'active' : ''}`}
+                className={`filter-pill ${
+                  dateFilter === 'month' ? 'active' : ''
+                }`}
                 onClick={() => setDateFilter('month')}
               >
                 This Month
               </button>
-            </div>
-
-            {/* Home Type Filters */}
-            <div className="filter-pills-row">
               <button
                 type="button"
-                className={`filter-pill ${homeTypeFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setHomeTypeFilter('all')}
+                className={`filter-pill ${dateFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setDateFilter('all')}
               >
-                All Types
+                All Time
               </button>
-              {['2BHK', '3BHK', '4BHK', 'Villa'].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  className={`filter-pill ${homeTypeFilter === type ? 'active' : ''}`}
-                  onClick={() => setHomeTypeFilter(type)}
-                >
-                  {type}
-                </button>
-              ))}
             </div>
           </div>
 
           {/* Leads Grid */}
-          <div className="leads-grid">
-            {filteredLeads.length > 0 ? (
-              filteredLeads.map((lead) => (
-                <LeadCard
-                  key={lead.id}
-                  lead={lead}
-                  onEdit={(l) => setEditingLead(l)}
-                  onDelete={handleDeleteLead}
-                />
-              ))
-            ) : (
-              <div className="empty-leads-card">
-                <div className="empty-icon-badge">
-                  <IonIcon icon={peopleOutline} />
+          {loading ? (
+            <div className="empty-leads-card">
+              <IonSpinner name="crescent" />
+              <p className="empty-text">Loading leads...</p>
+            </div>
+          ) : (
+            <div className="leads-grid">
+              {filteredLeads.length > 0 ? (
+                filteredLeads.map((lead) => (
+                  <LeadCard
+                    key={lead.id}
+                    lead={lead}
+                    isSelected={selectedIds.includes(lead.id)}
+                    isSelectionMode={isSelectionMode}
+                    onSelectToggle={handleToggleSelect}
+                    onLongPress={handleLongPress}
+                  />
+                ))
+              ) : (
+                <div className="empty-leads-card">
+                  <div className="empty-icon-badge">
+                    <IonIcon icon={peopleOutline} />
+                  </div>
+                  <h3 className="empty-title">No leads found</h3>
+                  <p className="empty-text">
+                    {searchQuery || dateFilter !== 'today'
+                      ? 'No customer records match your current search or filter criteria.'
+                      : 'No leads entered today. Start by creating a new lead from the entry form.'}
+                  </p>
                 </div>
-                <h3 className="empty-title">No leads found</h3>
-                <p className="empty-text">
-                  {searchQuery || dateFilter !== 'all' || homeTypeFilter !== 'all'
-                    ? 'No customer records match your current search or filter criteria.'
-                    : 'Start by creating a new lead from the entry form.'}
-                </p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showBulkDeleteModal && (
+          <div
+            className="edit-modal-backdrop"
+            onClick={() => setShowBulkDeleteModal(false)}
+          >
+            <div
+              className="delete-modal-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="delete-modal-title">
+                {selectedIds.length === 1 ? 'Delete Lead' : `Delete ${selectedIds.length} Leads`}
+              </h3>
+              <p className="delete-modal-desc">
+                Are you sure you want to delete {selectedIds.length === 1 ? 'this lead' : `these ${selectedIds.length} selected leads`}?
+              </p>
+              <span className="delete-modal-warning">This action cannot be undone.</span>
+              
+              <div className="delete-modal-actions">
+                <button
+                  type="button"
+                  className="btn-modal-cancel"
+                  onClick={() => setShowBulkDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-modal-delete"
+                  onClick={handleConfirmBulkDelete}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Edit Lead Modal */}
         {editingLead && (
-          <div className="edit-modal-backdrop" onClick={() => setEditingLead(null)}>
-            <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="edit-modal-backdrop"
+            onClick={() => setEditingLead(null)}
+          >
+            <div
+              className="edit-modal-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
               <div className="edit-modal-header">
-                <h2 className="edit-modal-title">Edit Lead</h2>
+                <div className="edit-modal-header-text">
+                  <h2 className="edit-modal-title">Edit Lead</h2>
+                  <p className="edit-modal-subtitle">Update customer details</p>
+                </div>
                 <button
                   type="button"
                   className="btn-close-modal"
@@ -273,9 +370,23 @@ const CRM: React.FC = () => {
                   <IonIcon icon={closeOutline} />
                 </button>
               </div>
-              <LeadForm
-                onSubmit={handleSaveEditedLead}
-              />
+
+              {/* Body */}
+              <div className="edit-modal-body">
+                <LeadForm
+                  defaultValues={{
+                    name: editingLead.name,
+                    phone: editingLead.phone,
+                    country_code: editingLead.country_code,
+                    home_type: editingLead.home_type,
+                    email: editingLead.email,
+                    notes: editingLead.notes,
+                  }}
+                  hideHeader
+                  submitButtonText="Save Changes"
+                  onSubmit={handleSaveEditedLead}
+                />
+              </div>
             </div>
           </div>
         )}

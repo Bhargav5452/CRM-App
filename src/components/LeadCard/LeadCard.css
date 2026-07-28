@@ -1,25 +1,64 @@
 .lead-card {
   background-color: #ffffff;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.02);
+  padding: 16px;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  justify-content: space-between;
+  height: 100%;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .lead-card:hover {
-  border-color: #D4D4D8;
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px -3px rgba(0, 0, 0, 0.05);
+}
+
+.lead-card:active {
+  transform: scale(0.985);
+}
+
+/* Selected state: 2px black border, light gray background */
+.lead-card.selected-card {
+  border: 2px solid #09090B;
+  background-color: #FAFAFA;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* Checkmark Badge for Selection (top-left) */
+.selection-check-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #A1A1AA;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 12px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.lead-card.selected-card .selection-check-badge {
+  background-color: #09090B;
+  border-color: #09090B;
+  color: #ffffff;
 }
 
 .lead-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .lead-card-name-group {
@@ -28,27 +67,43 @@
   gap: 2px;
 }
 
+.lead-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .lead-card-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #09090B;
   margin: 0;
   letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 
 .lead-card-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
   color: #71717A;
-  font-weight: 400;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.date-icon {
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
 .home-type-badge {
   background-color: #F4F4F5;
-  color: #18181B;
-  border: 1px solid #E4E4E7;
+  color: #09090B;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 20px;
   white-space: nowrap;
 }
@@ -57,6 +112,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 10px;
+  flex: 1;
 }
 
 .lead-info-row {
@@ -65,6 +122,8 @@
   gap: 8px;
   font-size: 14px;
   color: #09090B;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .lead-info-row .info-icon {
@@ -75,57 +134,10 @@
 
 .lead-notes-box {
   background-color: #F4F4F5;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 10px;
+  padding: 8px 10px;
   font-size: 13px;
   color: #3F3F46;
   line-height: 1.4;
-  margin-top: 4px;
-}
-
-.lead-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #F4F4F5;
-  padding-top: 12px;
-  margin-top: 4px;
-}
-
-.card-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-card-action {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid #E4E4E7;
-  background-color: #ffffff;
-  color: #09090B;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.12s ease, border-color 0.12s ease;
-  text-decoration: none;
-}
-
-.btn-card-action:hover {
-  background-color: #F4F4F5;
-  border-color: #D4D4D8;
-}
-
-.btn-card-action.danger {
-  color: #EF4444;
-  border-color: #FCA5A5;
-}
-
-.btn-card-action.danger:hover {
-  background-color: #FEF2F2;
-  border-color: #EF4444;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }

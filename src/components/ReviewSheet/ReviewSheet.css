@@ -7,7 +7,7 @@
   bottom: 0;
   background-color: rgba(9, 9, 11, 0.45);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 2000;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -23,7 +23,7 @@
   border-top-right-radius: 24px;
   border: 1px solid #E4E4E7;
   box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.12);
-  padding: 24px 28px 36px 28px;
+  padding: 24px 28px max(36px, calc(env(safe-area-inset-bottom, 0px) + 20px)) 28px;
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -198,3 +198,10 @@
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+.btn-confirm:focus-visible,
+.btn-edit:focus-visible {
+  outline: 2px solid #09090B;
+  outline-offset: 2px;
+}
+

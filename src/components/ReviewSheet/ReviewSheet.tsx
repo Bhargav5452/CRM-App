@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IonIcon } from '@ionic/react';
 import { checkmarkCircleOutline, createOutline, alertCircleOutline } from 'ionicons/icons';
 import { LeadFormInput, getCountryByCode } from '../../types/lead';
@@ -21,6 +21,16 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onEdit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onEdit]);
+
   if (!isOpen || !data) return null;
 
   const country = getCountryByCode(data.country_code);
@@ -35,6 +45,7 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
     setIsSaving(false);
 
     if (result.success) {
+      window.dispatchEvent(new CustomEvent('crm-lead-added'));
       onSaveSuccess();
     } else {
       setErrorMessage(result.error || 'Failed to save lead.');

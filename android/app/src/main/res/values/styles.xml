@@ -13,10 +13,21 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Solid white status bar — prevents WebView from drawing behind it -->
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <!-- Dark icons (time, wifi, battery) on white background -->
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Do NOT draw under the status bar -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:fitsSystemWindows">false</item>
     </style>
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <!-- Keep status bar solid white during splash too -->
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
     </style>
 </resources>

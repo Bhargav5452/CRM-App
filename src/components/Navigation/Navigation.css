@@ -1,33 +1,80 @@
+/* ─────────────────────────────────────────
+   Shared Application Layout
+   ───────────────────────────────────────── */
+.app-main-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-persistent-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-shrink: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.app-main-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────
+   Application Navbar Container
+   
+   On Android with overlaysWebView=false, the OS shifts the WebView down
+   automatically so --ion-safe-area-top & env(safe-area-inset-top) are 0.
+   
+   On iOS notch devices, env(safe-area-inset-top) is non-zero and must be
+   respected here so nothing overlaps the notch or Dynamic Island.
+   ───────────────────────────────────────── */
 .app-navbar-container {
   width: 100%;
   background-color: #ffffff;
-  border-bottom: 1px solid #E4E4E7;
+  /* iOS safe-area inset for notch/Dynamic Island; 0 on Android with overlay=false */
+  padding-top: max(env(safe-area-inset-top, 0px), var(--ion-safe-area-top, 0px));
 }
 
 .app-navbar-inner {
   max-width: 960px;
   margin: 0 auto;
+  /* Desktop: 68px   Tablet: 64px   Phone: 60px (set per breakpoint) */
+  height: 56px;
   padding: 0 20px;
-  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
+/* ─────────────────────────────────────────
+   Brand Mark
+   ───────────────────────────────────────── */
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
+  gap: 8px;
+  font-size: 16px;
   font-weight: 700;
   color: #09090B;
   text-decoration: none;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
+  min-height: 44px;
 }
 
 .app-brand-badge {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   background-color: #09090B;
   color: #ffffff;
@@ -38,27 +85,36 @@
   font-weight: 700;
 }
 
+/* ─────────────────────────────────────────
+   Segmented Navigation
+   ───────────────────────────────────────── */
 .nav-links-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   background-color: #F4F4F5;
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid #E4E4E7;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
 }
 
 .nav-link-item {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 0 14px;
+  height: 34px;
+  min-height: 34px;
+  min-width: 90px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   color: #71717A;
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
 }
 
 .nav-link-item:hover {
@@ -68,5 +124,42 @@
 .nav-link-item.active {
   background-color: #ffffff;
   color: #09090B;
-  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────
+   Responsive Breakpoints
+   
+   Desktop:  navbar-inner height 56px  → total header ≈68px
+   Tablet:   navbar-inner height 52px  → total header ≈64px
+   Phone:    navbar-inner height 48px  → total header ≈60px
+   ───────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 1023px) and (min-width: 640px) {
+  .app-navbar-inner {
+    height: 52px;
+    padding: 0 16px;
+  }
+}
+
+/* Phone */
+@media (max-width: 639px) {
+  .app-navbar-inner {
+    height: 48px;
+    padding: 0 12px;
+  }
+
+  .app-brand span {
+    font-size: 15px;
+  }
+
+  .nav-link-item {
+    padding: 0 10px;
+    font-size: 12px;
+    min-width: 76px;
+    height: 34px;
+    min-height: 44px; /* Ergonomic touch target minimum */
+  }
 }

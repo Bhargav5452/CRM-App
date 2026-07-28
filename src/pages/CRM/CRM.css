@@ -2,46 +2,178 @@
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 32px 20px 60px 20px;
+  padding: 20px 16px 60px 16px;
 }
 
-/* CRM Header */
+/* Header Row & In-Place Selection Swap (Google Photos / Gmail Pattern) */
 .crm-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  height: 52px;
+  min-height: 52px;
+  margin-bottom: 16px;
+  gap: 12px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .crm-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* Requirement #3: Dashboard Title (Phone 28px, Tablet 32px, Desktop 34px) */
 .crm-page-title {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
   color: #09090B;
   margin: 0;
   letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .crm-count-badge {
   background-color: #F4F4F5;
   color: #18181B;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
   font-weight: 600;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
-.btn-export-excel {
-  height: 44px;
-  padding: 0 18px;
+/* In-Place Selection Title Swap (Requirement #7 & Recommendation) */
+.selection-count-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #09090B;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.selection-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-toolbar-action {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  color: #09090B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.btn-toolbar-action:hover {
+  background-color: #F4F4F5;
+}
+
+.btn-toolbar-action:active {
+  transform: scale(0.96);
+}
+
+.btn-toolbar-action.danger-btn {
+  background-color: #EF4444;
+  border-color: #EF4444;
+  color: #ffffff;
+}
+
+.btn-toolbar-action.danger-btn:hover {
+  background-color: #DC2626;
+}
+
+/* Controls Section: Search & Export Inlined (Requirement #4) */
+.crm-controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.search-export-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.crm-search-bar {
+  position: relative;
+  flex: 1;
+}
+
+.crm-search-input {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 0 40px 0 42px;
+  font-size: 15px;
+  color: #09090B;
+  outline: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.crm-search-input:focus {
+  border-color: #09090B;
+  box-shadow: 0 0 0 2px #FAFAFA, 0 0 0 4px #09090B;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #71717A;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #71717A;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  color: #09090B;
+}
+
+/* Inlined Export Button (Requirement #4: 48px height, 44px touch) */
+.btn-export-inline {
+  height: 48px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 16px;
   background-color: #09090B;
   color: #ffffff;
   border: none;
@@ -51,67 +183,36 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.12s ease;
+  white-space: nowrap;
 }
 
-.btn-export-excel:hover:not(:disabled) {
+.btn-export-inline:hover:not(:disabled) {
   background-color: #18181B;
 }
 
-.btn-export-excel:disabled {
+.btn-export-inline:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn-export-inline:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-/* Search & Filters Section */
-.crm-controls-section {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 28px;
-}
-
-.crm-search-bar {
-  position: relative;
-  width: 100%;
-}
-
-.crm-search-input {
-  width: 100%;
-  height: 48px;
-  background-color: #ffffff;
-  border: 1px solid #E4E4E7;
-  border-radius: 12px;
-  padding: 0 16px 0 44px;
-  font-size: 14px;
-  color: #09090B;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.crm-search-input:focus {
-  border-color: #09090B;
-  box-shadow: 0 0 0 1px #09090B;
-}
-
-.search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #71717A;
-  font-size: 18px;
-  pointer-events: none;
-}
-
+/* Requirement #5: Filter Chips with extra right padding & smooth scroll */
 .filter-pills-row {
   display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 2px 20px 6px 0;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
 }
 
 .filter-pills-row::-webkit-scrollbar {
@@ -119,21 +220,24 @@
 }
 
 .filter-pill {
-  height: 36px;
-  padding: 0 14px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 16px;
   border-radius: 20px;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
   color: #71717A;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  scroll-snap-align: start;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 .filter-pill:hover {
-  border-color: #D4D4D8;
+  border-color: rgba(0, 0, 0, 0.2);
   color: #09090B;
 }
 
@@ -148,7 +252,7 @@
 .leads-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 
 @media (max-width: 767px) {
@@ -161,7 +265,7 @@
 .empty-leads-card {
   grid-column: 1 / -1;
   background-color: #ffffff;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 20px;
   padding: 48px 24px;
   text-align: center;
@@ -176,7 +280,7 @@
   height: 56px;
   border-radius: 16px;
   background-color: #F4F4F5;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,53 +302,77 @@
   max-width: 320px;
 }
 
-/* Edit Lead Modal */
+/* Modal Overlay (40% opacity + blur) */
 .edit-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(9, 9, 11, 0.45);
+  background-color: rgba(9, 9, 11, 0.40);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
+  overscroll-behavior: contain;
 }
 
+/* Edit Lead Modal */
 .edit-modal-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 720px;
+  max-height: 90vh;
   background-color: #ffffff;
   border-radius: 24px;
-  border: 1px solid #E4E4E7;
-  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.18);
-  padding: 28px 24px;
-  max-height: 90vh;
-  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
 }
 
 .edit-modal-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.edit-modal-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .edit-modal-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #09090B;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.edit-modal-subtitle {
+  font-size: 14px;
+  color: #71717A;
   margin: 0;
 }
 
 .btn-close-modal {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
-  border: 1px solid #E4E4E7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   background-color: #F4F4F5;
   color: #71717A;
   display: flex;
@@ -252,4 +380,233 @@
   justify-content: center;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
+
+.btn-close-modal:hover {
+  background-color: #E4E4E7;
+  color: #09090B;
+}
+
+.edit-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Delete Confirmation Dialog */
+.delete-modal-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.22);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  margin: 0 auto;
+}
+
+.delete-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #09090B;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.delete-modal-desc {
+  font-size: 14px;
+  color: #3F3F46;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.delete-modal-warning {
+  font-size: 13px;
+  font-weight: 600;
+  color: #EF4444;
+  margin: 0;
+}
+
+.delete-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  height: 48px;
+  min-height: 48px;
+  background-color: #ffffff;
+  color: #09090B;
+  border: 1px solid #09090B;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-cancel:hover {
+  background-color: #F4F4F5;
+}
+
+.btn-modal-delete {
+  flex: 1;
+  height: 48px;
+  min-height: 48px;
+  background-color: #EF4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-modal-delete:hover {
+  background-color: #DC2626;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tablet Scale */
+@media (max-width: 1023px) and (min-width: 640px) {
+  .crm-page-title {
+    font-size: 32px;
+  }
+
+  .edit-modal-card {
+    width: 90%;
+    max-width: 720px;
+    max-height: 90vh;
+  }
+
+  .edit-modal-title {
+    font-size: 20px;
+  }
+
+  .delete-modal-card {
+    width: 440px;
+  }
+}
+
+/* Phone Layout (Requirement #3: Title 28px, compact export icon button) */
+@media (max-width: 639px) {
+  .crm-page-wrapper {
+    padding: 16px 12px 48px 12px;
+  }
+
+  .crm-page-title {
+    font-size: 28px;
+  }
+
+  .selection-count-title {
+    font-size: 17px;
+  }
+
+  .btn-toolbar-action {
+    padding: 0 8px;
+    font-size: 12px;
+    height: 36px;
+  }
+
+  .btn-toolbar-action .action-label {
+    display: inline-block;
+  }
+
+  .edit-modal-backdrop {
+    padding: 0;
+  }
+
+  .edit-modal-card {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    padding: 18px 14px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  .edit-modal-title {
+    font-size: 18px;
+  }
+
+  .delete-modal-card {
+    width: 90%;
+    max-width: 380px;
+    padding: 20px 16px;
+  }
+
+  .btn-export-inline {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .export-btn-text {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Ultra-Small Viewports (320px - 360px)
+   ───────────────────────────────────────── */
+@media (max-width: 379px) {
+  .crm-header-row {
+    gap: 6px;
+  }
+
+  .selection-count-title {
+    font-size: 15px;
+  }
+
+  .btn-toolbar-action {
+    padding: 0 6px;
+    font-size: 11px;
+    height: 36px;
+    min-height: 44px;
+  }
+
+  .btn-toolbar-action .action-label {
+    display: none;
+  }
+
+  .btn-toolbar-action ion-icon {
+    font-size: 16px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Accessibility Focus Outlines
+   ───────────────────────────────────────── */
+.btn-toolbar-action:focus-visible,
+.filter-pill:focus-visible,
+.btn-export-inline:focus-visible,
+.btn-modal-cancel:focus-visible,
+.btn-modal-delete:focus-visible,
+.btn-close-modal:focus-visible {
+  outline: 2px solid #09090B;
+  outline-offset: 2px;
+}
+

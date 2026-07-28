@@ -20,7 +20,7 @@ export interface CountryCode {
   digits: number;
 }
 
-export const COUNTRY_CODES: CountryCode[] = [
+const RAW_COUNTRY_CODES: CountryCode[] = [
   { code: '+91', name: 'India', flag: '🇮🇳', iso: 'IN', digits: 10 },
   { code: '+1', name: 'United States', flag: '🇺🇸', iso: 'US', digits: 10 },
   { code: '+44', name: 'United Kingdom', flag: '🇬🇧', iso: 'GB', digits: 10 },
@@ -62,7 +62,13 @@ export const COUNTRY_CODES: CountryCode[] = [
   { code: '+254', name: 'Kenya', flag: '🇰🇪', iso: 'KE', digits: 9 },
 ];
 
-export const DEFAULT_COUNTRY_CODE = COUNTRY_CODES[0]; // India +91
+// Sort alphabetically by country name
+export const COUNTRY_CODES: CountryCode[] = [...RAW_COUNTRY_CODES].sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
+
+export const DEFAULT_COUNTRY_CODE: CountryCode =
+  COUNTRY_CODES.find((c) => c.iso === 'IN') || COUNTRY_CODES[0];
 
 export const getCountryByCode = (code: string, iso?: string): CountryCode => {
   if (iso) {
