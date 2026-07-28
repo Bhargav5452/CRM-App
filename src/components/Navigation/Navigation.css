@@ -1,0 +1,75 @@
+.app-navbar-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #E4E4E7;
+  position: sticky;
+  top: 0;
+  z-index: 500;
+}
+
+.app-navbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #09090B;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.app-brand-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background-color: #09090B;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.nav-links-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #F4F4F5;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid #E4E4E7;
+}
+
+.nav-link-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #71717A;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.nav-link-item:hover {
+  color: #09090B;
+}
+
+.nav-link-item.active {
+  background-color: #ffffff;
+  color: #09090B;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+}
