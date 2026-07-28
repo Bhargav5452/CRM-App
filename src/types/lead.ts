@@ -131,14 +131,10 @@ export interface FilterState {
   time: DateFilterOption;
   customFrom?: string; // YYYY-MM-DD
   customTo?: string;   // YYYY-MM-DD
-  // Extensible for future sections:
-  // homeType?: string;
-  // leadStatus?: string;
-  // assignedAgent?: string;
 }
 
 export const DEFAULT_FILTER_STATE: FilterState = {
-  time: 'all',
+  time: 'today',
   customFrom: '',
   customTo: '',
 };
