@@ -111,9 +111,152 @@
 
 .custom-input:focus,
 .custom-textarea:focus,
-.custom-dropdown-trigger.focused {
+.custom-dropdown-trigger.focused,
+.phone-input-container.focused {
   border-color: #09090B;
   box-shadow: 0 0 0 1px #09090B;
+}
+
+/* Combined Phone Input Container */
+.phone-input-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  background-color: #ffffff;
+  border: 1px solid #E4E4E7;
+  border-radius: 12px;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.country-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 14px;
+  height: 100%;
+  border-right: 1px solid #E4E4E7;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  background: transparent;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  transition: background-color 0.12s ease;
+}
+
+.country-picker-trigger:hover {
+  background-color: #F4F4F5;
+}
+
+.country-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.country-dial-code {
+  font-size: 14px;
+  font-weight: 600;
+  color: #09090B;
+}
+
+.phone-number-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #09090B;
+  outline: none;
+  width: 100%;
+}
+
+.phone-number-input::placeholder {
+  color: #A1A1AA;
+}
+
+/* Country Code Dropdown Menu */
+.country-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 280px;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 120;
+  background: #ffffff;
+  border: 1px solid #E4E4E7;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.country-dropdown-search {
+  padding: 6px 8px;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+  border-bottom: 1px solid #E4E4E7;
+  margin-bottom: 4px;
+}
+
+.country-search-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #E4E4E7;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  outline: none;
+  color: #09090B;
+}
+
+.country-search-input:focus {
+  border-color: #09090B;
+}
+
+.country-option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #09090B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.12s ease;
+}
+
+.country-option:hover {
+  background-color: #F4F4F5;
+}
+
+.country-option.selected {
+  background-color: #F4F4F5;
+  font-weight: 600;
+}
+
+.country-option-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.country-option-name {
+  color: #09090B;
+}
+
+.country-option-code {
+  color: #71717A;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* Custom Dropdown Trigger */
