@@ -8,7 +8,6 @@ import {
   IonSelectOption,
   IonTextarea,
   IonButton,
-  IonText,
   IonNote,
 } from '@ionic/react';
 import { leadFormSchema, LeadFormInput, HOME_TYPES } from '../../types/lead';
@@ -30,7 +29,6 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
       name: '',
       phone: '',
       home_type: '',
-      location: '',
       email: '',
       notes: '',
     },
@@ -113,27 +111,6 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
           )}
         </IonItem>
 
-        {/* Location */}
-        <IonItem className={errors.location ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="location"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonInput
-                label="Location"
-                labelPlacement="stacked"
-                placeholder="Enter location"
-                type="text"
-                value={value}
-                onIonInput={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              />
-            )}
-          />
-          {errors.location && (
-            <IonNote slot="error">{errors.location.message}</IonNote>
-          )}
-        </IonItem>
 
         {/* Email (Optional) */}
         <IonItem className={errors.email ? 'ion-invalid' : 'ion-valid'}>

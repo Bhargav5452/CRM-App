@@ -5,7 +5,6 @@ export interface Lead {
   name: string;
   phone: string;
   home_type: string;
-  location: string;
   email: string;
   notes: string;
   created_at: string;
@@ -13,13 +12,10 @@ export interface Lead {
 }
 
 export const HOME_TYPES = [
-  'Apartment',
+  '2BHK',
+  '3BHK',
+  '4BHK',
   'Villa',
-  'Independent House',
-  'Plot',
-  'Penthouse',
-  'Studio',
-  'Other',
 ] as const;
 
 export const leadFormSchema = z.object({
@@ -34,10 +30,6 @@ export const leadFormSchema = z.object({
   home_type: z
     .string()
     .min(1, 'Home type is required'),
-  location: z
-    .string()
-    .min(1, 'Location is required')
-    .max(200, 'Location must be under 200 characters'),
   email: z
     .string()
     .email('Enter a valid email')
