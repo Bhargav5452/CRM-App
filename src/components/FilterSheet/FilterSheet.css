@@ -240,11 +240,13 @@
   color: #09090B;
   outline: none;
   font-family: inherit;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .date-input:focus {
   border-color: #09090B;
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08);
+  outline: none;
 }
 
 .date-error-text {
@@ -313,7 +315,8 @@
 .btn-filter-reset:focus-visible,
 .btn-filter-apply:focus-visible,
 .btn-close-filter:focus-visible,
-.radio-option-card:focus-visible {
+.radio-option-card:focus-visible,
+.date-input:focus-visible {
   outline: 2px solid #09090B;
   outline-offset: 2px;
 }

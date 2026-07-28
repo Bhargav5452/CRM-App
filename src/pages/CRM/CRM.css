@@ -47,7 +47,7 @@
   flex-shrink: 0;
 }
 
-/* Selection Toolbar (Requirement #5: High discoverability compact labeled buttons) */
+/* Selection Toolbar */
 .selection-count-title {
   font-size: 16px;
   font-weight: 700;
@@ -141,12 +141,14 @@
   color: #09090B;
   outline: none;
   box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
+/* Standardized Modern Subtle Focus State */
 .crm-search-input:focus {
   border-color: #09090B;
-  box-shadow: 0 0 0 2px #FAFAFA, 0 0 0 4px #09090B;
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08);
+  outline: none;
 }
 
 .search-icon {
@@ -553,7 +555,7 @@
   }
 }
 
-/* Mobile Phones (320px to 639px): Labeled Selection Toolbar & Grouped Export/Filter */
+/* Mobile Phones (320px to 639px) */
 @media (max-width: 639px) {
   .crm-page-wrapper {
     padding: 14px 12px 40px 12px;
@@ -649,7 +651,7 @@
   }
 }
 
-/* Accessibility Focus Outlines */
+/* Keyboard Focus Outlines for Accessibility */
 .btn-toolbar-action:focus-visible,
 .filter-pill:focus-visible,
 .btn-export-inline:focus-visible,

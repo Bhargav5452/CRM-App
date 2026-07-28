@@ -98,7 +98,7 @@
   color: #09090B;
   outline: none;
   box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -107,12 +107,15 @@
   color: #A1A1AA;
 }
 
+/* Standardized Modern Subtle Focus State */
 .custom-input:focus,
 .custom-textarea:focus,
 .custom-dropdown-trigger.focused,
-.phone-input-container:focus-within {
+.phone-input-container:focus-within,
+.country-search-input:focus {
   border-color: #09090B;
-  box-shadow: 0 0 0 2px #FAFAFA, 0 0 0 4px #09090B;
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08);
+  outline: none;
 }
 
 .custom-input.input-error,
@@ -149,7 +152,7 @@
   cursor: pointer;
   user-select: none;
   box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .dropdown-value {
@@ -238,7 +241,7 @@
   align-items: center;
   overflow: hidden;
   box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .country-picker-trigger {
@@ -339,10 +342,7 @@
   color: #09090B;
   outline: none;
   box-sizing: border-box;
-}
-
-.country-search-input:focus {
-  border-color: #09090B;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .country-popover-list {
@@ -425,7 +425,7 @@
   font-family: inherit;
   line-height: 1.4;
   box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -452,7 +452,7 @@
   font-weight: 700;
 }
 
-/* Form Action Button (Compact spacing for mobile viewports) */
+/* Form Action Button */
 .form-actions {
   margin-top: 20px;
   width: 100%;
@@ -492,7 +492,16 @@
   cursor: not-allowed;
 }
 
-/* Mobile Phones (320px - 639px): Spacious 24px 20px card padding & compact fast-entry fields */
+/* Keyboard accessibility for interactive controls */
+.custom-dropdown-trigger:focus-visible,
+.btn-submit:focus-visible,
+.country-picker-trigger:focus-visible,
+.country-search-input:focus-visible {
+  outline: 2px solid #09090B;
+  outline-offset: 2px;
+}
+
+/* Mobile Phones (320px - 639px) */
 @media (max-width: 639px) {
   .lead-form-wrapper {
     padding: 16px;
@@ -581,8 +590,7 @@
   }
 }
 
-/* ── Replaced inline styles ─────────────────────────────── */
-
+/* Replaced inline styles */
 .country-trigger-chevron {
   font-size: 12px;
   color: #71717A;
