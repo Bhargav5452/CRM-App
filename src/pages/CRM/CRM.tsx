@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { IonContent, IonPage, IonIcon } from '@ionic/react';
+import { IonContent, IonPage, IonHeader, IonIcon } from '@ionic/react';
 import {
   searchOutline,
   downloadOutline,
   peopleOutline,
   closeOutline,
 } from 'ionicons/icons';
+import Navigation from '../../components/Navigation/Navigation';
 import LeadCard from '../../components/LeadCard/LeadCard';
 import LeadForm from '../../components/LeadForm/LeadForm';
 import { Lead, LeadFormInput } from '../../types/lead';
@@ -130,6 +131,10 @@ const CRM: React.FC = () => {
 
   return (
     <IonPage>
+      <IonHeader className="ion-no-border">
+        <Navigation />
+      </IonHeader>
+
       <IonContent fullscreen className="home-content">
         <div className="crm-page-wrapper">
           {/* Header Row */}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { IonContent, IonPage, IonIcon } from '@ionic/react';
+import { IonContent, IonPage, IonHeader, IonIcon } from '@ionic/react';
 import { checkmarkCircleOutline } from 'ionicons/icons';
+import Navigation from '../../components/Navigation/Navigation';
 import LeadForm from '../../components/LeadForm/LeadForm';
 import ReviewSheet from '../../components/ReviewSheet/ReviewSheet';
 import { LeadFormInput } from '../../types/lead';
@@ -24,7 +25,7 @@ const Home: React.FC = () => {
   const handleSaveSuccess = () => {
     setIsReviewOpen(false);
     setReviewData(null);
-    setFormKey((prev) => prev + 1); // Reset form
+    setFormKey((prev) => prev + 1);
     setShowSuccessToast(true);
 
     setTimeout(() => {
@@ -34,6 +35,10 @@ const Home: React.FC = () => {
 
   return (
     <IonPage>
+      <IonHeader className="ion-no-border">
+        <Navigation />
+      </IonHeader>
+
       <IonContent fullscreen className="home-content">
         {/* Success Banner */}
         {showSuccessToast && (
