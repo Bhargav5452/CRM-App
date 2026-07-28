@@ -41,8 +41,8 @@
 .app-navbar-inner {
   max-width: 960px;
   margin: 0 auto;
-  height: 56px;
-  padding: 0 20px;
+  height: 60px;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -100,7 +100,7 @@
   justify-content: center;
   gap: 6px;
   padding: 0 14px;
-  height: 34px;
+  height: 36px;
   min-height: 44px; /* Touch target minimum */
   min-width: 88px;
   border-radius: 8px;
@@ -131,16 +131,16 @@
 /* Tablet */
 @media (max-width: 1023px) and (min-width: 640px) {
   .app-navbar-inner {
-    height: 54px;
-    padding: 0 20px;
+    height: 58px;
+    padding: 6px 18px;
   }
 }
 
-/* Mobile Phones (Balanced alignment & native segmented feel) */
+/* Mobile Phones (Comfortable breathing room & native segmented control feel) */
 @media (max-width: 639px) {
   .app-navbar-inner {
-    height: 52px;
-    padding: 0 16px;
+    height: 56px;
+    padding: 6px 14px;
     gap: 10px;
   }
 
@@ -156,7 +156,7 @@
   }
 
   .nav-links-group {
-    padding: 2.5px;
+    padding: 3px;
     gap: 2px;
   }
 
@@ -164,7 +164,7 @@
     padding: 0 10px;
     font-size: 12px;
     min-width: 76px;
-    height: 32px;
+    height: 34px;
     min-height: 44px;
   }
 }
@@ -172,7 +172,7 @@
 /* Ultra-Small Phones (320px - 360px) */
 @media (max-width: 360px) {
   .app-navbar-inner {
-    padding: 0 10px;
+    padding: 4px 10px;
     gap: 6px;
   }
 

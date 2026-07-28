@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 20px 16px;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
@@ -12,10 +12,10 @@
   width: 100%;
   max-width: 100%;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
-  padding: 28px 24px;
+  padding: 24px 20px;
   box-sizing: border-box;
 }
 
@@ -40,19 +40,19 @@
 .card-subtitle {
   font-size: 13.5px;
   color: #71717A;
-  margin: 4px 0 0 0;
+  margin: 3px 0 0 0;
   font-weight: 400;
 }
 
 .card-header {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 /* Grid Layout */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 14px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -60,13 +60,13 @@
 .form-field-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   position: relative;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
   /* Reserved space for inline error messages */
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 
 .form-field-full {
@@ -74,7 +74,7 @@
 }
 
 .field-label {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #52525B;
   letter-spacing: 0.01em;
@@ -88,13 +88,13 @@
 
 .custom-input {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 46px;
+  min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 0 14px;
-  font-size: 14.5px;
+  font-size: 14px;
   color: #09090B;
   outline: none;
   box-sizing: border-box;
@@ -127,7 +127,7 @@
   position: absolute;
   bottom: 2px;
   left: 2px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
   color: #EF4444;
   line-height: 1;
@@ -136,13 +136,13 @@
 /* Custom Dropdown for Home Type */
 .custom-dropdown-trigger {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 46px;
+  min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 0 14px;
-  font-size: 14.5px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -173,7 +173,7 @@
 
 .custom-dropdown-menu {
   position: absolute;
-  top: calc(100% - 14px);
+  top: calc(100% - 12px);
   left: 0;
   right: 0;
   z-index: 100;
@@ -191,7 +191,7 @@
 .dropdown-option {
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13.5px;
   color: #09090B;
   display: flex;
   align-items: center;
@@ -225,15 +225,15 @@
   }
 }
 
-/* Phone Number Field with Integrated Country Code Picker (Flexbox Overflow Fix) */
+/* Phone Number Field with Integrated Country Code Picker */
 .phone-input-container {
   width: 100%;
   max-width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 46px;
+  min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -266,7 +266,7 @@
 }
 
 .country-dial-code {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #09090B;
   font-variant-numeric: tabular-nums;
@@ -275,13 +275,13 @@
 .phone-number-input {
   flex: 1;
   width: 100%;
-  min-width: 0; /* CRITICAL FLEXBOX OVERFLOW FIX for inputs on mobile */
+  min-width: 0; /* Flexbox overflow fix */
   height: 100%;
   border: none;
   outline: none;
   background: transparent;
   padding: 0 12px;
-  font-size: 14.5px;
+  font-size: 14px;
   color: #09090B;
   font-variant-numeric: tabular-nums;
   box-sizing: border-box;
@@ -401,7 +401,7 @@
   font-size: 13.5px;
 }
 
-/* Notes Textarea (Optimized vertical space) */
+/* Notes Textarea (Optimized compact vertical height) */
 .textarea-container {
   position: relative;
   display: flex;
@@ -412,18 +412,18 @@
 
 .custom-textarea {
   width: 100%;
-  height: 84px;
-  min-height: 84px;
+  height: 72px;
+  min-height: 72px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 14.5px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
   color: #09090B;
   outline: none;
   resize: none;
   font-family: inherit;
-  line-height: 1.4;
+  line-height: 1.35;
   box-sizing: border-box;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-appearance: none;
@@ -437,11 +437,11 @@
 .textarea-footer {
   display: flex;
   justify-content: flex-end;
-  padding-top: 4px;
+  padding-top: 3px;
 }
 
 .char-counter {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #A1A1AA;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -452,21 +452,21 @@
   font-weight: 700;
 }
 
-/* Form Action Button (Optimized spacing for mobile viewports) */
+/* Form Action Button (Compact spacing for mobile viewports) */
 .form-actions {
-  margin-top: 20px;
+  margin-top: 16px;
   width: 100%;
 }
 
 .btn-submit {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 46px;
+  min-height: 44px;
   background-color: #09090B;
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: 11px;
+  font-size: 14.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
@@ -492,49 +492,49 @@
   cursor: not-allowed;
 }
 
-/* Mobile Phones (320px - 639px): Zero overflow & compact height so button is visible */
+/* Mobile Phones (320px - 639px): Compact height & fast lead entry */
 @media (max-width: 639px) {
   .lead-form-wrapper {
-    padding: 16px;
+    padding: 14px 12px;
   }
 
   .lead-form-card {
-    border-radius: 18px;
-    padding: 20px 16px;
+    border-radius: 16px;
+    padding: 18px 14px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .card-title {
-    font-size: 22px;
+    font-size: 21px;
   }
 
   .card-header {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .field-label {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   .form-field-group {
-    padding-bottom: 16px;
-    gap: 5px;
+    padding-bottom: 14px;
+    gap: 4px;
   }
 
   .custom-input,
   .custom-dropdown-trigger,
   .phone-input-container {
-    height: 46px;
-    min-height: 46px;
-    font-size: 14.5px;
+    height: 44px;
+    min-height: 44px;
+    font-size: 14px;
   }
 
   .phone-number-input {
-    font-size: 14.5px;
+    font-size: 14px;
     padding: 0 10px;
   }
 
@@ -548,36 +548,36 @@
   }
 
   .country-dial-code {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   .custom-textarea {
-    height: 76px;
-    min-height: 76px;
-    font-size: 14px;
-    padding: 8px 12px;
+    height: 70px;
+    min-height: 70px;
+    font-size: 13.5px;
+    padding: 8px 10px;
   }
 
   .btn-submit {
-    height: 48px;
-    min-height: 48px;
-    border-radius: 12px;
-    font-size: 14.5px;
+    height: 46px;
+    min-height: 44px;
+    border-radius: 10px;
+    font-size: 14px;
   }
 
   .form-actions {
-    margin-top: 16px;
+    margin-top: 14px;
   }
 }
 
-/* Ultra-Small Phones (320px - 360px): Extra side padding safety */
+/* Ultra-Small Phones (320px - 360px) */
 @media (max-width: 360px) {
   .lead-form-wrapper {
-    padding: 12px 10px;
+    padding: 10px 8px;
   }
 
   .lead-form-card {
-    padding: 16px 12px;
+    padding: 14px 10px;
   }
 }
 
