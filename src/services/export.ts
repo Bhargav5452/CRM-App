@@ -30,11 +30,15 @@ if (Capacitor.isNativePlatform()) {
 }
 
 /**
- * Bulletproof web file downloader using Blob + ObjectURL + HTML Anchor.
- * Guarantees direct .xlsx file download across all desktop & mobile browsers.
+ * Robust web file downloader.
+ * Uses SheetJS native XLSX.writeFile with explicit download attribute fallback,
+ * ensuring files are saved with the proper filename (e.g. CRM_YYYY_MM_DD.xlsx) rather than blob UUIDs.
  */
 const triggerWebDownload = (workbook: XLSX.WorkBook, filename: string): void => {
   try {
+    XLSX.writeFile(workbook, filename);
+  } catch (err) {
+    console.error('XLSX.writeFile error, using anchor blob fallback:', err);
     const arrayBuffer = XLSX.write(workbook, {
       bookType: 'xlsx',
       type: 'array',
@@ -44,7 +48,7 @@ const triggerWebDownload = (workbook: XLSX.WorkBook, filename: string): void => 
 
     const anchor = document.createElement('a');
     anchor.href = blobUrl;
-    anchor.download = filename;
+    anchor.setAttribute('download', filename);
     anchor.style.display = 'none';
 
     document.body.appendChild(anchor);
@@ -53,10 +57,7 @@ const triggerWebDownload = (workbook: XLSX.WorkBook, filename: string): void => 
 
     setTimeout(() => {
       URL.revokeObjectURL(blobUrl);
-    }, 1000);
-  } catch (err) {
-    console.error('Web Blob download error, falling back to XLSX.writeFile:', err);
-    XLSX.writeFile(workbook, filename);
+    }, 2000);
   }
 };
 
