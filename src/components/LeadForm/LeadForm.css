@@ -71,6 +71,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 .form-field-full {
@@ -89,8 +90,7 @@
   margin-left: 3px;
 }
 
-.custom-input,
-.custom-select {
+.custom-input {
   width: 100%;
   height: 48px;
   background-color: #ffffff;
@@ -110,37 +110,95 @@
 }
 
 .custom-input:focus,
-.custom-select:focus,
-.custom-textarea:focus {
+.custom-textarea:focus,
+.custom-dropdown-trigger.focused {
   border-color: #09090B;
   box-shadow: 0 0 0 1px #09090B;
 }
 
-.custom-select-wrapper {
-  position: relative;
+/* Custom Dropdown Trigger */
+.custom-dropdown-trigger {
   width: 100%;
-}
-
-.custom-select {
-  padding-right: 40px;
+  height: 48px;
+  background-color: #ffffff;
+  border: 1px solid #E4E4E7;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.custom-select:invalid,
-.custom-select[data-placeholder="true"] {
+.dropdown-value {
+  color: #09090B;
+  font-weight: 500;
+}
+
+.dropdown-placeholder {
   color: #A1A1AA;
+  font-weight: 400;
 }
 
 .select-chevron {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
   color: #71717A;
   font-size: 16px;
+  transition: transform 0.2s ease;
 }
 
+.select-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Custom Dropdown Menu */
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid #E4E4E7;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-option {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #09090B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.12s ease;
+}
+
+.dropdown-option:hover {
+  background-color: #F4F4F5;
+}
+
+.dropdown-option.selected {
+  background-color: #F4F4F5;
+  font-weight: 600;
+  color: #09090B;
+}
+
+.option-check {
+  font-size: 14px;
+  color: #09090B;
+}
+
+/* Textarea */
 .textarea-container {
   position: relative;
   width: 100%;

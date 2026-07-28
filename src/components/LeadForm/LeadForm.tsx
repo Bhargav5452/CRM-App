@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IonIcon } from '@ionic/react';
-import { documentTextOutline, arrowForwardOutline, chevronDownOutline } from 'ionicons/icons';
+import { documentTextOutline, arrowForwardOutline, chevronDownOutline, checkmarkOutline } from 'ionicons/icons';
 import { leadFormSchema, LeadFormInput, HOME_TYPES } from '../../types/lead';
 import './LeadForm.css';
 
@@ -11,9 +11,13 @@ interface LeadFormProps {
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
     formState: { errors, isValid },
   } = useForm<LeadFormInput>({
@@ -30,6 +34,24 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
 
   const notesValue = watch('notes') || '';
   const homeTypeValue = watch('home_type') || '';
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsSelectOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleSelectOption = (type: string) => {
+    setValue('home_type', type, { shouldValidate: true, shouldTouch: true });
+    setIsSelectOpen(false);
+  };
 
   return (
     <div className="lead-form-wrapper">
@@ -84,29 +106,62 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
               )}
             </div>
 
-            {/* Home Type */}
-            <div className="form-field-group">
-              <label htmlFor="home_type" className="field-label">
+            {/* Home Type (Custom Dropdown) */}
+            <div className="form-field-group" ref={dropdownRef}>
+              <label htmlFor="home_type_trigger" className="field-label">
                 Home Type <span className="required-asterisk">*</span>
               </label>
-              <div className="custom-select-wrapper">
-                <select
-                  id="home_type"
-                  data-placeholder={!homeTypeValue}
-                  className={`custom-select ${errors.home_type ? 'input-error' : ''}`}
-                  {...register('home_type')}
-                >
-                  <option value="" disabled hidden>
-                    Select home type
-                  </option>
-                  {HOME_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                <IonIcon icon={chevronDownOutline} className="select-chevron" />
+              <div
+                id="home_type_trigger"
+                tabIndex={0}
+                role="button"
+                aria-haspopup="listbox"
+                aria-expanded={isSelectOpen}
+                className={`custom-dropdown-trigger ${isSelectOpen ? 'focused' : ''} ${
+                  errors.home_type ? 'input-error' : ''
+                }`}
+                onClick={() => setIsSelectOpen(!isSelectOpen)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setIsSelectOpen(!isSelectOpen);
+                  }
+                }}
+              >
+                {homeTypeValue ? (
+                  <span className="dropdown-value">{homeTypeValue}</span>
+                ) : (
+                  <span className="dropdown-placeholder">Select home type</span>
+                )}
+                <IonIcon
+                  icon={chevronDownOutline}
+                  className={`select-chevron ${isSelectOpen ? 'open' : ''}`}
+                />
               </div>
+
+              {/* Custom Dropdown Menu Options */}
+              {isSelectOpen && (
+                <div className="custom-dropdown-menu" role="listbox">
+                  {HOME_TYPES.map((type) => {
+                    const isSelected = homeTypeValue === type;
+                    return (
+                      <div
+                        key={type}
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`dropdown-option ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleSelectOption(type)}
+                      >
+                        <span>{type}</span>
+                        {isSelected && (
+                          <IonIcon icon={checkmarkOutline} className="option-check" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {errors.home_type && (
                 <span className="error-message">{errors.home_type.message}</span>
               )}
