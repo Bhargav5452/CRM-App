@@ -1,0 +1,4 @@
+.home-content {
+  --background: var(--bg-main);
+  background-color: var(--bg-main);
+}

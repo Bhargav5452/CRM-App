@@ -1,15 +1,6 @@
-import { useForm, Controller } from 'react-hook-form';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  IonList,
-  IonItem,
-  IonInput,
-  IonSelect,
-  IonSelectOption,
-  IonTextarea,
-  IonButton,
-  IonNote,
-} from '@ionic/react';
 import { leadFormSchema, LeadFormInput, HOME_TYPES } from '../../types/lead';
 import './LeadForm.css';
 
@@ -19,7 +10,7 @@ interface LeadFormProps {
 
 const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
   const {
-    control,
+    register,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<LeadFormInput>({
@@ -35,141 +26,111 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit }) => {
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <IonList className="lead-form-list">
-        {/* Name */}
-        <IonItem className={errors.name ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonInput
-                label="Name"
-                labelPlacement="stacked"
-                placeholder="Enter full name"
-                type="text"
-                value={value}
-                onIonInput={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              />
-            )}
-          />
-          {errors.name && (
-            <IonNote slot="error">{errors.name.message}</IonNote>
-          )}
-        </IonItem>
+    <div className="lead-form-container">
+      <div className="form-header">
+        <h1 className="form-title">New Lead</h1>
+        <p className="form-subtitle">Start by entering the customer's details.</p>
+      </div>
 
-        {/* Phone */}
-        <IonItem className={errors.phone ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonInput
-                label="Phone"
-                labelPlacement="stacked"
-                placeholder="10-digit phone number"
-                type="tel"
-                inputmode="numeric"
-                maxlength={10}
-                value={value}
-                onIonInput={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              />
-            )}
+      <hr className="form-divider" />
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="form-fields">
+        {/* Full Name */}
+        <div className="form-field-group">
+          <label htmlFor="name" className="field-label">
+            Full Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            placeholder="John Doe"
+            className={`custom-input ${errors.name ? 'input-error' : ''}`}
+            {...register('name')}
           />
-          {errors.phone && (
-            <IonNote slot="error">{errors.phone.message}</IonNote>
-          )}
-        </IonItem>
+          {errors.name && <span className="error-message">{errors.name.message}</span>}
+        </div>
+
+        {/* Phone Number */}
+        <div className="form-field-group">
+          <label htmlFor="phone" className="field-label">
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            inputMode="numeric"
+            maxLength={10}
+            placeholder="9876543210"
+            className={`custom-input ${errors.phone ? 'input-error' : ''}`}
+            {...register('phone')}
+          />
+          {errors.phone && <span className="error-message">{errors.phone.message}</span>}
+        </div>
 
         {/* Home Type */}
-        <IonItem className={errors.home_type ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="home_type"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonSelect
-                label="Home Type"
-                labelPlacement="stacked"
-                placeholder="Select home type"
-                interface="action-sheet"
-                value={value}
-                onIonChange={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              >
-                {HOME_TYPES.map((type) => (
-                  <IonSelectOption key={type} value={type}>
-                    {type}
-                  </IonSelectOption>
-                ))}
-              </IonSelect>
-            )}
-          />
+        <div className="form-field-group">
+          <label htmlFor="home_type" className="field-label">
+            Home Type
+          </label>
+          <div className="custom-select-wrapper">
+            <select
+              id="home_type"
+              className={`custom-select ${errors.home_type ? 'input-error' : ''}`}
+              {...register('home_type')}
+            >
+              <option value="" disabled hidden>
+                Select home type
+              </option>
+              {HOME_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <span className="select-arrow">▼</span>
+          </div>
           {errors.home_type && (
-            <IonNote slot="error">{errors.home_type.message}</IonNote>
+            <span className="error-message">{errors.home_type.message}</span>
           )}
-        </IonItem>
+        </div>
 
-
-        {/* Email (Optional) */}
-        <IonItem className={errors.email ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="email"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonInput
-                label="Email"
-                labelPlacement="stacked"
-                placeholder="Optional"
-                type="email"
-                value={value}
-                onIonInput={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              />
-            )}
+        {/* Email */}
+        <div className="form-field-group">
+          <label htmlFor="email" className="field-label">
+            Email <span className="optional-tag">(Optional)</span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="john@example.com"
+            className={`custom-input ${errors.email ? 'input-error' : ''}`}
+            {...register('email')}
           />
-          {errors.email && (
-            <IonNote slot="error">{errors.email.message}</IonNote>
-          )}
-        </IonItem>
+          {errors.email && <span className="error-message">{errors.email.message}</span>}
+        </div>
 
-        {/* Notes (Optional) */}
-        <IonItem className={errors.notes ? 'ion-invalid' : 'ion-valid'}>
-          <Controller
-            name="notes"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <IonTextarea
-                label="Notes"
-                labelPlacement="stacked"
-                placeholder="Optional"
-                rows={3}
-                maxlength={500}
-                value={value}
-                onIonInput={(e) => onChange(e.detail.value ?? '')}
-                onIonBlur={onBlur}
-              />
-            )}
+        {/* Notes */}
+        <div className="form-field-group">
+          <label htmlFor="notes" className="field-label">
+            Notes <span className="optional-tag">(Optional)</span>
+          </label>
+          <textarea
+            id="notes"
+            placeholder="Additional requirements or details..."
+            className={`custom-textarea ${errors.notes ? 'input-error' : ''}`}
+            {...register('notes')}
           />
-          {errors.notes && (
-            <IonNote slot="error">{errors.notes.message}</IonNote>
-          )}
-        </IonItem>
-      </IonList>
+          {errors.notes && <span className="error-message">{errors.notes.message}</span>}
+        </div>
 
-      <div className="lead-form-actions">
-        <IonButton
-          type="submit"
-          expand="block"
-          size="large"
-          disabled={!isValid}
-          className="review-save-button"
-        >
-          Review & Save
-        </IonButton>
-      </div>
-    </form>
+        {/* Action Button */}
+        <div className="form-actions">
+          <button type="submit" disabled={!isValid} className="btn-primary">
+            Review & Save
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
