@@ -1,0 +1,7 @@
+{
+  "name": "Offline CRM",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
