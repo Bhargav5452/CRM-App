@@ -177,15 +177,15 @@ export const exportLeadsToExcel = async (leads: Lead[]): Promise<void> => {
         console.warn('Could not check/request notification permissions:', e);
       }
 
-      // 4. Schedule OS Export Notification (with Open & Share actions on notification)
+      // 4. Schedule OS Export Notification (Concise title, filename body, custom monochrome white smallIcon)
       const notifId = Math.floor(Math.random() * 100000) + 1;
       await LocalNotifications.schedule({
         notifications: [
           {
             id: notifId,
-            title: 'Excel Export Complete',
-            body: `${filename} has been saved. Tap to open in Excel or Google Sheets.`,
-            smallIcon: 'ic_launcher',
+            title: 'Export Complete',
+            body: filename,
+            smallIcon: 'ic_stat_offline_crm',
             iconColor: '#09090B',
             channelId: EXPORT_CHANNEL_ID,
             actionTypeId: 'EXCEL_EXPORT_ACTIONS',
