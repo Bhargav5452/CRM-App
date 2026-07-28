@@ -9,13 +9,75 @@ import { Lead } from '../types/lead';
 const EXCEL_MIME_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-// Initialize notification tap listener on native mobile platforms
+const EXPORT_CHANNEL_ID = 'offline_crm_exports';
+
+/**
+ * Initialize Notification Channel & Action Types on Native Android / iOS
+ */
+const initNotificationChannel = async () => {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    // 1. Register Action Buttons for Notifications (Open & Share)
+    await LocalNotifications.registerActionTypes({
+      types: [
+        {
+          id: 'EXCEL_EXPORT_ACTIONS',
+          actions: [
+            {
+              id: 'open_file',
+              title: 'Open',
+              foreground: true,
+            },
+            {
+              id: 'share_file',
+              title: 'Share',
+              foreground: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    // 2. Create Notification Channel for Offline CRM Exports
+    await LocalNotifications.createChannel({
+      id: EXPORT_CHANNEL_ID,
+      name: 'Offline CRM - Exports',
+      description: 'Notifications for exported CRM lead spreadsheets',
+      importance: 4, // High importance (Heads-up banner + alert sound)
+      visibility: 1, // Public on lockscreen
+    });
+  } catch (e) {
+    console.warn('Could not initialize notification channel or actions:', e);
+  }
+};
+
+// Run channel initialization on native platforms
+initNotificationChannel();
+
+// Initialize notification action listener on native mobile platforms
 if (Capacitor.isNativePlatform()) {
   LocalNotifications.addListener(
     'localNotificationActionPerformed',
     async (action) => {
       const extra = action.notification.extra;
-      if (extra && extra.filePath) {
+      const actionId = action.actionId;
+
+      if (!extra || !extra.filePath) return;
+
+      if (actionId === 'share_file') {
+        // Trigger native share sheet if 'Share' action button clicked
+        try {
+          await Share.share({
+            title: 'Export CRM Leads',
+            text: `Exported ${extra.filename || 'CRM Leads'}`,
+            url: extra.filePath,
+            dialogTitle: 'Share Excel File',
+          });
+        } catch (err) {
+          console.error('Error sharing file via notification action:', err);
+        }
+      } else {
+        // Default tap or 'Open' action -> Launch FileOpener directly
         try {
           await FileOpener.open({
             filePath: extra.filePath,
@@ -30,9 +92,7 @@ if (Capacitor.isNativePlatform()) {
 }
 
 /**
- * Robust web file downloader.
- * Uses SheetJS native XLSX.writeFile with explicit download attribute fallback,
- * ensuring files are saved with the proper filename (e.g. CRM_YYYY_MM_DD.xlsx) rather than blob UUIDs.
+ * Robust web file downloader using SheetJS native XLSX.writeFile with anchor fallback.
  */
 const triggerWebDownload = (workbook: XLSX.WorkBook, filename: string): void => {
   try {
@@ -117,18 +177,21 @@ export const exportLeadsToExcel = async (leads: Lead[]): Promise<void> => {
         console.warn('Could not check/request notification permissions:', e);
       }
 
-      // 4. Schedule OS Download Complete notification
+      // 4. Schedule OS Export Notification with App Icon, Actions, and Channel
       const notifId = Math.floor(Math.random() * 100000) + 1;
       await LocalNotifications.schedule({
         notifications: [
           {
             id: notifId,
-            title: 'Download Complete 📄',
-            body: `${filename} downloaded. Tap to open in Excel / Sheets.`,
+            title: 'Excel Export Complete',
+            body: `${filename} has been saved. Tap to open in Excel or Google Sheets.`,
             smallIcon: 'ic_launcher',
             iconColor: '#09090B',
+            channelId: EXPORT_CHANNEL_ID,
+            actionTypeId: 'EXCEL_EXPORT_ACTIONS',
             extra: {
               filePath: savedFile.uri,
+              filename: filename,
               mimeType: EXCEL_MIME_TYPE,
             },
           },
