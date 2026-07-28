@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Lead, LeadFormInput } from '../types/lead';
+import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/lead';
 import { databaseService } from '../services/database';
-
-export type DateFilter = 'all' | 'today' | 'yesterday' | 'week' | 'month';
 
 export const useLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+  const [filterState, setFilterState] = useState<FilterState>(DEFAULT_FILTER_STATE);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -82,8 +80,8 @@ export const useLeads = () => {
         }
       }
 
-      // 2. Date Filter
-      if (dateFilter !== 'all') {
+      // 2. Time Filter
+      if (filterState.time !== 'all') {
         const leadDate = new Date(lead.created_at);
         const now = new Date();
         const startOfToday = new Date(
@@ -92,30 +90,53 @@ export const useLeads = () => {
           now.getDate()
         );
 
-        if (dateFilter === 'today') {
+        if (filterState.time === 'today') {
           if (leadDate < startOfToday) return false;
-        } else if (dateFilter === 'yesterday') {
+        } else if (filterState.time === 'yesterday') {
           const startOfYesterday = new Date(startOfToday);
           startOfYesterday.setDate(startOfYesterday.getDate() - 1);
           if (leadDate < startOfYesterday || leadDate >= startOfToday)
             return false;
-        } else if (dateFilter === 'week') {
+        } else if (filterState.time === 'week') {
           const startOfWeek = new Date(startOfToday);
           startOfWeek.setDate(startOfWeek.getDate() - 7);
           if (leadDate < startOfWeek) return false;
-        } else if (dateFilter === 'month') {
+        } else if (filterState.time === 'month') {
           const startOfMonth = new Date(
             now.getFullYear(),
             now.getMonth(),
             1
           );
           if (leadDate < startOfMonth) return false;
+        } else if (filterState.time === 'lastMonth') {
+          const startOfThisMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+          );
+          const startOfLastMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1
+          );
+          if (leadDate < startOfLastMonth || leadDate >= startOfThisMonth)
+            return false;
+        } else if (filterState.time === 'custom') {
+          if (filterState.customFrom && filterState.customTo) {
+            const [fromY, fromM, fromD] = filterState.customFrom.split('-').map(Number);
+            const [toY, toM, toD] = filterState.customTo.split('-').map(Number);
+
+            const fromDate = new Date(fromY, fromM - 1, fromD, 0, 0, 0, 0);
+            const toDate = new Date(toY, toM - 1, toD, 23, 59, 59, 999);
+
+            if (leadDate < fromDate || leadDate > toDate) return false;
+          }
         }
       }
 
       return true;
     });
-  }, [leads, searchQuery, dateFilter]);
+  }, [leads, searchQuery, filterState]);
 
   return {
     leads,
@@ -123,8 +144,8 @@ export const useLeads = () => {
     loading,
     searchQuery,
     setSearchQuery,
-    dateFilter,
-    setDateFilter,
+    filterState,
+    setFilterState,
     fetchLeads,
     addLead,
     updateLead,

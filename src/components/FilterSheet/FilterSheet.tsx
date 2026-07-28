@@ -1,0 +1,250 @@
+import React, { useState, useEffect } from 'react';
+import { IonIcon } from '@ionic/react';
+import { closeOutline, calendarOutline } from 'ionicons/icons';
+import {
+  FilterState,
+  DateFilterOption,
+  DEFAULT_FILTER_STATE,
+} from '../../types/lead';
+import './FilterSheet.css';
+
+interface FilterSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  filterState: FilterState;
+  onApply: (state: FilterState) => void;
+  onReset: () => void;
+}
+
+const TIME_OPTIONS: { id: DateFilterOption; label: string }[] = [
+  { id: 'today', label: 'Today' },
+  { id: 'yesterday', label: 'Yesterday' },
+  { id: 'week', label: 'This Week' },
+  { id: 'month', label: 'This Month' },
+  { id: 'lastMonth', label: 'Last Month' },
+  { id: 'all', label: 'All Time' },
+  { id: 'custom', label: 'Custom Date Range' },
+];
+
+const FilterSheet: React.FC<FilterSheetProps> = ({
+  isOpen,
+  onClose,
+  filterState,
+  onApply,
+  onReset,
+}) => {
+  const [draftState, setDraftState] = useState<FilterState>(filterState);
+
+  // Sync draft state with incoming filterState when sheet opens
+  useEffect(() => {
+    if (isOpen) {
+      setDraftState(filterState);
+    }
+  }, [isOpen, filterState]);
+
+  // Escape key & body scroll lock
+  useEffect(() => {
+    if (!isOpen) return;
+
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const isCustom = draftState.time === 'custom';
+
+  // Validation: If Custom is selected, both from & to must be provided, and from <= to
+  const isCustomIncomplete =
+    isCustom && (!draftState.customFrom || !draftState.customTo);
+  const isCustomInvalid =
+    isCustom &&
+    draftState.customFrom &&
+    draftState.customTo &&
+    draftState.customFrom > draftState.customTo;
+
+  const canApply = !isCustomIncomplete && !isCustomInvalid;
+
+  const handleSelectTime = (timeOption: DateFilterOption) => {
+    setDraftState((prev) => ({
+      ...prev,
+      time: timeOption,
+    }));
+  };
+
+  const handleApply = () => {
+    if (!canApply) return;
+    onApply(draftState);
+    onClose();
+  };
+
+  const handleReset = () => {
+    onReset();
+    setDraftState(DEFAULT_FILTER_STATE);
+    onClose();
+  };
+
+  return (
+    <div className="filter-sheet-backdrop" onClick={onClose}>
+      <div
+        className="filter-sheet-container"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="filter-handle-bar" />
+
+        {/* Header */}
+        <div className="filter-sheet-header">
+          <h2 className="filter-sheet-title">Filters</h2>
+          <button
+            type="button"
+            className="btn-close-filter"
+            onClick={onClose}
+            title="Close filters"
+          >
+            <IonIcon icon={closeOutline} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="filter-sheet-body">
+          {/* Section: Time */}
+          <div className="filter-section">
+            <h3 className="filter-section-title">Time</h3>
+            <div className="radio-options-grid" role="radiogroup">
+              {TIME_OPTIONS.map((opt) => {
+                const isSelected = draftState.time === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    className={`radio-option-card ${
+                      isSelected ? 'selected' : ''
+                    }`}
+                    onClick={() => handleSelectTime(opt.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectTime(opt.id);
+                      }
+                    }}
+                  >
+                    <div className="radio-circle">
+                      {isSelected && <div className="radio-inner-dot" />}
+                    </div>
+                    <span className="radio-label">{opt.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sub-Section: Custom Date Range */}
+          {isCustom && (
+            <div className="custom-date-box">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#09090B',
+                }}
+              >
+                <IonIcon icon={calendarOutline} style={{ fontSize: 15 }} />
+                <span>Select Custom Range</span>
+              </div>
+
+              <div className="date-pickers-row">
+                <div className="date-field">
+                  <label htmlFor="custom_from" className="date-label">
+                    From
+                  </label>
+                  <input
+                    id="custom_from"
+                    type="date"
+                    className="date-input"
+                    value={draftState.customFrom || ''}
+                    onChange={(e) =>
+                      setDraftState((prev) => ({
+                        ...prev,
+                        customFrom: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="date-field">
+                  <label htmlFor="custom_to" className="date-label">
+                    To
+                  </label>
+                  <input
+                    id="custom_to"
+                    type="date"
+                    className="date-input"
+                    min={draftState.customFrom || undefined}
+                    value={draftState.customTo || ''}
+                    onChange={(e) =>
+                      setDraftState((prev) => ({
+                        ...prev,
+                        customTo: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {isCustomIncomplete && (
+                <span className="date-error-text">
+                  Please select both From and To dates to apply.
+                </span>
+              )}
+
+              {isCustomInvalid && (
+                <span className="date-error-text">
+                  End date cannot be earlier than start date.
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Extensible Future Sections Placeholder (Home Type, Status, Agent etc.) */}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="filter-sheet-actions">
+          <button
+            type="button"
+            className="btn-filter-reset"
+            onClick={handleReset}
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            className="btn-filter-apply"
+            onClick={handleApply}
+            disabled={!canApply}
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FilterSheet;

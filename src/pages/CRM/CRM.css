@@ -168,15 +168,20 @@
   color: #09090B;
 }
 
-/* Inlined Export Button (Requirement #4: 48px height, 44px touch) */
-.btn-export-inline {
+/* Action Buttons Group (Export & Filter Inlined) */
+.crm-action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-export-inline,
+.btn-filter-inline {
   height: 48px;
   min-height: 48px;
-  min-width: 48px;
+  min-width: 44px;
   padding: 0 16px;
-  background-color: #09090B;
-  color: #ffffff;
-  border: none;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -186,8 +191,15 @@
   justify-content: center;
   gap: 8px;
   flex-shrink: 0;
-  transition: background-color 0.15s ease, transform 0.12s ease;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+  position: relative;
+}
+
+.btn-export-inline {
+  background-color: #09090B;
+  color: #ffffff;
+  border: none;
 }
 
 .btn-export-inline:hover:not(:disabled) {
@@ -203,49 +215,75 @@
   cursor: not-allowed;
 }
 
-/* Requirement #5: Filter Chips with extra right padding & smooth scroll */
-.filter-pills-row {
+.btn-filter-inline {
+  background-color: #ffffff;
+  color: #09090B;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.btn-filter-inline:hover {
+  background-color: #F4F4F5;
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+.btn-filter-inline.active {
+  border-color: #09090B;
+  background-color: #FAFAFA;
+}
+
+.filter-active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #09090B;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* Active Filter Indicator Badge Below Search */
+.active-filter-indicator-row {
   display: flex;
   align-items: center;
+  margin-top: 2px;
+}
+
+.active-filter-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  overflow-x: auto;
-  padding: 2px 20px 6px 0;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  scroll-snap-type: x mandatory;
-}
-
-.filter-pills-row::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-pill {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 16px;
+  padding: 6px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
-  color: #71717A;
+  background-color: #F4F4F5;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  scroll-snap-align: start;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
-}
-
-.filter-pill:hover {
-  border-color: rgba(0, 0, 0, 0.2);
-  color: #09090B;
-}
-
-.filter-pill.active {
-  background-color: #09090B;
-  color: #ffffff;
-  border-color: #09090B;
   font-weight: 600;
+  color: #09090B;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.active-filter-badge:hover {
+  background-color: #E4E4E7;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.btn-clear-active-filter {
+  background: transparent;
+  border: none;
+  color: #71717A;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.btn-clear-active-filter:hover {
+  color: #09090B;
 }
 
 /* Leads Grid */
@@ -558,13 +596,14 @@
     padding: 20px 16px;
   }
 
-  .btn-export-inline {
+  .btn-export-inline,
+  .btn-filter-inline {
     height: 48px;
     padding: 0 12px;
     font-size: 13px;
   }
 
-  .export-btn-text {
+  .action-btn-text {
     display: none;
   }
 }

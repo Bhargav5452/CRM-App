@@ -3,6 +3,7 @@ import { IonContent, IonPage, IonIcon, IonSpinner, useIonViewWillEnter } from '@
 import {
   searchOutline,
   downloadOutline,
+  funnelOutline,
   peopleOutline,
   closeOutline,
   checkmarkDoneOutline,
@@ -11,10 +12,32 @@ import {
 } from 'ionicons/icons';
 import LeadCard from '../../components/LeadCard/LeadCard';
 import LeadForm from '../../components/LeadForm/LeadForm';
-import { Lead, LeadFormInput } from '../../types/lead';
+import FilterSheet from '../../components/FilterSheet/FilterSheet';
+import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../../types/lead';
 import { useLeads } from '../../hooks/useLeads';
 import { exportLeadsToExcel } from '../../services/export';
 import './CRM.css';
+
+const getActiveFilterLabel = (filter: FilterState): string | null => {
+  if (filter.time === 'all') return null;
+  if (filter.time === 'today') return '📅 Today';
+  if (filter.time === 'yesterday') return '📅 Yesterday';
+  if (filter.time === 'week') return '📅 This Week';
+  if (filter.time === 'month') return '📅 This Month';
+  if (filter.time === 'lastMonth') return '📅 Last Month';
+  if (filter.time === 'custom') {
+    if (filter.customFrom && filter.customTo) {
+      const formatDate = (dateStr: string) => {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+      return `📅 ${formatDate(filter.customFrom)} – ${formatDate(filter.customTo)}`;
+    }
+    return '📅 Custom Range';
+  }
+  return null;
+};
 
 const CRM: React.FC = () => {
   const {
@@ -22,8 +45,8 @@ const CRM: React.FC = () => {
     loading,
     searchQuery,
     setSearchQuery,
-    dateFilter,
-    setDateFilter,
+    filterState,
+    setFilterState,
     fetchLeads,
     updateLead,
     deleteLead,
@@ -33,30 +56,32 @@ const CRM: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   const isSelectionMode = selectedIds.length > 0;
 
-  // Set 'today' as default filter & refresh leads on entry
+  // Navigation persistence: refresh list & reset selection, but PRESERVE active filterState
   useIonViewWillEnter(() => {
-    setDateFilter('today');
     setSelectedIds([]);
     fetchLeads();
   });
 
-  // Body scroll lock when any modal is open
+  // Body scroll lock when modal is open
   useEffect(() => {
-    const modalActive = Boolean(editingLead || showBulkDeleteModal);
+    const modalActive = Boolean(editingLead || showBulkDeleteModal || isFilterSheetOpen);
     document.body.style.overflow = modalActive ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [editingLead, showBulkDeleteModal]);
+  }, [editingLead, showBulkDeleteModal, isFilterSheetOpen]);
 
   // Keyboard Escape listener to close modals
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (showBulkDeleteModal) {
+        if (isFilterSheetOpen) {
+          setIsFilterSheetOpen(false);
+        } else if (showBulkDeleteModal) {
           setShowBulkDeleteModal(false);
         } else if (editingLead) {
           setEditingLead(null);
@@ -67,7 +92,7 @@ const CRM: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editingLead, showBulkDeleteModal, isSelectionMode]);
+  }, [editingLead, showBulkDeleteModal, isSelectionMode, isFilterSheetOpen]);
 
   const handleToggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -119,11 +144,22 @@ const CRM: React.FC = () => {
     }
   };
 
+  const handleApplyFilter = (newFilterState: FilterState) => {
+    setFilterState(newFilterState);
+  };
+
+  const handleResetFilter = () => {
+    setFilterState(DEFAULT_FILTER_STATE);
+  };
+
+  const activeFilterLabel = getActiveFilterLabel(filterState);
+  const isFilterActive = filterState.time !== 'all';
+
   return (
     <IonPage>
       <IonContent fullscreen className="home-content">
         <div className="crm-page-wrapper">
-          {/* Header Row: Swaps in-place during selection mode (Google Photos / Gmail pattern - zero layout jump!) */}
+          {/* Header Row: Swaps in-place during selection mode */}
           <div className="crm-header-row">
             {isSelectionMode ? (
               <>
@@ -190,7 +226,7 @@ const CRM: React.FC = () => {
             )}
           </div>
 
-          {/* Controls Section: Inlined Search + Export */}
+          {/* Controls Section: Search + Export + Filter */}
           <div className="crm-controls-section">
             <div className="search-export-row">
               {/* Search Bar */}
@@ -215,61 +251,55 @@ const CRM: React.FC = () => {
                 )}
               </div>
 
-              {/* Inlined Export Button */}
-              <button
-                type="button"
-                className="btn-export-inline"
-                onClick={handleExport}
-                disabled={filteredLeads.length === 0}
-                title="Export filtered leads to Excel"
-              >
-                <IonIcon icon={downloadOutline} style={{ fontSize: 18 }} />
-                <span className="export-btn-text">Export</span>
-              </button>
+              {/* Inlined Action Buttons: Export & Filter */}
+              <div className="crm-action-buttons-group">
+                <button
+                  type="button"
+                  className="btn-export-inline"
+                  onClick={handleExport}
+                  disabled={filteredLeads.length === 0}
+                  title="Export filtered leads to Excel"
+                >
+                  <IonIcon icon={downloadOutline} style={{ fontSize: 18 }} />
+                  <span className="action-btn-text">Export</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`btn-filter-inline ${isFilterActive ? 'active' : ''}`}
+                  onClick={() => setIsFilterSheetOpen(true)}
+                  title="Open filter options"
+                >
+                  <IonIcon icon={funnelOutline} style={{ fontSize: 17 }} />
+                  <span className="action-btn-text">Filter</span>
+                  {isFilterActive && <span className="filter-active-dot" />}
+                </button>
+              </div>
             </div>
 
-            {/* Time Filters Only */}
-            <div className="filter-pills-row">
-              <button
-                type="button"
-                className={`filter-pill ${dateFilter === 'today' ? 'active' : ''}`}
-                onClick={() => setDateFilter('today')}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${
-                  dateFilter === 'yesterday' ? 'active' : ''
-                }`}
-                onClick={() => setDateFilter('yesterday')}
-              >
-                Yesterday
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${dateFilter === 'week' ? 'active' : ''}`}
-                onClick={() => setDateFilter('week')}
-              >
-                This Week
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${
-                  dateFilter === 'month' ? 'active' : ''
-                }`}
-                onClick={() => setDateFilter('month')}
-              >
-                This Month
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${dateFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setDateFilter('all')}
-              >
-                All Time
-              </button>
-            </div>
+            {/* Active Filter Indicator Badge (Appears below search row when filter is active) */}
+            {activeFilterLabel && (
+              <div className="active-filter-indicator-row">
+                <div
+                  className="active-filter-badge"
+                  onClick={() => setIsFilterSheetOpen(true)}
+                  title="Click to change filter"
+                >
+                  <span>{activeFilterLabel}</span>
+                  <button
+                    type="button"
+                    className="btn-clear-active-filter"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleResetFilter();
+                    }}
+                    title="Reset to All Time"
+                  >
+                    <IonIcon icon={closeOutline} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Leads Grid */}
@@ -298,15 +328,24 @@ const CRM: React.FC = () => {
                   </div>
                   <h3 className="empty-title">No leads found</h3>
                   <p className="empty-text">
-                    {searchQuery || dateFilter !== 'today'
+                    {searchQuery || isFilterActive
                       ? 'No customer records match your current search or filter criteria.'
-                      : 'No leads entered today. Start by creating a new lead from the entry form.'}
+                      : 'No customer records entered yet. Start by creating a new lead from the entry form.'}
                   </p>
                 </div>
               )}
             </div>
           )}
         </div>
+
+        {/* Filter Sheet Modal */}
+        <FilterSheet
+          isOpen={isFilterSheetOpen}
+          onClose={() => setIsFilterSheetOpen(false)}
+          filterState={filterState}
+          onApply={handleApplyFilter}
+          onReset={handleResetFilter}
+        />
 
         {/* Delete Confirmation Dialog */}
         {showBulkDeleteModal && (
@@ -319,13 +358,21 @@ const CRM: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="delete-modal-title">
-                {selectedIds.length === 1 ? 'Delete Lead' : `Delete ${selectedIds.length} Leads`}
+                {selectedIds.length === 1
+                  ? 'Delete Lead'
+                  : `Delete ${selectedIds.length} Leads`}
               </h3>
               <p className="delete-modal-desc">
-                Are you sure you want to delete {selectedIds.length === 1 ? 'this lead' : `these ${selectedIds.length} selected leads`}?
+                Are you sure you want to delete{' '}
+                {selectedIds.length === 1
+                  ? 'this lead'
+                  : `these ${selectedIds.length} selected leads`}
+                ?
               </p>
-              <span className="delete-modal-warning">This action cannot be undone.</span>
-              
+              <span className="delete-modal-warning">
+                This action cannot be undone.
+              </span>
+
               <div className="delete-modal-actions">
                 <button
                   type="button"

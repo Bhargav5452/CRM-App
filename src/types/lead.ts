@@ -113,3 +113,32 @@ export const leadFormSchema = z
   );
 
 export type LeadFormInput = z.infer<typeof leadFormSchema>;
+
+// ─────────────────────────────────────────────────────────────
+// Advanced Filter System Types
+// ─────────────────────────────────────────────────────────────
+
+export type DateFilterOption =
+  | 'all'
+  | 'today'
+  | 'yesterday'
+  | 'week'
+  | 'month'
+  | 'lastMonth'
+  | 'custom';
+
+export interface FilterState {
+  time: DateFilterOption;
+  customFrom?: string; // YYYY-MM-DD
+  customTo?: string;   // YYYY-MM-DD
+  // Extensible for future sections:
+  // homeType?: string;
+  // leadStatus?: string;
+  // assignedAgent?: string;
+}
+
+export const DEFAULT_FILTER_STATE: FilterState = {
+  time: 'all',
+  customFrom: '',
+  customTo: '',
+};
