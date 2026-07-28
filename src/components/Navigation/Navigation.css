@@ -41,8 +41,8 @@
 .app-navbar-inner {
   max-width: 960px;
   margin: 0 auto;
-  height: 60px;
-  padding: 8px 20px;
+  height: 64px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 3px;
   background-color: #F4F4F5;
-  padding: 3px;
+  padding: 3.5px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
@@ -131,17 +131,17 @@
 /* Tablet */
 @media (max-width: 1023px) and (min-width: 640px) {
   .app-navbar-inner {
-    height: 58px;
-    padding: 6px 18px;
+    height: 60px;
+    padding: 8px 18px;
   }
 }
 
 /* Mobile Phones (Comfortable breathing room & native segmented control feel) */
 @media (max-width: 639px) {
   .app-navbar-inner {
-    height: 56px;
-    padding: 6px 14px;
-    gap: 10px;
+    height: 58px;
+    padding: 8px 16px;
+    gap: 12px;
   }
 
   .app-brand {
@@ -172,7 +172,7 @@
 /* Ultra-Small Phones (320px - 360px) */
 @media (max-width: 360px) {
   .app-navbar-inner {
-    padding: 4px 10px;
+    padding: 6px 10px;
     gap: 6px;
   }
 

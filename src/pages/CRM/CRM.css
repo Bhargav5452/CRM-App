@@ -47,7 +47,7 @@
   flex-shrink: 0;
 }
 
-/* Selection Toolbar (Requirement #3: Labeled Action Buttons with Icons) */
+/* Selection Toolbar (Requirement #5: High discoverability compact labeled buttons) */
 .selection-count-title {
   font-size: 16px;
   font-weight: 700;
@@ -60,7 +60,7 @@
 .selection-toolbar-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -68,7 +68,7 @@
   height: 36px;
   min-height: 44px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: 12px;
   font-weight: 600;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -105,7 +105,7 @@
   display: inline-block;
 }
 
-/* Controls Section: Search + Export + Filter Group (Requirement #4) */
+/* Controls Section: Search + Export + Filter Group */
 .crm-controls-section {
   display: flex;
   flex-direction: column;

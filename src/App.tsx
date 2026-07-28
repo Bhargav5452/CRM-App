@@ -36,9 +36,9 @@ const App: React.FC = () => {
       try {
         // Prevent web content from drawing underneath the system status bar
         await StatusBar.setOverlaysWebView({ overlay: false });
-        // Use dark icons on white status bar background
-        await StatusBar.setStyle({ style: Style.Dark });
-        // Set status bar background to match app header
+        // Use Style.Light -> Light status bar background with dark icons/text
+        await StatusBar.setStyle({ style: Style.Light });
+        // Match status bar background to application header (#FFFFFF)
         await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
       } catch (e) {
         console.warn('StatusBar configuration error:', e);

@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 20px 16px;
+  padding: 24px 20px;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
@@ -12,10 +12,10 @@
   width: 100%;
   max-width: 100%;
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
-  padding: 24px 20px;
+  padding: 32px 28px;
   box-sizing: border-box;
 }
 
@@ -40,19 +40,19 @@
 .card-subtitle {
   font-size: 13.5px;
   color: #71717A;
-  margin: 3px 0 0 0;
+  margin: 4px 0 0 0;
   font-weight: 400;
 }
 
 .card-header {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
-/* Grid Layout */
+/* Grid Layout (8px Spacing Scale) */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 16px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -60,12 +60,12 @@
 .form-field-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   position: relative;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
-  /* Reserved space for inline error messages */
+  /* Reserved 16px space for inline error messages */
   padding-bottom: 16px;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #52525B;
   letter-spacing: 0.01em;
@@ -92,9 +92,9 @@
   min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 0 14px;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #09090B;
   outline: none;
   box-sizing: border-box;
@@ -127,7 +127,7 @@
   position: absolute;
   bottom: 2px;
   left: 2px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #EF4444;
   line-height: 1;
@@ -140,9 +140,9 @@
   min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 0 14px;
-  font-size: 14px;
+  font-size: 14.5px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -191,7 +191,7 @@
 .dropdown-option {
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 14px;
   color: #09090B;
   display: flex;
   align-items: center;
@@ -233,7 +233,7 @@
   min-height: 44px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -266,7 +266,7 @@
 }
 
 .country-dial-code {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #09090B;
   font-variant-numeric: tabular-nums;
@@ -281,7 +281,7 @@
   outline: none;
   background: transparent;
   padding: 0 12px;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #09090B;
   font-variant-numeric: tabular-nums;
   box-sizing: border-box;
@@ -401,7 +401,7 @@
   font-size: 13.5px;
 }
 
-/* Notes Textarea (Optimized compact vertical height) */
+/* Notes Textarea (Optimized vertical space) */
 .textarea-container {
   position: relative;
   display: flex;
@@ -412,18 +412,18 @@
 
 .custom-textarea {
   width: 100%;
-  height: 72px;
-  min-height: 72px;
+  height: 76px;
+  min-height: 76px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14.5px;
   color: #09090B;
   outline: none;
   resize: none;
   font-family: inherit;
-  line-height: 1.35;
+  line-height: 1.4;
   box-sizing: border-box;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-appearance: none;
@@ -437,11 +437,11 @@
 .textarea-footer {
   display: flex;
   justify-content: flex-end;
-  padding-top: 3px;
+  padding-top: 4px;
 }
 
 .char-counter {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #A1A1AA;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -454,19 +454,19 @@
 
 /* Form Action Button (Compact spacing for mobile viewports) */
 .form-actions {
-  margin-top: 16px;
+  margin-top: 20px;
   width: 100%;
 }
 
 .btn-submit {
   width: 100%;
-  height: 46px;
+  height: 48px;
   min-height: 44px;
   background-color: #09090B;
   color: #ffffff;
   border: none;
-  border-radius: 11px;
-  font-size: 14.5px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
@@ -492,20 +492,20 @@
   cursor: not-allowed;
 }
 
-/* Mobile Phones (320px - 639px): Compact height & fast lead entry */
+/* Mobile Phones (320px - 639px): Spacious 24px 20px card padding & compact fast-entry fields */
 @media (max-width: 639px) {
   .lead-form-wrapper {
-    padding: 14px 12px;
+    padding: 16px;
   }
 
   .lead-form-card {
-    border-radius: 16px;
-    padding: 18px 14px;
+    border-radius: 18px;
+    padding: 24px 20px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
   }
 
   .card-title {
@@ -513,22 +513,22 @@
   }
 
   .card-header {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
   .field-label {
-    font-size: 12.5px;
+    font-size: 13px;
   }
 
   .form-field-group {
-    padding-bottom: 14px;
+    padding-bottom: 16px;
     gap: 4px;
   }
 
   .custom-input,
   .custom-dropdown-trigger,
   .phone-input-container {
-    height: 44px;
+    height: 46px;
     min-height: 44px;
     font-size: 14px;
   }
@@ -552,32 +552,32 @@
   }
 
   .custom-textarea {
-    height: 70px;
-    min-height: 70px;
+    height: 76px;
+    min-height: 74px;
     font-size: 13.5px;
-    padding: 8px 10px;
+    padding: 8px 12px;
   }
 
   .btn-submit {
-    height: 46px;
+    height: 48px;
     min-height: 44px;
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 12px;
+    font-size: 14.5px;
   }
 
   .form-actions {
-    margin-top: 14px;
+    margin-top: 16px;
   }
 }
 
 /* Ultra-Small Phones (320px - 360px) */
 @media (max-width: 360px) {
   .lead-form-wrapper {
-    padding: 10px 8px;
+    padding: 12px 10px;
   }
 
   .lead-form-card {
-    padding: 14px 10px;
+    padding: 20px 14px;
   }
 }
 
