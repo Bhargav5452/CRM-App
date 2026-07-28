@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 36px 20px;
+  padding: 32px 24px;
   display: flex;
   justify-content: center;
 }
@@ -24,39 +24,39 @@
 
 /* Header */
 .card-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #09090B;
   margin: 0;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .card-subtitle {
-  font-size: 15px;
+  font-size: 14.5px;
   color: #71717A;
-  margin: 4px 0 0 0;
+  margin: 6px 0 0 0;
   font-weight: 400;
 }
 
 .card-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
-/* Grid Layout */
+/* Grid Layout (8px spacing scale system) */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 .form-field-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   position: relative;
-  /* Reserve space below input so error messages never shift layout (Requirement #9) */
-  padding-bottom: 20px;
+  /* Reserve 24px space below input so error messages never shift layout */
+  padding-bottom: 24px;
 }
 
 .form-field-full {
@@ -68,6 +68,7 @@
   font-weight: 600;
   color: #52525B;
   letter-spacing: 0.01em;
+  margin-bottom: 2px;
 }
 
 .required-asterisk {
@@ -77,8 +78,8 @@
 
 .custom-input {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 52px;
+  min-height: 52px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
@@ -98,40 +99,146 @@
 .custom-input:focus,
 .custom-textarea:focus,
 .custom-dropdown-trigger.focused,
-.phone-input-container.focused {
+.phone-input-container:focus-within {
   border-color: #09090B;
   box-shadow: 0 0 0 2px #FAFAFA, 0 0 0 4px #09090B;
 }
 
-/* Combined Phone Input Container */
-.phone-input-container {
-  display: flex;
-  align-items: center;
+.custom-input.input-error,
+.custom-textarea.input-error,
+.custom-dropdown-trigger.input-error,
+.phone-input-container.input-error {
+  border-color: #EF4444 !important;
+  background-color: #FEF2F2;
+}
+
+.error-message {
+  position: absolute;
+  bottom: 4px;
+  left: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #EF4444;
+  line-height: 1;
+}
+
+/* Custom Dropdown for Home Type */
+.custom-dropdown-trigger {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 52px;
+  min-height: 52px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
-  position: relative;
+  padding: 0 16px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-value {
+  color: #09090B;
+  font-weight: 500;
+}
+
+.dropdown-placeholder {
+  color: #A1A1AA;
+}
+
+.select-chevron {
+  font-size: 14px;
+  color: #71717A;
+  transition: transform 0.2s ease;
+}
+
+.select-chevron.open {
+  transform: rotate(180deg);
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% - 18px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: dropdownSlide 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dropdown-option {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  color: #09090B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.dropdown-option:hover {
+  background-color: #F4F4F5;
+}
+
+.dropdown-option.selected {
+  background-color: #F4F4F5;
+  font-weight: 600;
+}
+
+.option-check {
+  font-size: 16px;
+  color: #09090B;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Phone Number Field with Integrated Country Code Picker */
+.phone-input-container {
+  width: 100%;
+  height: 52px;
+  min-height: 52px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .country-picker-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 12px 0 14px;
+  gap: 8px;
+  padding: 0 14px;
   height: 100%;
-  min-height: 44px;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #FAFAFA;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
-  background: transparent;
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.15s ease;
 }
 
 .country-picker-trigger:hover {
@@ -154,12 +261,11 @@
   flex: 1;
   height: 100%;
   border: none;
+  outline: none;
   background: transparent;
-  padding: 0 14px;
+  padding: 0 16px;
   font-size: 15px;
   color: #09090B;
-  outline: none;
-  width: 100%;
   font-variant-numeric: tabular-nums;
 }
 
@@ -167,38 +273,40 @@
   color: #A1A1AA;
 }
 
-/* Country Popover Backdrop & Menu */
+/* Country Selection Popover Modal */
 .country-popover-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(9, 9, 11, 0.4);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
+  background-color: rgba(9, 9, 11, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2500;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
 .country-popover-card {
   width: 100%;
-  max-width: 380px;
-  max-height: 380px;
+  max-width: 440px;
+  max-height: 80vh;
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 20px;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: scaleIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .country-popover-header {
-  padding: 12px 14px;
+  padding: 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   background-color: #ffffff;
 }
@@ -208,10 +316,10 @@
   height: 44px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
-  padding: 0 12px;
+  padding: 0 14px;
   font-size: 14px;
-  outline: none;
   color: #09090B;
+  outline: none;
 }
 
 .country-search-input:focus {
@@ -229,17 +337,14 @@
 }
 
 .country-option {
-  padding: 10px 14px;
-  min-height: 44px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #09090B;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
   transition: background-color 0.12s ease;
+  user-select: none;
 }
 
 .country-option:hover,
@@ -249,7 +354,7 @@
 
 .country-option.selected {
   background-color: #F4F4F5;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .country-option-left {
@@ -259,118 +364,35 @@
 }
 
 .country-option-name {
+  font-size: 14px;
   color: #09090B;
 }
 
 .country-option-code {
-  color: #71717A;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
+  color: #71717A;
   font-variant-numeric: tabular-nums;
 }
 
 .country-no-results {
   padding: 24px;
   text-align: center;
-  font-size: 14px;
   color: #71717A;
-}
-
-/* Custom Dropdown Trigger */
-.custom-dropdown-trigger {
-  width: 100%;
-  height: 48px;
-  min-height: 48px;
-  background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
-  padding: 0 16px;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dropdown-value {
-  color: #09090B;
-  font-weight: 500;
-}
-
-.dropdown-placeholder {
-  color: #A1A1AA;
-  font-weight: 400;
-}
-
-.select-chevron {
-  color: #71717A;
-  font-size: 16px;
-  transition: transform 0.2s ease;
-}
-
-.select-chevron.open {
-  transform: rotate(180deg);
-}
-
-/* Custom Dropdown Menu */
-.custom-dropdown-menu {
-  position: absolute;
-  top: calc(100% - 14px);
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.dropdown-option {
-  padding: 10px 14px;
-  min-height: 44px;
-  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  color: #09090B;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background-color 0.12s ease;
 }
 
-.dropdown-option:hover {
-  background-color: #F4F4F5;
-}
-
-.dropdown-option.selected {
-  background-color: #F4F4F5;
-  font-weight: 600;
-  color: #09090B;
-}
-
-.option-check {
-  font-size: 14px;
-  color: #09090B;
-}
-
-/* Textarea & Counter Wrapper (Requirement #10) */
+/* Notes Textarea */
 .textarea-container {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 100%;
 }
 
 .custom-textarea {
   width: 100%;
   height: 110px;
+  min-height: 110px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
@@ -379,8 +401,11 @@
   color: #09090B;
   outline: none;
   resize: none;
+  font-family: inherit;
   line-height: 1.45;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .custom-textarea::placeholder {
@@ -389,57 +414,45 @@
 
 .textarea-footer {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
+  padding-top: 6px;
 }
 
 .char-counter {
   font-size: 12px;
-  color: #71717A;
+  color: #A1A1AA;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .char-counter.max-reached {
   color: #EF4444;
+  font-weight: 700;
 }
 
-.input-error {
-  border-color: #EF4444 !important;
-}
-
-/* Reserved Error Message Space (Requirement #9: Zero Layout Jump) */
-.error-message {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-size: 12px;
-  color: #EF4444;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
+/* Form Action Button (Requirement #10: 32px spacing above submit button) */
 .form-actions {
-  margin-top: 16px;
+  margin-top: 32px;
 }
 
-/* Requirement #11: Height 52px, Radius 14px, Smooth Press Animation */
 .btn-submit {
   width: 100%;
-  height: 52px;
-  min-height: 52px;
+  height: 54px;
+  min-height: 54px;
   background-color: #09090B;
   color: #ffffff;
   border: none;
   border-radius: 14px;
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+  gap: 10px;
+  transition: background-color 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
+  user-select: none;
 }
 
 .btn-submit:hover:not(:disabled) {
@@ -455,34 +468,39 @@
   cursor: not-allowed;
 }
 
-/* Phone Layout (1 column stack) */
+/* Phone Layout (Requirement #11: 20px-24px outer page margins, spacious 32px 24px card padding) */
 @media (max-width: 639px) {
   .lead-form-wrapper {
-    padding: 16px 12px;
+    padding: 28px 20px;
   }
 
   .lead-form-card {
     border-radius: 20px;
-    padding: 24px 18px;
+    padding: 32px 24px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 
   .card-title {
-    font-size: 28px;
+    font-size: 25px;
+  }
+
+  .card-header {
+    margin-bottom: 24px;
   }
 
   .field-label {
-    font-size: 14px;
+    font-size: 13.5px;
   }
 
   .custom-input,
   .custom-dropdown-trigger,
   .phone-input-container {
-    height: 48px;
+    height: 50px;
+    min-height: 50px;
     font-size: 15px;
   }
 
@@ -491,7 +509,8 @@
   }
 
   .custom-textarea {
-    height: 100px;
+    height: 110px;
+    min-height: 110px;
     font-size: 15px;
   }
 
@@ -499,6 +518,20 @@
     height: 52px;
     border-radius: 14px;
     font-size: 15px;
+  }
+
+  .form-actions {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .lead-form-wrapper {
+    padding: 24px 16px;
+  }
+
+  .lead-form-card {
+    padding: 28px 20px;
   }
 }
 
@@ -535,4 +568,3 @@
 .close-popover-icon {
   font-size: 18px;
 }
-

@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 20px 16px 60px 16px;
+  padding: 32px 24px 64px 24px;
 }
 
 /* Header Row & In-Place Selection Swap (Google Photos / Gmail Pattern) */
@@ -12,25 +12,25 @@
   justify-content: space-between;
   height: 52px;
   min-height: 52px;
-  margin-bottom: 16px;
-  gap: 12px;
+  margin-bottom: 24px;
+  gap: 16px;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .crm-title-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* Requirement #3: Dashboard Title (Phone 28px, Tablet 32px, Desktop 34px) */
+/* Dashboard Title (Phone 26px, Tablet 30px, Desktop 32px) */
 .crm-page-title {
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 700;
   color: #09090B;
   margin: 0;
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .crm-count-badge {
@@ -39,12 +39,12 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-variant-numeric: tabular-nums;
 }
 
-/* In-Place Selection Title Swap (Requirement #7 & Recommendation) */
+/* In-Place Selection Title Swap */
 .selection-count-title {
   font-size: 20px;
   font-weight: 700;
@@ -57,13 +57,13 @@
 .selection-toolbar-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .btn-toolbar-action {
-  height: 38px;
-  min-height: 38px;
-  padding: 0 10px;
+  height: 40px;
+  min-height: 44px;
+  padding: 0 12px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
@@ -73,7 +73,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
@@ -96,18 +96,18 @@
   background-color: #DC2626;
 }
 
-/* Controls Section: Search & Export Inlined (Requirement #4) */
+/* Controls Section: Search + Export + Filter */
 .crm-controls-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .search-export-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -118,12 +118,12 @@
 
 .crm-search-input {
   width: 100%;
-  height: 48px;
-  min-height: 48px;
+  height: 52px;
+  min-height: 52px;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
-  padding: 0 40px 0 42px;
+  padding: 0 40px 0 44px;
   font-size: 15px;
   color: #09090B;
   outline: none;
@@ -178,8 +178,8 @@
 
 .btn-export-inline,
 .btn-filter-inline {
-  height: 48px;
-  min-height: 48px;
+  height: 52px;
+  min-height: 52px;
   min-width: 44px;
   padding: 0 16px;
   border-radius: 12px;
@@ -251,7 +251,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 20px;
   background-color: #F4F4F5;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -286,16 +286,17 @@
   color: #09090B;
 }
 
-/* Leads Grid */
+/* Leads Grid (8px grid spacing) */
 .leads-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 @media (max-width: 767px) {
   .leads-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
@@ -304,50 +305,51 @@
   grid-column: 1 / -1;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 20px;
-  padding: 48px 24px;
+  border-radius: 24px;
+  padding: 56px 28px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .empty-icon-badge {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
   background-color: #F4F4F5;
   border: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #71717A;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .empty-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 700;
   color: #09090B;
   margin: 0;
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: 14.5px;
   color: #71717A;
   margin: 0;
-  max-width: 320px;
+  max-width: 340px;
+  line-height: 1.45;
 }
 
-/* Modal Overlay (40% opacity + blur) */
+/* Modal Overlay */
 .edit-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(9, 9, 11, 0.40);
+  background-color: rgba(9, 9, 11, 0.45);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 2000;
@@ -367,7 +369,7 @@
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2);
-  padding: 24px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -378,8 +380,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
@@ -387,7 +389,7 @@
 .edit-modal-header-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .edit-modal-title {
@@ -442,7 +444,7 @@
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.22);
-  padding: 24px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -459,7 +461,7 @@
 }
 
 .delete-modal-desc {
-  font-size: 14px;
+  font-size: 14.5px;
   color: #3F3F46;
   margin: 0;
   line-height: 1.45;
@@ -476,7 +478,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 12px;
   width: 100%;
 }
 
@@ -530,7 +532,7 @@
 /* Tablet Scale */
 @media (max-width: 1023px) and (min-width: 640px) {
   .crm-page-title {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .edit-modal-card {
@@ -548,14 +550,14 @@
   }
 }
 
-/* Phone Layout (Requirement #3: Title 28px, compact export icon button) */
+/* Phone Layout (Requirement #11: 20px-24px outer page margins) */
 @media (max-width: 639px) {
   .crm-page-wrapper {
-    padding: 16px 12px 48px 12px;
+    padding: 28px 20px 56px 20px;
   }
 
   .crm-page-title {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .selection-count-title {
@@ -565,7 +567,7 @@
   .btn-toolbar-action {
     padding: 0 8px;
     font-size: 12px;
-    height: 36px;
+    height: 38px;
   }
 
   .btn-toolbar-action .action-label {
@@ -581,30 +583,36 @@
     height: 100%;
     max-height: 100vh;
     border-radius: 0;
-    padding: 18px 14px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding: 24px 20px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
   }
 
   .edit-modal-title {
-    font-size: 18px;
+    font-size: 19px;
   }
 
   .delete-modal-card {
     width: 90%;
     max-width: 380px;
-    padding: 20px 16px;
+    padding: 24px 20px;
   }
 
   .btn-export-inline,
   .btn-filter-inline {
-    height: 48px;
-    padding: 0 12px;
-    font-size: 13px;
+    height: 50px;
+    padding: 0 14px;
+    font-size: 13.5px;
   }
 
   .action-btn-text {
     display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .crm-page-wrapper {
+    padding: 24px 16px 48px 16px;
   }
 }
 
@@ -642,10 +650,10 @@
 .btn-toolbar-action:focus-visible,
 .filter-pill:focus-visible,
 .btn-export-inline:focus-visible,
+.btn-filter-inline:focus-visible,
 .btn-modal-cancel:focus-visible,
 .btn-modal-delete:focus-visible,
 .btn-close-modal:focus-visible {
   outline: 2px solid #09090B;
   outline-offset: 2px;
 }
-
