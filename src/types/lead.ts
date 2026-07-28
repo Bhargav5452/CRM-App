@@ -36,7 +36,7 @@ export const leadFormSchema = z.object({
     .or(z.literal('')),
   notes: z
     .string()
-    .max(500, 'Notes must be under 500 characters'),
+    .max(300, 'Notes must be under 300 characters'),
 });
 
 export type LeadFormInput = z.infer<typeof leadFormSchema>;
