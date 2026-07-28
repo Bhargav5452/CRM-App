@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.0",
     "@capacitor/android": "8.4.2",
     "@capacitor/app": "8.1.1",
     "@capacitor/core": "8.4.2",
@@ -19,6 +20,7 @@
     "@capacitor/ios": "8.4.2",
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/status-bar": "8.0.3",
+    "@hookform/resolvers": "^5.5.7",
     "@ionic/react": "^8.5.0",
     "@ionic/react-router": "^8.5.0",
     "@types/react-router": "^5.1.20",
@@ -26,8 +28,11 @@
     "ionicons": "^7.4.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.83.0",
     "react-router": "^5.3.4",
-    "react-router-dom": "^5.3.4"
+    "react-router-dom": "^5.3.4",
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@capacitor/cli": "8.4.2",
