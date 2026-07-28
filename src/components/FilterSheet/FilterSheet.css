@@ -31,12 +31,13 @@
   border-top-right-radius: 24px;
   border: 1px solid #E4E4E7;
   box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.12);
-  padding: 20px 24px max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px)) 24px;
-  max-height: 85vh;
+  padding: 18px 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 14px)) 20px;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -44,6 +45,7 @@
     border-radius: 24px;
     box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.18);
     animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    padding: 20px 24px;
   }
 }
 
@@ -53,7 +55,7 @@
   height: 4px;
   background-color: #E4E4E7;
   border-radius: 2px;
-  margin: 0 auto 12px auto;
+  margin: 0 auto 10px auto;
 }
 
 /* Header Row */
@@ -61,8 +63,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
@@ -102,7 +104,7 @@
   padding-right: 2px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -110,11 +112,11 @@
 .filter-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .filter-section-title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #71717A;
   text-transform: uppercase;
@@ -122,24 +124,20 @@
   margin: 0;
 }
 
-/* Radio Group List */
+/* Two-Column Responsive Radio Group Grid */
 .radio-options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-}
-
-@media (max-width: 480px) {
-  .radio-options-grid {
-    grid-template-columns: 1fr;
-  }
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .radio-option-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background-color: #ffffff;
@@ -147,6 +145,11 @@
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   min-height: 44px;
+  box-sizing: border-box;
+}
+
+.radio-option-card.full-width {
+  grid-column: 1 / -1;
 }
 
 .radio-option-card:hover {
@@ -185,9 +188,10 @@
 }
 
 .radio-label {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   color: #09090B;
+  line-height: 1.2;
 }
 
 .radio-option-card.selected .radio-label {
@@ -199,20 +203,20 @@
   background-color: #F4F4F5;
   border: 1px solid #E4E4E7;
   border-radius: 14px;
-  padding: 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   animation: fadeIn 0.15s ease-out forwards;
 }
 
 .date-pickers-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 360px) {
   .date-pickers-row {
     grid-template-columns: 1fr;
   }
@@ -232,14 +236,15 @@
 
 .date-input {
   height: 42px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   background-color: #ffffff;
-  font-size: 14px;
+  font-size: 13.5px;
   color: #09090B;
   outline: none;
   font-family: inherit;
+  box-sizing: border-box;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -249,19 +254,25 @@
   outline: none;
 }
 
+.date-input:invalid,
+.date-input.input-error {
+  border-color: #EF4444;
+}
+
 .date-error-text {
   font-size: 12px;
   color: #EF4444;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 /* Footer Actions */
 .filter-sheet-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 14px;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }

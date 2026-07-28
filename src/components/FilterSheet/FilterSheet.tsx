@@ -26,6 +26,17 @@ const TIME_OPTIONS: { id: DateFilterOption; label: string }[] = [
   { id: 'custom', label: 'Custom Date Range' },
 ];
 
+/**
+ * Returns today's date formatted as YYYY-MM-DD
+ */
+const getTodayStr = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const FilterSheet: React.FC<FilterSheetProps> = ({
   isOpen,
   onClose,
@@ -34,6 +45,8 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
   onReset,
 }) => {
   const [draftState, setDraftState] = useState<FilterState>(filterState);
+
+  const todayStr = getTodayStr();
 
   // Sync draft state with incoming filterState when sheet opens
   useEffect(() => {
@@ -65,21 +78,76 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
   const isCustom = draftState.time === 'custom';
 
-  // Validation: If Custom is selected, both from & to must be provided, and from <= to
+  // Strict Date Range Validation Rules:
+  // 1. From Date <= Today Date
+  // 2. To Date <= Today Date
+  // 3. From Date <= To Date
   const isCustomIncomplete =
     isCustom && (!draftState.customFrom || !draftState.customTo);
   const isCustomInvalid =
     isCustom &&
-    draftState.customFrom &&
-    draftState.customTo &&
-    draftState.customFrom > draftState.customTo;
+    Boolean(
+      (draftState.customFrom && draftState.customFrom > todayStr) ||
+        (draftState.customTo && draftState.customTo > todayStr) ||
+        (draftState.customFrom &&
+          draftState.customTo &&
+          draftState.customFrom > draftState.customTo)
+    );
 
   const canApply = !isCustomIncomplete && !isCustomInvalid;
 
   const handleSelectTime = (timeOption: DateFilterOption) => {
+    setDraftState((prev) => {
+      const nextState = { ...prev, time: timeOption };
+      // If user switches to custom for the first time without values, default to today
+      if (timeOption === 'custom' && (!prev.customFrom || !prev.customTo)) {
+        nextState.customFrom = todayStr;
+        nextState.customTo = todayStr;
+      }
+      return nextState;
+    });
+  };
+
+  const handleFromChange = (newFrom: string) => {
+    let validFrom = newFrom;
+    // Rule: Future dates must never be selectable
+    if (validFrom > todayStr) {
+      validFrom = todayStr;
+    }
+
+    setDraftState((prev) => {
+      let validTo = prev.customTo || '';
+
+      // Rule: If From Date = Today's date, To Date automatically becomes Today
+      if (validFrom === todayStr) {
+        validTo = todayStr;
+      } else if (!validTo || validTo < validFrom || validTo > todayStr) {
+        // Auto-update To Date if current value is invalid for the new From Date
+        validTo = validFrom;
+      }
+
+      return {
+        ...prev,
+        customFrom: validFrom,
+        customTo: validTo,
+      };
+    });
+  };
+
+  const handleToChange = (newTo: string) => {
+    let validTo = newTo;
+    // Rule: Maximum selectable date = Today's date
+    if (validTo > todayStr) {
+      validTo = todayStr;
+    }
+    // Rule: Minimum selectable date = selected From Date
+    if (draftState.customFrom && validTo < draftState.customFrom) {
+      validTo = draftState.customFrom;
+    }
+
     setDraftState((prev) => ({
       ...prev,
-      time: timeOption,
+      customTo: validTo,
     }));
   };
 
@@ -118,12 +186,13 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
         {/* Body */}
         <div className="filter-sheet-body">
-          {/* Section: Time */}
+          {/* Section: Time (2-Column Responsive Radio Grid) */}
           <div className="filter-section">
             <h3 className="filter-section-title">Time</h3>
             <div className="radio-options-grid" role="radiogroup">
               {TIME_OPTIONS.map((opt) => {
                 const isSelected = draftState.time === opt.id;
+                const isFullWidth = opt.id === 'custom';
                 return (
                   <div
                     key={opt.id}
@@ -131,8 +200,8 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                     aria-checked={isSelected}
                     tabIndex={0}
                     className={`radio-option-card ${
-                      isSelected ? 'selected' : ''
-                    }`}
+                      isFullWidth ? 'full-width' : ''
+                    } ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleSelectTime(opt.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -177,13 +246,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                     id="custom_from"
                     type="date"
                     className="date-input"
+                    max={todayStr}
                     value={draftState.customFrom || ''}
-                    onChange={(e) =>
-                      setDraftState((prev) => ({
-                        ...prev,
-                        customFrom: e.target.value,
-                      }))
-                    }
+                    onChange={(e) => handleFromChange(e.target.value)}
                   />
                 </div>
 
@@ -196,13 +261,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                     type="date"
                     className="date-input"
                     min={draftState.customFrom || undefined}
+                    max={todayStr}
                     value={draftState.customTo || ''}
-                    onChange={(e) =>
-                      setDraftState((prev) => ({
-                        ...prev,
-                        customTo: e.target.value,
-                      }))
-                    }
+                    onChange={(e) => handleToChange(e.target.value)}
                   />
                 </div>
               </div>
@@ -215,13 +276,11 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
               {isCustomInvalid && (
                 <span className="date-error-text">
-                  End date cannot be earlier than start date.
+                  Invalid range selected. Future dates and reverse ranges are not allowed.
                 </span>
               )}
             </div>
           )}
-
-          {/* Extensible Future Sections Placeholder (Home Type, Status, Agent etc.) */}
         </div>
 
         {/* Footer Actions */}
