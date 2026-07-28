@@ -65,7 +65,7 @@ if (Capacitor.isNativePlatform()) {
       if (!extra || !extra.filePath) return;
 
       if (actionId === 'share_file') {
-        // Trigger native share sheet if 'Share' action button clicked
+        // Trigger native share sheet if 'Share' action button clicked on notification
         try {
           await Share.share({
             title: 'Export CRM Leads',
@@ -177,7 +177,7 @@ export const exportLeadsToExcel = async (leads: Lead[]): Promise<void> => {
         console.warn('Could not check/request notification permissions:', e);
       }
 
-      // 4. Schedule OS Export Notification with App Icon, Actions, and Channel
+      // 4. Schedule OS Export Notification (with Open & Share actions on notification)
       const notifId = Math.floor(Math.random() * 100000) + 1;
       await LocalNotifications.schedule({
         notifications: [
@@ -196,14 +196,6 @@ export const exportLeadsToExcel = async (leads: Lead[]): Promise<void> => {
             },
           },
         ],
-      });
-
-      // 5. Open Native Share sheet so user can save or share directly
-      await Share.share({
-        title: 'Export CRM Leads',
-        text: `Exported ${filename}`,
-        url: savedFile.uri,
-        dialogTitle: 'Share or Save Excel File',
       });
     } catch (err) {
       console.error('Error exporting file on mobile platform, falling back to web trigger:', err);
