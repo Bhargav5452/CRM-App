@@ -57,6 +57,17 @@ const CRM: React.FC = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const isSelectionMode = selectedIds.length > 0;
 
@@ -234,7 +245,7 @@ const CRM: React.FC = () => {
                 <IonIcon icon={searchOutline} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Search name, phone, email, notes..."
+                  placeholder={isMobile ? 'Search...' : 'Search name, phone, email, notes...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="crm-search-input"
