@@ -2,3 +2,40 @@
   --background: var(--bg-main);
   background-color: var(--bg-main);
 }
+
+/* Success Banner Toast */
+.toast-success-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-content {
+  background-color: #FFFFFF;
+  border: 1px solid #BBF7D0;
+  box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #14532D;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
