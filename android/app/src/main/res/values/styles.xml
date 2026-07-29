@@ -18,6 +18,12 @@
         <item name="windowNoTitle">true</item>
         <!-- Solid background color matching app's bg-main (#FAFAFA) -->
         <item name="android:windowBackground">@color/app_background</item>
+        <!-- Transparent status bar for edge-to-edge layout -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Dark (black) icons & text for light status bar -->
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Prevent Android OS System Dark Mode from force-inverting light theme -->
+        <item name="android:forceDarkAllowed">false</item>
         <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
         <item name="android:datePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
         <item name="android:timePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
