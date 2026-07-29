@@ -13,7 +13,7 @@
       Main app theme: no action bar, solid white status bar with dark icons.
       Solid window background (#FAFAFA) prevents background image leak into WebView dialogs.
     -->
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!-- Solid background color matching app's bg-main (#FAFAFA) -->
@@ -22,7 +22,6 @@
         <item name="android:statusBarColor">#FFFFFF</item>
         <!-- Dark icons (time, wifi, battery) on white status bar -->
         <item name="android:windowLightStatusBar">true</item>
-        <!-- Do NOT draw under the status bar -->
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:fitsSystemWindows">false</item>
         <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
