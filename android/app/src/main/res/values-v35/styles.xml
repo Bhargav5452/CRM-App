@@ -8,12 +8,15 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <!-- Match app background to prevent black/grey flash when WebView loads -->
         <item name="android:windowBackground">@color/app_background</item>
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowTranslucentStatus">false</item>
-        <!-- API 35+: opt out of forced edge-to-edge -->
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+
+        <!-- Explicitly scope DatePickerDialog & Dialog themes to clean Material defaults -->
+        <item name="android:datePickerDialogTheme">@style/CustomDatePickerDialog</item>
+        <item name="android:dialogTheme">@style/CustomAlertDialog</item>
+        <item name="android:alertDialogTheme">@style/CustomAlertDialog</item>
     </style>
 </resources>
