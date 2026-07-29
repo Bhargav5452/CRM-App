@@ -175,6 +175,16 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
     onClose();
   };
 
+  const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    if ('showPicker' in e.currentTarget && typeof e.currentTarget.showPicker === 'function') {
+      try {
+        e.currentTarget.showPicker();
+      } catch {
+        // Fallback for native browser behavior
+      }
+    }
+  };
+
   return (
     <div className="filter-sheet-backdrop" onClick={onClose}>
       <div
@@ -211,8 +221,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                     role="radio"
                     aria-checked={isSelected}
                     tabIndex={0}
-                    className={`radio-option-card ${isFullWidth ? 'full-width' : ''
-                      } ${isSelected ? 'selected' : ''}`}
+                    className={`radio-option-card ${
+                      isFullWidth ? 'full-width' : ''
+                    } ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleSelectTime(opt.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -261,6 +272,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                       className="date-input-native"
                       max={todayStr}
                       value={draftState.customFrom || ''}
+                      onClick={handleInputClick}
                       onChange={(e) => handleFromChange(e.target.value)}
                     />
                     <div className="date-input-display">
@@ -290,6 +302,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                       min={draftState.customFrom || undefined}
                       max={todayStr}
                       value={draftState.customTo || ''}
+                      onClick={handleInputClick}
                       onChange={(e) => handleToChange(e.target.value)}
                     />
                     <div className="date-input-display">

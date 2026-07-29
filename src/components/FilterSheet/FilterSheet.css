@@ -216,12 +216,6 @@
   gap: 10px;
 }
 
-@media (max-width: 360px) {
-  .date-pickers-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .date-field {
   display: flex;
   flex-direction: column;
