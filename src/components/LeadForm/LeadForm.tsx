@@ -130,26 +130,45 @@ const LeadForm: React.FC<LeadFormProps> = ({
     setCountrySearch('');
   };
 
-  const filteredCountries = COUNTRY_CODES.filter(
+  const PINNED_ISOS = ['IN', 'US'];
+  const searchLower = countrySearch.toLowerCase().trim();
+
+  // Pinned countries (India & United States)
+  const filteredPinned = COUNTRY_CODES.filter(
     (c) =>
-      c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
-      c.code.includes(countrySearch) ||
-      c.iso.toLowerCase().includes(countrySearch.toLowerCase())
+      PINNED_ISOS.includes(c.iso) &&
+      (c.name.toLowerCase().includes(searchLower) ||
+        c.code.includes(searchLower) ||
+        c.iso.toLowerCase().includes(searchLower))
   );
 
+  // Alphabetical list excluding pinned countries
+  const filteredOthers = COUNTRY_CODES.filter(
+    (c) =>
+      !PINNED_ISOS.includes(c.iso) &&
+      (c.name.toLowerCase().includes(searchLower) ||
+        c.code.includes(searchLower) ||
+        c.iso.toLowerCase().includes(searchLower))
+  );
+
+  // Flattened array for index-based keyboard navigation
+  const allFilteredCountries = [...filteredPinned, ...filteredOthers];
+
   const handleCountrySearchKeyDown = (e: React.KeyboardEvent) => {
-    if (filteredCountries.length === 0) return;
+    if (allFilteredCountries.length === 0) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setKeyFocusedIdx((prev) => (prev + 1) % filteredCountries.length);
+      setKeyFocusedIdx((prev) => (prev + 1) % allFilteredCountries.length);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setKeyFocusedIdx((prev) => (prev - 1 + filteredCountries.length) % filteredCountries.length);
+      setKeyFocusedIdx(
+        (prev) => (prev - 1 + allFilteredCountries.length) % allFilteredCountries.length
+      );
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredCountries[keyFocusedIdx]) {
-        handleSelectCountry(filteredCountries[keyFocusedIdx]);
+      if (allFilteredCountries[keyFocusedIdx]) {
+        handleSelectCountry(allFilteredCountries[keyFocusedIdx]);
       }
     }
   };
@@ -398,28 +417,63 @@ const LeadForm: React.FC<LeadFormProps> = ({
             </div>
 
             <div className="country-popover-list" role="listbox">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map((country, idx) => {
-                  const isSelected = selectedCountryCode === country.code;
-                  const isKeyFocused = idx === keyFocusedIdx;
-                  return (
-                    <div
-                      key={`${country.iso}-${country.code}`}
-                      ref={isSelected ? selectedCountryRef : null}
-                      role="option"
-                      aria-selected={isSelected}
-                      className={`country-option ${isSelected ? 'selected' : ''} ${isKeyFocused ? 'focused-key' : ''
+              {allFilteredCountries.length > 0 ? (
+                <>
+                  {filteredPinned.map((country) => {
+                    const globalIdx = allFilteredCountries.findIndex((c) => c.iso === country.iso);
+                    const isSelected = activeCountry.iso === country.iso;
+                    const isKeyFocused = globalIdx === keyFocusedIdx;
+                    return (
+                      <div
+                        key={`pinned-${country.iso}-${country.code}`}
+                        ref={isSelected ? selectedCountryRef : null}
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`country-option ${isSelected ? 'selected' : ''} ${
+                          isKeyFocused ? 'focused-key' : ''
                         }`}
-                      onClick={() => handleSelectCountry(country)}
-                    >
-                      <div className="country-option-left">
-                        <span className="country-flag">{country.flag}</span>
-                        <span className="country-option-name">{country.name}</span>
+                        onClick={() => handleSelectCountry(country)}
+                      >
+                        <div className="country-option-left">
+                          <span className="country-flag">{country.flag}</span>
+                          <span className="country-option-name">{country.name}</span>
+                        </div>
+                        <span className="country-option-code">{country.code}</span>
                       </div>
-                      <span className="country-option-code">{country.code}</span>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+
+                  {filteredOthers.length > 0 && (
+                    <>
+                      {filteredPinned.length > 0 && (
+                        <div className="country-section-divider">All Countries</div>
+                      )}
+                      {filteredOthers.map((country) => {
+                        const globalIdx = allFilteredCountries.findIndex((c) => c.iso === country.iso);
+                        const isSelected = activeCountry.iso === country.iso;
+                        const isKeyFocused = globalIdx === keyFocusedIdx;
+                        return (
+                          <div
+                            key={`other-${country.iso}-${country.code}`}
+                            ref={isSelected ? selectedCountryRef : null}
+                            role="option"
+                            aria-selected={isSelected}
+                            className={`country-option ${isSelected ? 'selected' : ''} ${
+                              isKeyFocused ? 'focused-key' : ''
+                            }`}
+                            onClick={() => handleSelectCountry(country)}
+                          >
+                            <div className="country-option-left">
+                              <span className="country-flag">{country.flag}</span>
+                              <span className="country-option-name">{country.name}</span>
+                            </div>
+                            <span className="country-option-code">{country.code}</span>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                </>
               ) : (
                 <div className="country-no-results">No countries match "{countrySearch}"</div>
               )}
