@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon } from '@ionic/react';
-import { closeOutline, calendarOutline } from 'ionicons/icons';
+import { IonIcon, IonDatetime, IonModal, IonButton } from '@ionic/react';
+import { closeOutline, calendarOutline, checkmarkOutline } from 'ionicons/icons';
 import {
   FilterState,
   DateFilterOption,
@@ -37,6 +37,21 @@ const getTodayStr = (): string => {
   return `${year}-${month}-${day}`;
 };
 
+/**
+ * Formats YYYY-MM-DD string into a clean readable date string: "Jul 28, 2026"
+ */
+const formatDisplayDate = (dateStr?: string): string => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return dateStr;
+  const dt = new Date(y, m - 1, d);
+  return dt.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
 const FilterSheet: React.FC<FilterSheetProps> = ({
   isOpen,
   onClose,
@@ -45,6 +60,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
   onReset,
 }) => {
   const [draftState, setDraftState] = useState<FilterState>(filterState);
+  const [activePicker, setActivePicker] = useState<'from' | 'to' | null>(null);
 
   const todayStr = getTodayStr();
 
@@ -52,6 +68,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
   useEffect(() => {
     if (isOpen) {
       setDraftState(filterState);
+      setActivePicker(null);
     }
   }, [isOpen, filterState]);
 
@@ -63,7 +80,11 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        if (activePicker) {
+          setActivePicker(null);
+        } else {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -72,7 +93,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, activePicker, onClose]);
 
   if (!isOpen) return null;
 
@@ -99,7 +120,6 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
   const handleSelectTime = (timeOption: DateFilterOption) => {
     setDraftState((prev) => {
       const nextState = { ...prev, time: timeOption };
-      // If user switches to custom for the first time without values, default to today
       if (timeOption === 'custom' && (!prev.customFrom || !prev.customTo)) {
         nextState.customFrom = todayStr;
         nextState.customTo = todayStr;
@@ -108,21 +128,19 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
     });
   };
 
-  const handleFromChange = (newFrom: string) => {
-    let validFrom = newFrom;
-    // Rule: Future dates must never be selectable
+  const handleFromChange = (newFromIso: string) => {
+    // IonDatetime returns ISO string (e.g. "2026-07-28T00:00:00") or YYYY-MM-DD
+    const rawStr = newFromIso.split('T')[0];
+    let validFrom = rawStr;
     if (validFrom > todayStr) {
       validFrom = todayStr;
     }
 
     setDraftState((prev) => {
       let validTo = prev.customTo || '';
-
-      // Rule: If From Date = Today's date, To Date automatically becomes Today
       if (validFrom === todayStr) {
         validTo = todayStr;
       } else if (!validTo || validTo < validFrom || validTo > todayStr) {
-        // Auto-update To Date if current value is invalid for the new From Date
         validTo = validFrom;
       }
 
@@ -132,15 +150,15 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
         customTo: validTo,
       };
     });
+    setActivePicker(null);
   };
 
-  const handleToChange = (newTo: string) => {
-    let validTo = newTo;
-    // Rule: Maximum selectable date = Today's date
+  const handleToChange = (newToIso: string) => {
+    const rawStr = newToIso.split('T')[0];
+    let validTo = rawStr;
     if (validTo > todayStr) {
       validTo = todayStr;
     }
-    // Rule: Minimum selectable date = selected From Date
     if (draftState.customFrom && validTo < draftState.customFrom) {
       validTo = draftState.customFrom;
     }
@@ -149,6 +167,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
       ...prev,
       customTo: validTo,
     }));
+    setActivePicker(null);
   };
 
   const handleApply = () => {
@@ -220,7 +239,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
             </div>
           </div>
 
-          {/* Sub-Section: Custom Date Range */}
+          {/* Sub-Section: Custom Date Range Trigger Buttons */}
           {isCustom && (
             <div className="custom-date-box">
               <div
@@ -239,32 +258,31 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
               <div className="date-pickers-row">
                 <div className="date-field">
-                  <label htmlFor="custom_from" className="date-label">
-                    From
-                  </label>
-                  <input
-                    id="custom_from"
-                    type="date"
-                    className="date-input"
-                    max={todayStr}
-                    value={draftState.customFrom || ''}
-                    onChange={(e) => handleFromChange(e.target.value)}
-                  />
+                  <span className="date-label">From</span>
+                  <button
+                    type="button"
+                    className="date-trigger-btn"
+                    onClick={() => setActivePicker('from')}
+                  >
+                    <span className="date-trigger-text">
+                      {formatDisplayDate(draftState.customFrom) || 'Select From Date'}
+                    </span>
+                    <IonIcon icon={calendarOutline} style={{ fontSize: 16, color: '#71717A' }} />
+                  </button>
                 </div>
 
                 <div className="date-field">
-                  <label htmlFor="custom_to" className="date-label">
-                    To
-                  </label>
-                  <input
-                    id="custom_to"
-                    type="date"
-                    className="date-input"
-                    min={draftState.customFrom || undefined}
-                    max={todayStr}
-                    value={draftState.customTo || ''}
-                    onChange={(e) => handleToChange(e.target.value)}
-                  />
+                  <span className="date-label">To</span>
+                  <button
+                    type="button"
+                    className="date-trigger-btn"
+                    onClick={() => setActivePicker('to')}
+                  >
+                    <span className="date-trigger-text">
+                      {formatDisplayDate(draftState.customTo) || 'Select To Date'}
+                    </span>
+                    <IonIcon icon={calendarOutline} style={{ fontSize: 16, color: '#71717A' }} />
+                  </button>
                 </div>
               </div>
 
@@ -302,6 +320,52 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Cross-Platform Ionic IonDatetime Picker Modal */}
+      <IonModal
+        isOpen={Boolean(activePicker)}
+        onDidDismiss={() => setActivePicker(null)}
+        className="ion-datetime-custom-modal"
+      >
+        <div className="ion-datetime-modal-container">
+          <div className="ion-datetime-modal-header">
+            <h3 className="ion-datetime-modal-title">
+              {activePicker === 'from' ? 'Select From Date' : 'Select To Date'}
+            </h3>
+            <button
+              type="button"
+              className="btn-close-filter"
+              onClick={() => setActivePicker(null)}
+            >
+              <IonIcon icon={closeOutline} />
+            </button>
+          </div>
+
+          <div className="ion-datetime-modal-body">
+            <IonDatetime
+              presentation="date"
+              preferWheel={false}
+              max={todayStr}
+              min={activePicker === 'to' ? draftState.customFrom : undefined}
+              value={
+                activePicker === 'from'
+                  ? draftState.customFrom || todayStr
+                  : draftState.customTo || todayStr
+              }
+              onIonChange={(e) => {
+                const val = e.detail.value;
+                if (!val) return;
+                const strVal = Array.isArray(val) ? val[0] : val;
+                if (activePicker === 'from') {
+                  handleFromChange(strVal);
+                } else if (activePicker === 'to') {
+                  handleToChange(strVal);
+                }
+              }}
+            />
+          </div>
+        </div>
+      </IonModal>
     </div>
   );
 };
