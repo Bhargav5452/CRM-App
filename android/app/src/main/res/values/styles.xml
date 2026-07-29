@@ -18,14 +18,6 @@
         <item name="windowNoTitle">true</item>
         <!-- Solid background color matching app's bg-main (#FAFAFA) -->
         <item name="android:windowBackground">@color/app_background</item>
-        <!-- Transparent status bar for edge-to-edge layout -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <!-- Dark icons (time, wifi, battery) on white status bar -->
-        <item name="android:windowLightStatusBar">true</item>
-        <!-- Prevent Android OS System Dark Mode from overriding light status bar icons -->
-        <item name="android:forceDarkAllowed">false</item>
-        <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:fitsSystemWindows">false</item>
         <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
         <item name="android:datePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
         <item name="android:timePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
@@ -45,10 +37,6 @@
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/app_background</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
-        <!-- Keep status bar transparent during splash -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowTranslucentStatus">false</item>
     </style>
 
 </resources>
