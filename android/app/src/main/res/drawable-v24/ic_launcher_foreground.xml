@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Lead CRM Adaptive Icon Foreground
-  108×108dp canvas, safe zone is inner 72×72dp (18dp margin each side)
-  Draws a bold white "C" letter centered on the canvas
+  108×108dp canvas, safe zone inner 72×72dp (18dp margin each side)
+  White bold "C" letter — scaled to ~40% of safe zone, centered
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -11,25 +11,25 @@
     android:viewportHeight="108">
 
     <!--
-      Bold white "C" shape centered at (54,54)
-      Outer radius: 26dp, inner radius: 17dp
-      Opening gap on the right side (~60° each)
-      Drawn as a closed path: outer arc CCW + inner arc CW with gap
+      Bold "C" centered at (54,54).
+      Outer radius: 20, inner radius: 13.
+      Gap opening on right side (~55° each side).
+      Significantly smaller than before (was r=26/17).
     -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="
-          M54,28
-          C38.54,28 26,40.54 26,56
-          C26,71.46 38.54,84 54,84
-          C62.4,84 69.93,80.36 75.1,74.6
-          L67.5,67
-          C64.12,70.76 59.33,73 54,73
-          C44.61,73 37,65.39 37,56
-          C37,46.61 44.61,39 54,39
-          C59.33,39 64.12,41.24 67.5,45
-          L75.1,37.4
-          C69.93,31.64 62.4,28 54,28
+          M54,34
+          C43.51,34 35,42.51 35,53
+          C35,63.49 43.51,72 54,72
+          C59.6,72 64.6,69.6 68.1,65.8
+          L63.2,60.9
+          C60.9,63.4 57.6,65 54,65
+          C47.37,65 42,59.63 42,53
+          C42,46.37 47.37,41 54,41
+          C57.6,41 60.9,42.6 63.2,45.1
+          L68.1,40.2
+          C64.6,36.4 59.6,34 54,34
           Z
         " />
 </vector>
