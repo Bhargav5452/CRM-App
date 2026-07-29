@@ -234,6 +234,13 @@
   color: #52525B;
 }
 
+.date-format-hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #09090B;
+  margin-left: 4px;
+}
+
 .date-input {
   height: 42px;
   padding: 0 10px;

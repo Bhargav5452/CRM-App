@@ -28,9 +28,11 @@ const getActiveFilterLabel = (filter: FilterState): string | null => {
   if (filter.time === 'custom') {
     if (filter.customFrom && filter.customTo) {
       const formatDate = (dateStr: string) => {
-        const [y, m, d] = dateStr.split('-').map(Number);
-        const dateObj = new Date(y, m - 1, d);
-        return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        const [y, m, d] = parts;
+        const yy = y.slice(-2);
+        return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${yy}`;
       };
       return `📅 ${formatDate(filter.customFrom)} – ${formatDate(filter.customTo)}`;
     }
@@ -340,8 +342,8 @@ const CRM: React.FC = () => {
                   <h3 className="empty-title">No leads found</h3>
                   <p className="empty-text">
                     {searchQuery || isFilterActive
-                      ? 'No customer records match your current search or filter criteria.'
-                      : 'No customer records entered yet. Start by creating a new lead from the entry form.'}
+                      ? 'No Lead records match your current search or filter criteria.'
+                      : 'No Lead records entered yet. Start by creating a new lead from the entry form.'}
                   </p>
                 </div>
               )}

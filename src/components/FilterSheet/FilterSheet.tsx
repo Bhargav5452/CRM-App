@@ -27,6 +27,18 @@ const TIME_OPTIONS: { id: DateFilterOption; label: string }[] = [
 ];
 
 /**
+ * Formats YYYY-MM-DD string to DD/MM/YY
+ */
+export const formatToDDMMYY = (dateStr?: string): string => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const [y, m, d] = parts;
+  const yy = y.slice(-2);
+  return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${yy}`;
+};
+
+/**
  * Returns today's date formatted as YYYY-MM-DD
  */
 const getTodayStr = (): string => {
@@ -240,7 +252,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
               <div className="date-pickers-row">
                 <div className="date-field">
                   <label htmlFor="custom_from" className="date-label">
-                    From
+                    From {draftState.customFrom && <span className="date-format-hint">({formatToDDMMYY(draftState.customFrom)})</span>}
                   </label>
                   <input
                     id="custom_from"
@@ -254,7 +266,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
                 <div className="date-field">
                   <label htmlFor="custom_to" className="date-label">
-                    To
+                    To {draftState.customTo && <span className="date-format-hint">({formatToDDMMYY(draftState.customTo)})</span>}
                   </label>
                   <input
                     id="custom_to"
