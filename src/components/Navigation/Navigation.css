@@ -35,7 +35,7 @@
 .app-navbar-container {
   width: 100%;
   background-color: #ffffff;
-  padding-top: max(env(safe-area-inset-top, 0px), var(--ion-safe-area-top, 0px));
+  padding-top: calc(max(env(safe-area-inset-top, 0px), var(--ion-safe-area-top, 0px)) + 10px);
 }
 
 .app-navbar-inner {
