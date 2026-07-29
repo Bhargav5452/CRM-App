@@ -351,12 +351,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
             <div className="card-header">
               <div className="header-text">
                 <h1 className="card-title">
-                  {defaultValues ? 'Edit Lead' : 'New Lead'}
+                  {defaultValues ? 'Edit Lead' : 'Client Info'}
                 </h1>
                 <p className="card-subtitle">
                   {defaultValues
                     ? 'Update customer details below'
-                    : 'Enter the details of your customer'}
+                    : 'Enter the details of your client'}
                 </p>
               </div>
             </div>

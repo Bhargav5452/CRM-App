@@ -83,6 +83,8 @@ export const HOME_TYPES = [
   '3BHK',
   '4BHK',
   'Villa',
+  'Open Land',
+  'Commercial Properties',
 ] as const;
 
 export const leadFormSchema = z
