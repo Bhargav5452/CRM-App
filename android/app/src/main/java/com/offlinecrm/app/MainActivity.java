@@ -15,6 +15,10 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Switch theme from splash launch theme (AppTheme.NoActionBarLaunch) to normal app theme
+        // before super.onCreate() so native dialogs (like DatePickerDialog) do not inherit splash.png
+        setTheme(R.style.AppTheme_NoActionBar);
+
         super.onCreate(savedInstanceState);
 
         /*
@@ -24,11 +28,6 @@ public class MainActivity extends BridgeActivity {
          *
          * We override that here — AFTER super.onCreate() — so the OS shifts
          * the WebView below the status bar automatically.
-         *
-         * Note: on API 35+ the OS still enforces edge-to-edge at the system
-         * level, but calling setDecorFitsSystemWindows(true) still works
-         * because it instructs the root decor view to consume the insets
-         * and NOT pass them down to child views (the WebView).
          */
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 

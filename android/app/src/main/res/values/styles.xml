@@ -34,6 +34,7 @@
 
     <!-- Dedicated Light Dialog Theme for DatePickerDialog launched by WebView -->
     <style name="AppCompatDatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/white</item>
         <item name="colorAccent">#09090B</item>
         <item name="android:colorAccent">#09090B</item>
     </style>
