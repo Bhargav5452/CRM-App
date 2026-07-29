@@ -20,63 +20,28 @@ import './theme/variables.css';
 // Route-level Code-Splitting: CRM page loaded on demand so initial bundle stays lightweight
 const CRM = lazy(() => import('./pages/CRM/CRM'));
 
-if (window.__mark) {
-  window.__mark('ionic_setup_start');
-}
 setupIonicReact();
-if (window.__mark) {
-  window.__mark('ionic_setup_done');
-}
-
-declare global {
-  interface Window {
-    __STARTUP_LOGS__?: Array<{ name: string; time: number; extra: string }>;
-    __mark?: (name: string, extra?: string) => void;
-  }
-}
 
 const App: React.FC = () => {
-  if (window.__mark) {
-    window.__mark('app_component_rendering');
-  }
-
   useEffect(() => {
-    if (window.__mark) {
-      window.__mark('app_component_mounted');
-    }
-
+    // Zero-latency startup sequence:
+    // Status bar configuration is handled natively in MainActivity.java at native startup (0ms JS delay).
+    // Hide splash screen on the very first painted animation frame after React mounts.
     if (Capacitor.isNativePlatform()) {
-      if (window.__mark) {
-        window.__mark('splash_hide_prepare');
-      }
       requestAnimationFrame(() => {
-        if (window.__mark) {
-          window.__mark('splash_hide_called');
-        }
-        SplashScreen.hide({ fadeOutDuration: 150 })
-          .then(() => {
-            if (window.__mark) {
-              window.__mark('splash_hide_completed');
-            }
-          })
-          .catch((e) => {
-            console.warn('SplashScreen.hide error:', e);
-          });
+        SplashScreen.hide({ fadeOutDuration: 150 }).catch((e) => {
+          console.warn('SplashScreen.hide error:', e);
+        });
       });
     }
 
+    // Defer non-essential background initialization (SQLite database pre-warming) until AFTER initial render
     const idleCallbackId = window.requestIdleCallback
       ? window.requestIdleCallback(() => {
-          if (window.__mark) window.__mark('idle_db_init_start');
-          databaseService.initialize().then(() => {
-            if (window.__mark) window.__mark('idle_db_init_done');
-          });
+          databaseService.initialize();
         })
       : setTimeout(() => {
-          if (window.__mark) window.__mark('idle_db_init_start');
-          databaseService.initialize().then(() => {
-            if (window.__mark) window.__mark('idle_db_init_done');
-          });
+          databaseService.initialize();
         }, 300);
 
     return () => {

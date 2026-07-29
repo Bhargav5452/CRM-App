@@ -25,14 +25,10 @@ class DatabaseService {
     if (this.initPromise) return this.initPromise;
 
     this.initPromise = (async () => {
-      const t0 = performance.now();
-      if (window.__mark) window.__mark('db_init_start');
-
       try {
         if (this.isNative) {
           this.sqlite = new SQLiteConnection(CapacitorSQLite);
           const isConn = (await this.sqlite.isConnection(DB_NAME, false)).result;
-          if (window.__mark) window.__mark('db_is_connection_checked');
 
           if (isConn) {
             this.db = await this.sqlite.retrieveConnection(DB_NAME, false);
@@ -45,10 +41,8 @@ class DatabaseService {
               false
             );
           }
-          if (window.__mark) window.__mark('db_connection_created');
 
           await this.db.open();
-          if (window.__mark) window.__mark('db_opened');
 
           const getVersionResult = await this.db.query('PRAGMA user_version;');
           const currentVersion =
@@ -101,15 +95,12 @@ class DatabaseService {
             }
             await this.db.execute('PRAGMA user_version = 1;');
           }
-          if (window.__mark) window.__mark('db_migration_checked');
         } else {
           if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
           }
         }
         this.isInitialized = true;
-        const total = Math.round(performance.now() - t0);
-        if (window.__mark) window.__mark('db_init_complete', `(${total}ms)`);
       } catch (err) {
         console.error('Database initialization error:', err);
         if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
