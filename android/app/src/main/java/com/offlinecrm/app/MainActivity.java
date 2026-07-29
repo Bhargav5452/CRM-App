@@ -15,8 +15,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Switch theme from splash launch theme (AppTheme.NoActionBarLaunch) to normal app theme
-        // before super.onCreate() so native dialogs (like DatePickerDialog) do not inherit splash.png
+        // Explicitly switch theme from launch theme to main app theme
+        // to clear any windowBackground drawable references from the Activity DecorView
         setTheme(R.style.AppTheme_NoActionBar);
 
         super.onCreate(savedInstanceState);
