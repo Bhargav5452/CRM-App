@@ -35,14 +35,14 @@
 .app-navbar-container {
   width: 100%;
   background-color: #ffffff;
-  padding-top: max(env(safe-area-inset-top, 0px), var(--ion-safe-area-top, 0px));
+  padding-top: calc(max(env(safe-area-inset-top, 0px), var(--ion-safe-area-top, 0px)) + 18px);
 }
 
 .app-navbar-inner {
   max-width: 960px;
   margin: 0 auto;
-  height: 64px;
-  padding: 10px 20px;
+  height: 68px;
+  padding: 8px 20px 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
