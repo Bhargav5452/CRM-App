@@ -109,7 +109,7 @@ export const leadFormSchema = z
       return data.phone.length === reqDigits;
     },
     {
-      message: 'Phone number digit length mismatch for selected country',
+      message: 'Enter a valid phone number',
       path: ['phone'],
     }
   );
