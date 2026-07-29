@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches --bg-main in variables.css. Used as android:windowBackground
+         in AppTheme.NoActionBar so no black/grey frame appears while the
+         WebView initializes. -->
+    <color name="app_background">#FAFAFA</color>
+
+    <!-- Legacy launcher icon background color (not used by adaptive icon) -->
+    <color name="colorPrimary">#09090B</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#09090B</color>
+</resources>

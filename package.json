@@ -23,6 +23,7 @@
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/local-notifications": "^8.2.1",
     "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "8.0.3",
     "@hookform/resolvers": "^5.5.7",
     "@ionic/react": "^8.5.0",

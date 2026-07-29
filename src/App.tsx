@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
 import Navigation from './components/Navigation/Navigation';
 import Home from './pages/Home/Home';
 import CRM from './pages/CRM/CRM';
@@ -31,20 +32,38 @@ setupIonicReact();
 
 const App: React.FC = () => {
   useEffect(() => {
-    const configureStatusBar = async () => {
+    const initializeNativePlatform = async () => {
       if (!Capacitor.isNativePlatform()) return;
+
       try {
-        // Prevent web content from drawing underneath the system status bar
+        // 1. Configure status bar: white background, dark icons
         await StatusBar.setOverlaysWebView({ overlay: false });
-        // Use Style.Light -> Light status bar background with dark icons/text
         await StatusBar.setStyle({ style: Style.Light });
-        // Match status bar background to application header (#FFFFFF)
         await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
       } catch (e) {
         console.warn('StatusBar configuration error:', e);
       }
+
+      // 2. Wait two animation frames so React has fully painted the first frame
+      //    (header + navigation + page content all present) before hiding the
+      //    splash. This prevents any blank/partial frame flash between the
+      //    splash and the live UI.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
+
+      // 3. Dismiss the splash with a soft fade. launchAutoHide is false in
+      //    capacitor.config.ts so the splash stays visible until we call hide().
+      try {
+        await SplashScreen.hide({ fadeOutDuration: 200 });
+      } catch (e) {
+        console.warn('SplashScreen.hide error:', e);
+      }
     };
-    configureStatusBar();
+
+    initializeNativePlatform();
   }, []);
 
   return (
