@@ -80,7 +80,7 @@ export const useLeads = () => {
         }
       }
 
-      // 2. Time Filter
+      // 2. Time Filter (Strict evaluation across all devices - Desktop, Web, iOS, Android)
       if (filterState.time !== 'all') {
         const leadDate = new Date(lead.created_at);
         const now = new Date();
@@ -122,14 +122,17 @@ export const useLeads = () => {
           if (leadDate < startOfLastMonth || leadDate >= startOfThisMonth)
             return false;
         } else if (filterState.time === 'custom') {
-          if (filterState.customFrom && filterState.customTo) {
+          // Strict Date Range Filter across all platforms
+          if (filterState.customFrom) {
             const [fromY, fromM, fromD] = filterState.customFrom.split('-').map(Number);
-            const [toY, toM, toD] = filterState.customTo.split('-').map(Number);
-
             const fromDate = new Date(fromY, fromM - 1, fromD, 0, 0, 0, 0);
-            const toDate = new Date(toY, toM - 1, toD, 23, 59, 59, 999);
+            if (leadDate < fromDate) return false;
+          }
 
-            if (leadDate < fromDate || leadDate > toDate) return false;
+          if (filterState.customTo) {
+            const [toY, toM, toD] = filterState.customTo.split('-').map(Number);
+            const toDate = new Date(toY, toM - 1, toD, 23, 59, 59, 999);
+            if (leadDate > toDate) return false;
           }
         }
       }
