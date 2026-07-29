@@ -25,10 +25,14 @@ class DatabaseService {
     if (this.initPromise) return this.initPromise;
 
     this.initPromise = (async () => {
+      const t0 = performance.now();
+      if (window.__mark) window.__mark('db_init_start');
+
       try {
         if (this.isNative) {
           this.sqlite = new SQLiteConnection(CapacitorSQLite);
           const isConn = (await this.sqlite.isConnection(DB_NAME, false)).result;
+          if (window.__mark) window.__mark('db_is_connection_checked');
 
           if (isConn) {
             this.db = await this.sqlite.retrieveConnection(DB_NAME, false);
@@ -41,13 +45,11 @@ class DatabaseService {
               false
             );
           }
+          if (window.__mark) window.__mark('db_connection_created');
 
           await this.db.open();
+          if (window.__mark) window.__mark('db_opened');
 
-          // ─────────────────────────────────────────────────────────────
-          // Database Schema & Migration Path (v1 -> v2)
-          // Migration: UNIQUE(phone) -> UNIQUE(country_code, phone)
-          // ─────────────────────────────────────────────────────────────
           const getVersionResult = await this.db.query('PRAGMA user_version;');
           const currentVersion =
             getVersionResult.values && getVersionResult.values[0]
@@ -61,7 +63,6 @@ class DatabaseService {
             const tableExists = tableCheck.values && tableCheck.values.length > 0;
 
             if (!tableExists) {
-              // Fresh installation
               await this.db.execute(`
                 CREATE TABLE leads (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +78,6 @@ class DatabaseService {
                 );
               `);
             } else {
-              // Existing installation: Migrate UNIQUE(phone) to UNIQUE(country_code, phone)
               await this.db.execute(`
                 BEGIN TRANSACTION;
                 CREATE TABLE leads_new (
@@ -101,13 +101,15 @@ class DatabaseService {
             }
             await this.db.execute('PRAGMA user_version = 1;');
           }
+          if (window.__mark) window.__mark('db_migration_checked');
         } else {
-          // Web Fallback (localStorage)
           if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
           }
         }
         this.isInitialized = true;
+        const total = Math.round(performance.now() - t0);
+        if (window.__mark) window.__mark('db_init_complete', `(${total}ms)`);
       } catch (err) {
         console.error('Database initialization error:', err);
         if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
@@ -120,10 +122,6 @@ class DatabaseService {
     return this.initPromise;
   }
 
-  /**
-   * Checks if a lead with the given country_code & phone already exists.
-   * If excludeId is provided (e.g. during edit), ignores that specific lead ID.
-   */
   public async checkPhoneExists(
     country_code: string,
     phone: string,
@@ -232,7 +230,6 @@ class DatabaseService {
     await this.initialize();
 
     try {
-      // Excludes current lead ID from duplicate check so editing without changing phone succeeds
       const exists = await this.checkPhoneExists(
         input.country_code,
         input.phone,

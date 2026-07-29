@@ -10,6 +10,20 @@ export default defineConfig({
     react(),
     legacy()
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/xlsx')) {
+            return 'vendor-xlsx';
+          }
+          if (id.includes('node_modules/@ionic')) {
+            return 'vendor-ionic';
+          }
+        }
+      }
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',

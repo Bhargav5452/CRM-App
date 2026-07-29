@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -11,17 +10,19 @@ const EXCEL_MIME_TYPE =
 
 const EXPORT_CHANNEL_ID = 'offline_crm_exports';
 
+let isChannelInitialized = false;
+
 /**
  * Initialize Notification Channel & Action Types on Native Android / iOS
  */
 const initNotificationChannel = async () => {
-  if (!Capacitor.isNativePlatform()) return;
+  if (!Capacitor.isNativePlatform() || isChannelInitialized) return;
   try {
     // 1. Register Action Buttons for Notifications (Open & Share)
     await LocalNotifications.registerActionTypes({
       types: [
         {
-          id: 'EXCEL_EXPORT_ACTIONS',
+          id: 'EXPORT_ACTIONS',
           actions: [
             {
               id: 'open_file',
@@ -46,13 +47,11 @@ const initNotificationChannel = async () => {
       importance: 4, // High importance (Heads-up banner + alert sound)
       visibility: 1, // Public on lockscreen
     });
+    isChannelInitialized = true;
   } catch (e) {
     console.warn('Could not initialize notification channel or actions:', e);
   }
 };
-
-// Run channel initialization on native platforms
-initNotificationChannel();
 
 // Initialize notification action listener on native mobile platforms
 if (Capacitor.isNativePlatform()) {
@@ -65,26 +64,24 @@ if (Capacitor.isNativePlatform()) {
       if (!extra || !extra.filePath) return;
 
       if (actionId === 'share_file') {
-        // Trigger native share sheet if 'Share' action button clicked on notification
         try {
           await Share.share({
-            title: 'Export CRM Leads',
-            text: `Exported ${extra.filename || 'CRM Leads'}`,
+            title: 'Share Exported CRM Leads',
+            text: `CRM Export: ${extra.filename}`,
             url: extra.filePath,
-            dialogTitle: 'Share Excel File',
+            dialogTitle: 'Share Lead Spreadsheet',
           });
         } catch (err) {
-          console.error('Error sharing file via notification action:', err);
+          console.warn('User dismissed or error sharing from notification:', err);
         }
-      } else {
-        // Default tap or 'Open' action -> Launch FileOpener directly
+      } else if (actionId === 'open_file') {
         try {
           await FileOpener.open({
             filePath: extra.filePath,
-            contentType: extra.mimeType || EXCEL_MIME_TYPE,
+            contentType: EXCEL_MIME_TYPE,
           });
         } catch (err) {
-          console.error('Error opening file via FileOpener on tap:', err);
+          console.warn('Error opening file from notification:', err);
         }
       }
     }
@@ -92,117 +89,130 @@ if (Capacitor.isNativePlatform()) {
 }
 
 /**
- * Robust web file downloader using SheetJS native XLSX.writeFile with anchor fallback.
+ * Format timestamp for clean filenames: YYYY_MM_DD
  */
-const triggerWebDownload = (workbook: XLSX.WorkBook, filename: string): void => {
+const getFormattedDateString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}_${month}_${day}`;
+};
+
+/**
+ * Exports an array of leads to an Excel spreadsheet (.xlsx)
+ * Dynamic lazy import of XLSX library ensures 1.5MB library is NEVER loaded on startup.
+ */
+export const exportLeadsToExcel = async (
+  leads: Lead[]
+): Promise<{ success: boolean; filename?: string; error?: string }> => {
   try {
-    XLSX.writeFile(workbook, filename);
-  } catch (err) {
-    console.error('XLSX.writeFile error, using anchor blob fallback:', err);
-    const arrayBuffer = XLSX.write(workbook, {
+    // Dynamically load XLSX library only when user clicks Export
+    const XLSX = await import('xlsx');
+
+    // Ensure notification channel is configured
+    await initNotificationChannel();
+
+    // 1. Prepare raw row data for Excel worksheet
+    const dataRows = leads.map((lead, index) => ({
+      'S.No': index + 1,
+      Name: lead.name,
+      'Country Code': lead.country_code || '+91',
+      'Phone Number': lead.phone,
+      'Home Type': lead.home_type,
+      Email: lead.email || '',
+      Notes: lead.notes || '',
+      'Created Date': new Date(lead.created_at).toLocaleString(),
+    }));
+
+    // 2. Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(dataRows);
+
+    // Auto-fit column widths
+    const columnWidths = [
+      { wch: 6 },  // S.No
+      { wch: 22 }, // Name
+      { wch: 14 }, // Country Code
+      { wch: 16 }, // Phone Number
+      { wch: 14 }, // Home Type
+      { wch: 26 }, // Email
+      { wch: 32 }, // Notes
+      { wch: 22 }, // Created Date
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
+
+    // 3. Generate binary array buffer
+    const excelBuffer = XLSX.write(workbook, {
       bookType: 'xlsx',
       type: 'array',
     });
-    const blob = new Blob([arrayBuffer], { type: EXCEL_MIME_TYPE });
-    const blobUrl = URL.createObjectURL(blob);
 
-    const anchor = document.createElement('a');
-    anchor.href = blobUrl;
-    anchor.setAttribute('download', filename);
-    anchor.style.display = 'none';
+    const filename = `CRM_${getFormattedDateString()}.xlsx`;
 
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
+    // 4. Save to device filesystem (Native mobile vs Web)
+    if (Capacitor.isNativePlatform()) {
+      // Convert ArrayBuffer to Base64 for Capacitor Filesystem
+      const uint8Array = new Uint8Array(excelBuffer);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.byteLength; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+      }
+      const base64Data = btoa(binaryString);
 
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 2000);
-  }
-};
-
-export const exportLeadsToExcel = async (leads: Lead[]): Promise<void> => {
-  if (leads.length === 0) return;
-
-  // Format leads into spreadsheet row objects
-  const dataToExport = leads.map((lead) => ({
-    Name: lead.name,
-    Phone: `${(lead.country_code || '').trim()} ${lead.phone}`.trim(),
-    'Home Type': lead.home_type,
-    Email: lead.email || 'N/A',
-    Notes: lead.notes || 'N/A',
-    'Created Date': new Date(lead.created_at).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-  }));
-
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
-
-  // Format filename: CRM_YYYY_MM_DD.xlsx
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  const filename = `CRM_${year}_${month}_${day}.xlsx`;
-
-  if (Capacitor.isNativePlatform()) {
-    try {
-      // 1. Generate Base64 representation of Excel workbook
-      const base64Data = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'base64',
-      });
-
-      // 2. Save file to device local Cache directory for direct FileOpener URI access
-      const savedFile = await Filesystem.writeFile({
+      // Write file to Cache directory
+      const writeResult = await Filesystem.writeFile({
         path: filename,
         data: base64Data,
         directory: Directory.Cache,
-        recursive: true,
       });
 
-      // 3. Request local notification permissions if not granted
+      const filePath = writeResult.uri;
+
+      // Send Android notification: title "Export Complete", body filename, Open & Share action buttons
       try {
-        const permStatus = await LocalNotifications.checkPermissions();
-        if (permStatus.display !== 'granted') {
-          await LocalNotifications.requestPermissions();
-        }
-      } catch (e) {
-        console.warn('Could not check/request notification permissions:', e);
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              title: 'Export Complete',
+              body: filename,
+              id: Date.now() % 100000,
+              sound: undefined,
+              actionTypeId: 'EXPORT_ACTIONS',
+              extra: {
+                filePath,
+                filename,
+              },
+              smallIcon: 'ic_stat_lead_crm',
+              iconColor: '#09090B',
+            },
+          ],
+        });
+      } catch (notifErr) {
+        console.warn('Could not schedule export notification:', notifErr);
       }
 
-      // 4. Schedule OS Export Notification (Concise title, filename body, custom monochrome white smallIcon)
-      const notifId = Math.floor(Math.random() * 100000) + 1;
-      await LocalNotifications.schedule({
-        notifications: [
-          {
-            id: notifId,
-            title: 'Export Complete',
-            body: filename,
-            smallIcon: 'ic_stat_offline_crm',
-            iconColor: '#09090B',
-            channelId: EXPORT_CHANNEL_ID,
-            actionTypeId: 'EXCEL_EXPORT_ACTIONS',
-            extra: {
-              filePath: savedFile.uri,
-              filename: filename,
-              mimeType: EXCEL_MIME_TYPE,
-            },
-          },
-        ],
-      });
-    } catch (err) {
-      console.error('Error exporting file on mobile platform, falling back to web trigger:', err);
-      triggerWebDownload(workbook, filename);
+      return { success: true, filename };
+    } else {
+      // Web Download Fallback
+      const blob = new Blob([excelBuffer], { type: EXCEL_MIME_TYPE });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      return { success: true, filename };
     }
-  } else {
-    // Web Browser platform trigger
-    triggerWebDownload(workbook, filename);
+  } catch (err: unknown) {
+    console.error('Failed to export leads:', err);
+    const message =
+      err instanceof Error ? err.message : 'Export failed due to an unknown error.';
+    return { success: false, error: message };
   }
 };

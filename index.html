@@ -3,6 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <title>Lead CRM</title>
+    <script>
+      (function() {
+        window.__STARTUP_LOGS__ = [];
+        const startTime = performance.now();
+        window.__mark = function(name, extra) {
+          const t = Math.round(performance.now() - startTime);
+          const entry = { name: name, time: t, extra: extra || '' };
+          window.__STARTUP_LOGS__.push(entry);
+          performance.mark(name);
+          console.log(`[PERF_TIMELINE] ${String(t).padStart(5, ' ')}ms | ${name} ${extra || ''}`);
+        };
+        window.__mark('app_launched');
+        document.addEventListener('DOMContentLoaded', function() {
+          window.__mark('dom_content_loaded');
+        });
+        window.addEventListener('load', function() {
+          window.__mark('window_loaded');
+        });
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function() {
+            window.__mark('fonts_loaded');
+          });
+        }
+      })();
+    </script>
     
     <base href="/" />
     

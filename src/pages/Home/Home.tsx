@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { IonContent, IonPage, IonIcon } from '@ionic/react';
 import { checkmarkCircleOutline, arrowForwardOutline } from 'ionicons/icons';
@@ -8,10 +8,25 @@ import { LeadFormInput } from '../../types/lead';
 import './Home.css';
 
 const Home: React.FC = () => {
+  if (window.__mark) {
+    window.__mark('home_component_rendering');
+  }
+
   const [reviewData, setReviewData] = useState<LeadFormInput | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [formKey, setFormKey] = useState(0);
+
+  useEffect(() => {
+    if (window.__mark) {
+      window.__mark('home_component_mounted');
+    }
+    requestAnimationFrame(() => {
+      if (window.__mark) {
+        window.__mark('home_first_contentful_paint');
+      }
+    });
+  }, []);
 
   const handleFormSubmit = (data: LeadFormInput) => {
     setReviewData(data);
