@@ -184,9 +184,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
             Phone Number <span className="required-asterisk">*</span>
           </label>
           <div
-            className={`phone-input-container ${
-              errors.phone || errors.country_code ? 'input-error' : ''
-            }`}
+            className={`phone-input-container ${errors.phone || errors.country_code ? 'input-error' : ''
+              }`}
           >
             <div
               className="country-picker-trigger"
@@ -230,9 +229,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
             role="button"
             aria-haspopup="listbox"
             aria-expanded={isHomeTypeOpen}
-            className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${
-              errors.home_type ? 'input-error' : ''
-            }`}
+            className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${errors.home_type ? 'input-error' : ''
+              }`}
             onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -311,9 +309,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
             />
             <div className="textarea-footer">
               <span
-                className={`char-counter ${
-                  notesValue.length === 300 ? 'max-reached' : ''
-                }`}
+                className={`char-counter ${notesValue.length === 300 ? 'max-reached' : ''
+                  }`}
               >
                 {notesValue.length}/300
               </span>
@@ -351,11 +348,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
             <div className="card-header">
               <div className="header-text">
                 <h1 className="card-title">
-                  {defaultValues ? 'Edit Lead' : 'Client Info'}
+                  {defaultValues ? 'Edit Client' : 'Client Info'}
                 </h1>
                 <p className="card-subtitle">
                   {defaultValues
-                    ? 'Update customer details below'
+                    ? 'Update client details below'
                     : 'Enter the details of your client'}
                 </p>
               </div>
@@ -411,9 +408,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
                       ref={isSelected ? selectedCountryRef : null}
                       role="option"
                       aria-selected={isSelected}
-                      className={`country-option ${isSelected ? 'selected' : ''} ${
-                        isKeyFocused ? 'focused-key' : ''
-                      }`}
+                      className={`country-option ${isSelected ? 'selected' : ''} ${isKeyFocused ? 'focused-key' : ''
+                        }`}
                       onClick={() => handleSelectCountry(country)}
                     >
                       <div className="country-option-left">
