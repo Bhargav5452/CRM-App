@@ -22,14 +22,10 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
 
         /*
-         * Capacitor 6+ (and Android 15+/API 35+ OS enforcement) both call
-         * WindowCompat.setDecorFitsSystemWindows(window, false) which draws
-         * the WebView underneath the status bar (edge-to-edge).
-         *
-         * We override that here — AFTER super.onCreate() — so the OS shifts
-         * the WebView below the status bar automatically.
+         * Enable edge-to-edge window decor fitting so Android passes
+         * system status bar insets to CSS env(safe-area-inset-top).
          */
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         fixStatusBar();
     }

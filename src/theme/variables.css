@@ -31,13 +31,11 @@
   --ion-color-primary-contrast: #ffffff;
 
   /*
-   * Safe area: Android handles the status bar offset natively via the
-   * Window/theme layer (see MainActivity.java + styles.xml), so Ionic
-   * must NOT add any extra top padding on Android.
-   * iOS notch padding is handled by env(safe-area-inset-top) in Navigation.css.
+   * Safe area: Uses CSS env(safe-area-inset-top) dynamically for
+   * iOS notch and Android status bar insets.
    */
-  --ion-safe-area-top: 0px;
-  --ion-safe-area-bottom: 0px;
+  --ion-safe-area-top: env(safe-area-inset-top, 0px);
+  --ion-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {

@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'LIGHT',
       backgroundColor: '#FFFFFF',
-      overlaysWebView: false,
+      overlaysWebView: true,
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_lead_crm',
