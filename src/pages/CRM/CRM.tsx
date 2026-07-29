@@ -28,11 +28,9 @@ const getActiveFilterLabel = (filter: FilterState): string | null => {
   if (filter.time === 'custom') {
     if (filter.customFrom && filter.customTo) {
       const formatDate = (dateStr: string) => {
-        const parts = dateStr.split('-');
-        if (parts.length !== 3) return dateStr;
-        const [y, m, d] = parts;
-        const yy = y.slice(-2);
-        return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${yy}`;
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       };
       return `📅 ${formatDate(filter.customFrom)} – ${formatDate(filter.customTo)}`;
     }
@@ -420,7 +418,7 @@ const CRM: React.FC = () => {
               <div className="edit-modal-header">
                 <div className="edit-modal-header-text">
                   <h2 className="edit-modal-title">Edit Lead</h2>
-                  <p className="edit-modal-subtitle">Update customer details</p>
+                  <p className="edit-modal-subtitle">Update Lead details</p>
                 </div>
                 <button
                   type="button"

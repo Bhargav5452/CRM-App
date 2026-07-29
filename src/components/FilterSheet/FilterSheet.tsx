@@ -100,10 +100,10 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
     isCustom &&
     Boolean(
       (draftState.customFrom && draftState.customFrom > todayStr) ||
-        (draftState.customTo && draftState.customTo > todayStr) ||
-        (draftState.customFrom &&
-          draftState.customTo &&
-          draftState.customFrom > draftState.customTo)
+      (draftState.customTo && draftState.customTo > todayStr) ||
+      (draftState.customFrom &&
+        draftState.customTo &&
+        draftState.customFrom > draftState.customTo)
     );
 
   const canApply = !isCustomIncomplete && !isCustomInvalid;
@@ -211,9 +211,8 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
                     role="radio"
                     aria-checked={isSelected}
                     tabIndex={0}
-                    className={`radio-option-card ${
-                      isFullWidth ? 'full-width' : ''
-                    } ${isSelected ? 'selected' : ''}`}
+                    className={`radio-option-card ${isFullWidth ? 'full-width' : ''
+                      } ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleSelectTime(opt.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -252,31 +251,59 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
               <div className="date-pickers-row">
                 <div className="date-field">
                   <label htmlFor="custom_from" className="date-label">
-                    From {draftState.customFrom && <span className="date-format-hint">({formatToDDMMYY(draftState.customFrom)})</span>}
+                    From
                   </label>
-                  <input
-                    id="custom_from"
-                    type="date"
-                    className="date-input"
-                    max={todayStr}
-                    value={draftState.customFrom || ''}
-                    onChange={(e) => handleFromChange(e.target.value)}
-                  />
+                  <div className="date-input-wrapper">
+                    <input
+                      id="custom_from"
+                      type="date"
+                      lang="en-GB"
+                      className="date-input-native"
+                      max={todayStr}
+                      value={draftState.customFrom || ''}
+                      onChange={(e) => handleFromChange(e.target.value)}
+                    />
+                    <div className="date-input-display">
+                      <span>
+                        {draftState.customFrom
+                          ? formatToDDMMYY(draftState.customFrom)
+                          : 'DD/MM/YY'}
+                      </span>
+                      <IonIcon
+                        icon={calendarOutline}
+                        style={{ fontSize: 14, color: '#71717A' }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="date-field">
                   <label htmlFor="custom_to" className="date-label">
-                    To {draftState.customTo && <span className="date-format-hint">({formatToDDMMYY(draftState.customTo)})</span>}
+                    To
                   </label>
-                  <input
-                    id="custom_to"
-                    type="date"
-                    className="date-input"
-                    min={draftState.customFrom || undefined}
-                    max={todayStr}
-                    value={draftState.customTo || ''}
-                    onChange={(e) => handleToChange(e.target.value)}
-                  />
+                  <div className="date-input-wrapper">
+                    <input
+                      id="custom_to"
+                      type="date"
+                      lang="en-GB"
+                      className="date-input-native"
+                      min={draftState.customFrom || undefined}
+                      max={todayStr}
+                      value={draftState.customTo || ''}
+                      onChange={(e) => handleToChange(e.target.value)}
+                    />
+                    <div className="date-input-display">
+                      <span>
+                        {draftState.customTo
+                          ? formatToDDMMYY(draftState.customTo)
+                          : 'DD/MM/YY'}
+                      </span>
+                      <IonIcon
+                        icon={calendarOutline}
+                        style={{ fontSize: 14, color: '#71717A' }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

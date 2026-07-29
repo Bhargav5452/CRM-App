@@ -241,35 +241,50 @@
   margin-left: 4px;
 }
 
-.date-input {
+.date-input-wrapper {
+  position: relative;
+  width: 100%;
   height: 42px;
-  padding: 0 10px;
+}
+
+.date-input-native {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 2;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.date-input-display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 12px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   background-color: #ffffff;
   font-size: 13.5px;
+  font-weight: 500;
   color: #09090B;
-  outline: none !important;
-  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   box-sizing: border-box;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  -webkit-appearance: none;
 }
 
-.date-input:focus,
-.date-input:focus-within,
-.date-input:focus-visible,
-.date-input:active {
+.date-input-wrapper:focus-within .date-input-display,
+.date-input-native:focus + .date-input-display {
   border-color: #09090B !important;
   box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08) !important;
-  outline: none !important;
-}
-
-.date-input::-webkit-datetime-edit,
-.date-input::-webkit-datetime-edit-fields-wrapper,
-.date-input::-webkit-calendar-picker-indicator {
-  outline: none !important;
-  cursor: pointer;
 }
 
 .date-input:invalid,
