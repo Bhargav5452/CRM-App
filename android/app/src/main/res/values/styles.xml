@@ -18,8 +18,8 @@
         <item name="windowNoTitle">true</item>
         <!-- Solid background color matching app's bg-main (#FAFAFA) -->
         <item name="android:windowBackground">@color/app_background</item>
-        <!-- Solid white status bar -->
-        <item name="android:statusBarColor">#FFFFFF</item>
+        <!-- Transparent status bar for edge-to-edge layout -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <!-- Dark icons (time, wifi, battery) on white status bar -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowTranslucentStatus">false</item>
@@ -43,8 +43,8 @@
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/app_background</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
-        <!-- Keep status bar solid white during splash -->
-        <item name="android:statusBarColor">#FFFFFF</item>
+        <!-- Keep status bar transparent during splash -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowTranslucentStatus">false</item>
     </style>
