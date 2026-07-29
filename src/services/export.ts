@@ -38,10 +38,10 @@ const initNotificationChannel = async () => {
       ],
     });
 
-    // 2. Create Notification Channel for Offline CRM Exports
+    // 2. Create Notification Channel for Lead CRM Exports
     await LocalNotifications.createChannel({
       id: EXPORT_CHANNEL_ID,
-      name: 'Offline CRM - Exports',
+      name: 'Lead CRM - Exports',
       description: 'Notifications for exported CRM lead spreadsheets',
       importance: 4, // High importance (Heads-up banner + alert sound)
       visibility: 1, // Public on lockscreen

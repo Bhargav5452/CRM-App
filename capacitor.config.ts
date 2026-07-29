@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.offlinecrm.app',
-  appName: 'Offline CRM',
+  appName: 'Lead CRM',
   webDir: 'dist',
   plugins: {
     StatusBar: {
@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
       overlaysWebView: false,
     },
     LocalNotifications: {
-      smallIcon: 'ic_stat_offline_crm',
+      smallIcon: 'ic_stat_lead_crm',
       iconColor: '#09090B',
     },
   },

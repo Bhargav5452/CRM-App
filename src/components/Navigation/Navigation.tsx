@@ -15,7 +15,7 @@ const Navigation: React.FC = () => {
       <div className="app-navbar-inner">
         <Link to="/home" className="app-brand">
           <div className="app-brand-badge">C</div>
-          <span>Offline CRM</span>
+          <span>Lead CRM</span>
         </Link>
 
         <div className="nav-links-group">
