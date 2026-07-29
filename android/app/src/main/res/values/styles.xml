@@ -22,6 +22,8 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <!-- Dark icons (time, wifi, battery) on white status bar -->
         <item name="android:windowLightStatusBar">true</item>
+        <!-- Prevent Android OS System Dark Mode from overriding light status bar icons -->
+        <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:fitsSystemWindows">false</item>
         <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
