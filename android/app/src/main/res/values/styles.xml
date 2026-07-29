@@ -27,6 +27,15 @@
         <!-- Do NOT draw under the status bar -->
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:fitsSystemWindows">false</item>
+        <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
+        <item name="android:datePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
+        <item name="android:timePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
+    </style>
+
+    <!-- Dedicated Light Dialog Theme for DatePickerDialog launched by WebView -->
+    <style name="AppCompatDatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">#09090B</item>
+        <item name="android:colorAccent">#09090B</item>
     </style>
 
     <!--

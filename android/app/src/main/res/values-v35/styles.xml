@@ -15,5 +15,8 @@
         <item name="android:windowTranslucentStatus">false</item>
         <!-- API 35+: opt out of forced edge-to-edge -->
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+        <!-- Configure explicit Date & Time Picker Dialog Themes for WebView HTML5 inputs -->
+        <item name="android:datePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
+        <item name="android:timePickerDialogTheme">@style/AppCompatDatePickerDialogTheme</item>
     </style>
 </resources>
