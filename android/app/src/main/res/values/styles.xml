@@ -11,7 +11,7 @@
 
     <!--
       Main app theme: no action bar, solid white status bar with dark icons.
-      The window background matches the app's --bg-main (#FAFAFA) so that
+      The window background matches the app's bg-main (#FAFAFA) so that
       any brief moment before the WebView paints shows the correct colour
       rather than black or system grey.
     -->

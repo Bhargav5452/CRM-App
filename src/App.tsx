@@ -3,27 +3,17 @@ import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import Navigation from './components/Navigation/Navigation';
 import Home from './pages/Home/Home';
 import CRM from './pages/CRM/CRM';
+import { databaseService } from './services/database';
 
-/* Core CSS required for Ionic components to work properly */
+/* Core CSS required for Ionic components */
 import '@ionic/react/css/core.css';
-
-/* Basic CSS for apps built with Ionic */
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
-
-/* Optional CSS utils */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
@@ -32,38 +22,27 @@ setupIonicReact();
 
 const App: React.FC = () => {
   useEffect(() => {
-    const initializeNativePlatform = async () => {
-      if (!Capacitor.isNativePlatform()) return;
-
-      try {
-        // 1. Configure status bar: white background, dark icons
-        await StatusBar.setOverlaysWebView({ overlay: false });
-        await StatusBar.setStyle({ style: Style.Light });
-        await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
-      } catch (e) {
-        console.warn('StatusBar configuration error:', e);
-      }
-
-      // 2. Wait two animation frames so React has fully painted the first frame
-      //    (header + navigation + page content all present) before hiding the
-      //    splash. This prevents any blank/partial frame flash between the
-      //    splash and the live UI.
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => resolve());
+    // Zero-latency startup sequence:
+    // Status bar configuration is handled natively in MainActivity.java at native startup (0ms JS delay).
+    // Hide splash screen on the very first painted animation frame after React mounts.
+    if (Capacitor.isNativePlatform()) {
+      requestAnimationFrame(() => {
+        SplashScreen.hide({ fadeOutDuration: 150 }).catch((e) => {
+          console.warn('SplashScreen.hide error:', e);
         });
       });
+    }
 
-      // 3. Dismiss the splash with a soft fade. launchAutoHide is false in
-      //    capacitor.config.ts so the splash stays visible until we call hide().
-      try {
-        await SplashScreen.hide({ fadeOutDuration: 200 });
-      } catch (e) {
-        console.warn('SplashScreen.hide error:', e);
+    // Defer non-essential background initialization (SQLite database pre-warming) until AFTER initial render
+    const idleCallbackId = window.requestIdleCallback
+      ? window.requestIdleCallback(() => databaseService.initialize())
+      : setTimeout(() => databaseService.initialize(), 300);
+
+    return () => {
+      if (window.cancelIdleCallback && typeof idleCallbackId === 'number') {
+        window.cancelIdleCallback(idleCallbackId);
       }
     };
-
-    initializeNativePlatform();
   }, []);
 
   return (

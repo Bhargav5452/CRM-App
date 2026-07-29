@@ -14,6 +14,7 @@ class DatabaseService {
   private db: SQLiteDBConnection | null = null;
   private isNative: boolean = false;
   private isInitialized: boolean = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.isNative = Capacitor.isNativePlatform();
@@ -21,98 +22,102 @@ class DatabaseService {
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
+    if (this.initPromise) return this.initPromise;
 
-    try {
-      if (this.isNative) {
-        this.sqlite = new SQLiteConnection(CapacitorSQLite);
-        const ret = await this.sqlite.checkConnectionsConsistency();
-        const isConn = (await this.sqlite.isConnection(DB_NAME, false)).result;
+    this.initPromise = (async () => {
+      try {
+        if (this.isNative) {
+          this.sqlite = new SQLiteConnection(CapacitorSQLite);
+          const isConn = (await this.sqlite.isConnection(DB_NAME, false)).result;
 
-        if (ret.result && isConn) {
-          this.db = await this.sqlite.retrieveConnection(DB_NAME, false);
-        } else {
-          this.db = await this.sqlite.createConnection(
-            DB_NAME,
-            false,
-            'no-encryption',
-            1,
-            false
-          );
-        }
-
-        await this.db.open();
-
-        // ─────────────────────────────────────────────────────────────
-        // Database Schema & Migration Path (v1 -> v2)
-        // Migration: UNIQUE(phone) -> UNIQUE(country_code, phone)
-        // ─────────────────────────────────────────────────────────────
-        const getVersionResult = await this.db.query('PRAGMA user_version;');
-        const currentVersion =
-          getVersionResult.values && getVersionResult.values[0]
-            ? (getVersionResult.values[0].user_version as number)
-            : 0;
-
-        if (currentVersion < 1) {
-          const tableCheck = await this.db.query(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='leads';"
-          );
-          const tableExists = tableCheck.values && tableCheck.values.length > 0;
-
-          if (!tableExists) {
-            // Fresh installation
-            await this.db.execute(`
-              CREATE TABLE leads (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                phone TEXT NOT NULL,
-                country_code TEXT NOT NULL DEFAULT '+91',
-                home_type TEXT NOT NULL,
-                email TEXT,
-                notes TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                UNIQUE(country_code, phone)
-              );
-            `);
+          if (isConn) {
+            this.db = await this.sqlite.retrieveConnection(DB_NAME, false);
           } else {
-            // Existing installation: Migrate UNIQUE(phone) to UNIQUE(country_code, phone)
-            await this.db.execute(`
-              BEGIN TRANSACTION;
-              CREATE TABLE leads_new (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                phone TEXT NOT NULL,
-                country_code TEXT NOT NULL DEFAULT '+91',
-                home_type TEXT NOT NULL,
-                email TEXT,
-                notes TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                UNIQUE(country_code, phone)
-              );
-              INSERT INTO leads_new (id, name, phone, country_code, home_type, email, notes, created_at, updated_at)
-              SELECT id, name, phone, country_code, home_type, email, notes, created_at, updated_at FROM leads;
-              DROP TABLE leads;
-              ALTER TABLE leads_new RENAME TO leads;
-              COMMIT;
-            `);
+            this.db = await this.sqlite.createConnection(
+              DB_NAME,
+              false,
+              'no-encryption',
+              1,
+              false
+            );
           }
-          await this.db.execute('PRAGMA user_version = 1;');
+
+          await this.db.open();
+
+          // ─────────────────────────────────────────────────────────────
+          // Database Schema & Migration Path (v1 -> v2)
+          // Migration: UNIQUE(phone) -> UNIQUE(country_code, phone)
+          // ─────────────────────────────────────────────────────────────
+          const getVersionResult = await this.db.query('PRAGMA user_version;');
+          const currentVersion =
+            getVersionResult.values && getVersionResult.values[0]
+              ? (getVersionResult.values[0].user_version as number)
+              : 0;
+
+          if (currentVersion < 1) {
+            const tableCheck = await this.db.query(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name='leads';"
+            );
+            const tableExists = tableCheck.values && tableCheck.values.length > 0;
+
+            if (!tableExists) {
+              // Fresh installation
+              await this.db.execute(`
+                CREATE TABLE leads (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT NOT NULL,
+                  phone TEXT NOT NULL,
+                  country_code TEXT NOT NULL DEFAULT '+91',
+                  home_type TEXT NOT NULL,
+                  email TEXT,
+                  notes TEXT,
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL,
+                  UNIQUE(country_code, phone)
+                );
+              `);
+            } else {
+              // Existing installation: Migrate UNIQUE(phone) to UNIQUE(country_code, phone)
+              await this.db.execute(`
+                BEGIN TRANSACTION;
+                CREATE TABLE leads_new (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT NOT NULL,
+                  phone TEXT NOT NULL,
+                  country_code TEXT NOT NULL DEFAULT '+91',
+                  home_type TEXT NOT NULL,
+                  email TEXT,
+                  notes TEXT,
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL,
+                  UNIQUE(country_code, phone)
+                );
+                INSERT INTO leads_new (id, name, phone, country_code, home_type, email, notes, created_at, updated_at)
+                SELECT id, name, phone, country_code, home_type, email, notes, created_at, updated_at FROM leads;
+                DROP TABLE leads;
+                ALTER TABLE leads_new RENAME TO leads;
+                COMMIT;
+              `);
+            }
+            await this.db.execute('PRAGMA user_version = 1;');
+          }
+        } else {
+          // Web Fallback (localStorage)
+          if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+          }
         }
-      } else {
-        // Web Fallback (localStorage)
+        this.isInitialized = true;
+      } catch (err) {
+        console.error('Database initialization error:', err);
         if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
         }
+        this.isInitialized = true;
       }
-      this.isInitialized = true;
-    } catch (err) {
-      console.error('Database initialization error:', err);
-      if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
-      }
-      this.isInitialized = true;
-    }
+    })();
+
+    return this.initPromise;
   }
 
   /**
