@@ -158,8 +158,9 @@ export const exportLeadsToExcel = async (
     // Ensure notification channel and permissions are configured
     await initNotificationChannel();
 
-    // 1. Prepare raw row data for Excel worksheet
-    const dataRows = leads.map((lead, index) => {
+    // 1. Prepare raw row data for Excel worksheet (Chronological order: oldest -> newest)
+    const chronologicalLeads = [...leads].reverse();
+    const dataRows = chronologicalLeads.map((lead, index) => {
       const code = lead.country_code ? lead.country_code.trim() : '';
       const phone = lead.phone ? lead.phone.trim() : '';
       const formattedPhone = code ? `${code} ${phone}` : phone;
