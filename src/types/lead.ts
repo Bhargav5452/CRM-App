@@ -5,7 +5,6 @@ export interface Lead {
   name: string;
   phone: string;
   country_code: string;
-  country_iso?: string;
   home_type: string;
   email: string;
   notes: string;
@@ -71,22 +70,7 @@ export const COUNTRY_CODES: CountryCode[] = [...RAW_COUNTRY_CODES].sort((a, b) =
 export const DEFAULT_COUNTRY_CODE: CountryCode =
   COUNTRY_CODES.find((c) => c.iso === 'IN') || COUNTRY_CODES[0];
 
-export const getCountryByIso = (iso?: string, code?: string): CountryCode => {
-  if (iso) {
-    const found = COUNTRY_CODES.find((c) => c.iso === iso);
-    if (found) return found;
-  }
-  if (code) {
-    return getCountryByCode(code);
-  }
-  return DEFAULT_COUNTRY_CODE;
-};
-
-export const getCountryByCode = (code: string, iso?: string): CountryCode => {
-  if (iso) {
-    const found = COUNTRY_CODES.find((c) => c.iso === iso);
-    if (found) return found;
-  }
+export const getCountryByCode = (code: string): CountryCode => {
   if (code === '+1') {
     return COUNTRY_CODES.find((c) => c.iso === 'US') || DEFAULT_COUNTRY_CODE;
   }
@@ -109,7 +93,6 @@ export const leadFormSchema = z
       .min(1, 'Name is required')
       .max(100, 'Name must be under 100 characters'),
     country_code: z.string().min(1, 'Country code is required'),
-    country_iso: z.string().optional(),
     phone: z
       .string()
       .min(1, 'Phone is required')
@@ -120,7 +103,7 @@ export const leadFormSchema = z
   })
   .refine(
     (data) => {
-      const country = getCountryByIso(data.country_iso, data.country_code);
+      const country = getCountryByCode(data.country_code);
       const reqDigits = country ? country.digits : 10;
       return data.phone.length === reqDigits;
     },

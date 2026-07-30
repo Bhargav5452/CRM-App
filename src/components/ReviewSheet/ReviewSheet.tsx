@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IonIcon } from '@ionic/react';
 import { checkmarkCircleOutline, createOutline, alertCircleOutline } from 'ionicons/icons';
-import { LeadFormInput, getCountryByIso } from '../../types/lead';
+import { LeadFormInput, getCountryByCode } from '../../types/lead';
 import { databaseService } from '../../services/database';
 import './ReviewSheet.css';
 
@@ -33,7 +33,7 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
 
   if (!isOpen || !data) return null;
 
-  const country = getCountryByIso(data.country_iso, data.country_code);
+  const country = getCountryByCode(data.country_code);
   const fullPhone = `${country.flag} ${data.country_code} ${data.phone}`;
 
   const handleConfirmSave = async () => {

@@ -63,7 +63,6 @@ class DatabaseService {
                   name TEXT NOT NULL,
                   phone TEXT NOT NULL,
                   country_code TEXT NOT NULL DEFAULT '+91',
-                  country_iso TEXT NOT NULL DEFAULT 'IN',
                   home_type TEXT NOT NULL,
                   email TEXT,
                   notes TEXT,
@@ -80,7 +79,6 @@ class DatabaseService {
                   name TEXT NOT NULL,
                   phone TEXT NOT NULL,
                   country_code TEXT NOT NULL DEFAULT '+91',
-                  country_iso TEXT NOT NULL DEFAULT 'IN',
                   home_type TEXT NOT NULL,
                   email TEXT,
                   notes TEXT,
@@ -96,13 +94,6 @@ class DatabaseService {
               `);
             }
             await this.db.execute('PRAGMA user_version = 1;');
-          }
-
-          // Dynamic column check for country_iso on existing SQLite DBs
-          const pragmaCols = await this.db.query('PRAGMA table_info(leads);');
-          const hasIso = pragmaCols.values && pragmaCols.values.some((col: { name: string }) => col.name === 'country_iso');
-          if (!hasIso) {
-            await this.db.execute("ALTER TABLE leads ADD COLUMN country_iso TEXT NOT NULL DEFAULT 'IN';");
           }
         } else {
           if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
@@ -168,18 +159,16 @@ class DatabaseService {
       }
 
       const now = new Date().toISOString();
-      const iso = input.country_iso || (input.country_code === '+1' ? 'US' : 'IN');
 
       if (this.isNative && this.db) {
         const query = `
-          INSERT INTO leads (name, phone, country_code, country_iso, home_type, email, notes, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+          INSERT INTO leads (name, phone, country_code, home_type, email, notes, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         `;
         const res = await this.db.run(query, [
           input.name,
           input.phone,
           input.country_code,
-          iso,
           input.home_type,
           input.email || '',
           input.notes || '',
@@ -193,7 +182,6 @@ class DatabaseService {
           name: input.name,
           phone: input.phone,
           country_code: input.country_code,
-          country_iso: iso,
           home_type: input.home_type,
           email: input.email || '',
           notes: input.notes || '',
@@ -208,7 +196,6 @@ class DatabaseService {
           name: input.name,
           phone: input.phone,
           country_code: input.country_code,
-          country_iso: iso,
           home_type: input.home_type,
           email: input.email || '',
           notes: input.notes || '',
@@ -247,19 +234,17 @@ class DatabaseService {
       }
 
       const now = new Date().toISOString();
-      const iso = input.country_iso || (input.country_code === '+1' ? 'US' : 'IN');
 
       if (this.isNative && this.db) {
         const query = `
           UPDATE leads
-          SET name = ?, phone = ?, country_code = ?, country_iso = ?, home_type = ?, email = ?, notes = ?, updated_at = ?
+          SET name = ?, phone = ?, country_code = ?, home_type = ?, email = ?, notes = ?, updated_at = ?
           WHERE id = ?;
         `;
         await this.db.run(query, [
           input.name,
           input.phone,
           input.country_code,
-          iso,
           input.home_type,
           input.email || '',
           input.notes || '',
@@ -276,7 +261,6 @@ class DatabaseService {
             name: input.name,
             phone: input.phone,
             country_code: input.country_code,
-            country_iso: iso,
             home_type: input.home_type,
             email: input.email || '',
             notes: input.notes || '',

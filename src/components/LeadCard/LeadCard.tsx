@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { IonIcon } from '@ionic/react';
 import { callOutline, checkmarkOutline, mailOutline, timeOutline } from 'ionicons/icons';
-import { Lead, getCountryByIso } from '../../types/lead';
+import { Lead, getCountryByCode } from '../../types/lead';
 import './LeadCard.css';
 
 interface LeadCardProps {
@@ -22,7 +22,7 @@ const LeadCardComponent: React.FC<LeadCardProps> = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressRef = useRef(false);
 
-  const country = getCountryByIso(lead.country_iso, lead.country_code);
+  const country = getCountryByCode(lead.country_code);
   const formattedPhone = `${country.flag} ${lead.country_code} ${lead.phone}`;
   const formattedDate = new Date(lead.created_at).toLocaleDateString('en-US', {
     month: 'short',

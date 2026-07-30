@@ -11,7 +11,6 @@ import {
   DEFAULT_COUNTRY_CODE,
   CountryCode,
   getCountryByCode,
-  getCountryByIso,
 } from '../../types/lead';
 import './LeadForm.css';
 
@@ -31,14 +30,16 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const [isHomeTypeOpen, setIsHomeTypeOpen] = useState(false);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
-  const [keyFocusedIdx, setKeyFocusedIdx] = useState(0);
+  const [keyFocusedIdx, setKeyFocusedIdx] = useState(-1);
 
   const homeTypeRef = useRef<HTMLDivElement>(null);
   const countryPickerRef = useRef<HTMLDivElement>(null);
   const selectedCountryRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  const initialIso = defaultValues?.country_iso || (defaultValues?.country_code ? getCountryByCode(defaultValues.country_code).iso : DEFAULT_COUNTRY_CODE.iso);
+  const [selectedCountryObj, setSelectedCountryObj] = useState<CountryCode>(() =>
+    getCountryByCode(defaultValues?.country_code || DEFAULT_COUNTRY_CODE.code)
+  );
 
   const {
     register,
@@ -53,7 +54,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     defaultValues: {
       name: defaultValues?.name || '',
       country_code: defaultValues?.country_code || DEFAULT_COUNTRY_CODE.code,
-      country_iso: initialIso,
       phone: defaultValues?.phone || '',
       home_type: defaultValues?.home_type || '',
       email: defaultValues?.email || '',
@@ -65,11 +65,9 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const notesValue = watch('notes') || '';
   const homeTypeValue = watch('home_type') || '';
-  const selectedCountryCode = watch('country_code') || DEFAULT_COUNTRY_CODE.code;
-  const selectedCountryIso = watch('country_iso') || initialIso;
   const phoneValue = watch('phone') || '';
 
-  const activeCountry: CountryCode = getCountryByIso(selectedCountryIso, selectedCountryCode);
+  const activeCountry: CountryCode = selectedCountryObj;
 
   // Focus Name input on mount/reset
   useEffect(() => {
@@ -82,6 +80,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
   useEffect(() => {
     if (isCountryOpen) {
       document.body.style.overflow = 'hidden';
+      setKeyFocusedIdx(-1);
     } else {
       document.body.style.overflow = '';
     }
@@ -125,8 +124,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleSelectCountry = (country: CountryCode) => {
+    setSelectedCountryObj(country);
     setValue('country_code', country.code, { shouldValidate: true, shouldTouch: true });
-    setValue('country_iso', country.iso, { shouldValidate: true, shouldTouch: true });
     if (phoneValue.length > country.digits) {
       setValue('phone', phoneValue.slice(0, country.digits), { shouldValidate: true, shouldTouch: true });
     } else if (phoneValue.length > 0) {
@@ -134,6 +133,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
     setIsCountryOpen(false);
     setCountrySearch('');
+    setKeyFocusedIdx(-1);
   };
 
   const PINNED_ISOS = ['IN', 'US'];
@@ -428,7 +428,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
                   {filteredPinned.map((country) => {
                     const globalIdx = allFilteredCountries.findIndex((c) => c.iso === country.iso);
                     const isSelected = activeCountry.iso === country.iso;
-                    const isKeyFocused = globalIdx === keyFocusedIdx;
+                    const isKeyFocused = keyFocusedIdx !== -1 && globalIdx === keyFocusedIdx;
                     return (
                       <div
                         key={`pinned-${country.iso}-${country.code}`}
@@ -457,7 +457,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
                       {filteredOthers.map((country) => {
                         const globalIdx = allFilteredCountries.findIndex((c) => c.iso === country.iso);
                         const isSelected = activeCountry.iso === country.iso;
-                        const isKeyFocused = globalIdx === keyFocusedIdx;
+                        const isKeyFocused = keyFocusedIdx !== -1 && globalIdx === keyFocusedIdx;
                         return (
                           <div
                             key={`other-${country.iso}-${country.code}`}
