@@ -153,16 +153,21 @@ export const exportLeadsToExcel = async (
     await initNotificationChannel();
 
     // 1. Prepare raw row data for Excel worksheet
-    const dataRows = leads.map((lead, index) => ({
-      'S.No': index + 1,
-      Name: lead.name,
-      'Country Code': lead.country_code || '+91',
-      'Phone Number': lead.phone,
-      'Home Type': lead.home_type,
-      Email: lead.email || '',
-      Notes: lead.notes || '',
-      'Created Date': new Date(lead.created_at).toLocaleString(),
-    }));
+    const dataRows = leads.map((lead, index) => {
+      const code = lead.country_code ? lead.country_code.trim() : '';
+      const phone = lead.phone ? lead.phone.trim() : '';
+      const formattedPhone = code ? `${code} ${phone}` : phone;
+
+      return {
+        'S.No': index + 1,
+        Name: lead.name,
+        'Phone Number': formattedPhone,
+        'Home Type': lead.home_type,
+        Email: lead.email || '',
+        Notes: lead.notes || '',
+        'Created Date': new Date(lead.created_at).toLocaleString(),
+      };
+    });
 
     // 2. Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(dataRows);
@@ -171,8 +176,7 @@ export const exportLeadsToExcel = async (
     const columnWidths = [
       { wch: 6 },  // S.No
       { wch: 22 }, // Name
-      { wch: 14 }, // Country Code
-      { wch: 16 }, // Phone Number
+      { wch: 20 }, // Phone Number
       { wch: 14 }, // Home Type
       { wch: 26 }, // Email
       { wch: 32 }, // Notes
