@@ -4,6 +4,7 @@ import {
   SQLiteConnection,
   SQLiteDBConnection,
 } from '@capacitor-community/sqlite';
+import Database from '@tauri-apps/plugin-sql';
 import { Lead, LeadFormInput } from '../types/lead';
 
 const DB_NAME = 'offline_crm_db';
@@ -12,12 +13,15 @@ const LOCAL_STORAGE_KEY = 'offline_crm_leads_v1';
 class DatabaseService {
   private sqlite: SQLiteConnection | null = null;
   private db: SQLiteDBConnection | null = null;
+  private tauriDb: Database | null = null;
   private isNative: boolean = false;
+  private isTauri: boolean = false;
   private isInitialized: boolean = false;
   private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.isNative = Capacitor.isNativePlatform();
+    this.isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   }
 
   public async initialize(): Promise<void> {
@@ -26,7 +30,23 @@ class DatabaseService {
 
     this.initPromise = (async () => {
       try {
-        if (this.isNative) {
+        if (this.isTauri) {
+          this.tauriDb = await Database.load('sqlite:offline_crm.db');
+          await this.tauriDb.execute(`
+            CREATE TABLE IF NOT EXISTS leads (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              phone TEXT NOT NULL,
+              country_code TEXT NOT NULL DEFAULT '+91',
+              home_type TEXT NOT NULL,
+              email TEXT,
+              notes TEXT,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL,
+              UNIQUE(country_code, phone)
+            );
+          `);
+        } else if (this.isNative) {
           this.sqlite = new SQLiteConnection(CapacitorSQLite);
           const isConn = (await this.sqlite.isConnection(DB_NAME, false)).result;
 
@@ -123,7 +143,16 @@ class DatabaseService {
     const normalizedCode = country_code.trim();
     const normalizedPhone = phone.trim();
 
-    if (this.isNative && this.db) {
+    if (this.isTauri && this.tauriDb) {
+      const query = excludeId
+        ? 'SELECT COUNT(*) as count FROM leads WHERE country_code = $1 AND phone = $2 AND id != $3;'
+        : 'SELECT COUNT(*) as count FROM leads WHERE country_code = $1 AND phone = $2;';
+      const params = excludeId
+        ? [normalizedCode, normalizedPhone, excludeId]
+        : [normalizedCode, normalizedPhone];
+      const res = await this.tauriDb.select<{ count: number }[]>(query, params);
+      return res && res.length > 0 ? res[0].count > 0 : false;
+    } else if (this.isNative && this.db) {
       const query = excludeId
         ? 'SELECT COUNT(*) as count FROM leads WHERE country_code = ? AND phone = ? AND id != ?;'
         : 'SELECT COUNT(*) as count FROM leads WHERE country_code = ? AND phone = ?;';
@@ -160,7 +189,36 @@ class DatabaseService {
 
       const now = new Date().toISOString();
 
-      if (this.isNative && this.db) {
+      if (this.isTauri && this.tauriDb) {
+        const query = `
+          INSERT INTO leads (name, phone, country_code, home_type, email, notes, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+        `;
+        const res = await this.tauriDb.execute(query, [
+          input.name,
+          input.phone,
+          input.country_code,
+          input.home_type,
+          input.email || '',
+          input.notes || '',
+          now,
+          now,
+        ]);
+
+        const newId = res.lastInsertId || Date.now();
+        const newLead: Lead = {
+          id: newId,
+          name: input.name,
+          phone: input.phone,
+          country_code: input.country_code,
+          home_type: input.home_type,
+          email: input.email || '',
+          notes: input.notes || '',
+          created_at: now,
+          updated_at: now,
+        };
+        return { success: true, lead: newLead };
+      } else if (this.isNative && this.db) {
         const query = `
           INSERT INTO leads (name, phone, country_code, home_type, email, notes, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?);
@@ -235,7 +293,24 @@ class DatabaseService {
 
       const now = new Date().toISOString();
 
-      if (this.isNative && this.db) {
+      if (this.isTauri && this.tauriDb) {
+        const query = `
+          UPDATE leads
+          SET name = $1, phone = $2, country_code = $3, home_type = $4, email = $5, notes = $6, updated_at = $7
+          WHERE id = $8;
+        `;
+        await this.tauriDb.execute(query, [
+          input.name,
+          input.phone,
+          input.country_code,
+          input.home_type,
+          input.email || '',
+          input.notes || '',
+          now,
+          id,
+        ]);
+        return { success: true };
+      } else if (this.isNative && this.db) {
         const query = `
           UPDATE leads
           SET name = ?, phone = ?, country_code = ?, home_type = ?, email = ?, notes = ?, updated_at = ?
@@ -291,7 +366,12 @@ class DatabaseService {
     await this.initialize();
 
     try {
-      if (this.isNative && this.db) {
+      if (this.isTauri && this.tauriDb) {
+        const placeholders = ids.map((_, i) => `$${i + 1}`).join(',');
+        const query = `DELETE FROM leads WHERE id IN (${placeholders});`;
+        await this.tauriDb.execute(query, ids);
+        return { success: true };
+      } else if (this.isNative && this.db) {
         const placeholders = ids.map(() => '?').join(',');
         const query = `DELETE FROM leads WHERE id IN (${placeholders});`;
         await this.db.run(query, ids);
@@ -314,7 +394,11 @@ class DatabaseService {
   public async getLeads(): Promise<Lead[]> {
     await this.initialize();
 
-    if (this.isNative && this.db) {
+    if (this.isTauri && this.tauriDb) {
+      return await this.tauriDb.select<Lead[]>(
+        'SELECT * FROM leads ORDER BY created_at DESC;'
+      );
+    } else if (this.isNative && this.db) {
       const res = await this.db.query(
         'SELECT * FROM leads ORDER BY created_at DESC;'
       );

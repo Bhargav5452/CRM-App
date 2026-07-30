@@ -3,6 +3,14 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { FileOpener } from '@capacitor-community/file-opener';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '@tauri-apps/plugin-fs';
+import {
+  sendNotification,
+  isPermissionGranted as isTauriNotifGranted,
+  requestPermission as requestTauriNotifPerm,
+} from '@tauri-apps/plugin-notification';
+import { openPath } from '@tauri-apps/plugin-opener';
 import { Lead } from '../types/lead';
 
 const EXCEL_MIME_TYPE =
@@ -11,6 +19,9 @@ const EXCEL_MIME_TYPE =
 const EXPORT_CHANNEL_ID = 'offline_crm_exports';
 
 let isChannelInitialized = false;
+
+const isTauriPlatform = (): boolean =>
+  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 /**
  * Determine MIME type dynamically based on file extension
@@ -34,6 +45,16 @@ export const getMimeTypeForFile = (filename: string): string => {
  * Open an exported document in external viewer or Android app chooser
  */
 export const openExportedFile = async (filePath: string, filename: string) => {
+  if (isTauriPlatform()) {
+    try {
+      await openPath(filePath);
+      return;
+    } catch (e) {
+      console.warn('Tauri file opener error:', e);
+      return;
+    }
+  }
+
   const mimeType = getMimeTypeForFile(filename);
   try {
     // Show Android app chooser (Google Sheets, Excel, PDF viewer, etc.)
@@ -204,8 +225,38 @@ export const exportLeadsToExcel = async (
 
     const filename = `CRM_${getFormattedDateString()}.xlsx`;
 
-    // 4. Save to device filesystem (Native mobile vs Web)
-    if (Capacitor.isNativePlatform()) {
+    // 4. Save to device filesystem (Tauri Desktop vs Capacitor Native vs Web)
+    if (isTauriPlatform()) {
+      const savePath = await save({
+        defaultPath: filename,
+        filters: [{ name: 'Excel Spreadsheet', extensions: ['xlsx'] }],
+      });
+
+      if (!savePath) {
+        return { success: false, error: 'Export cancelled.' };
+      }
+
+      const uint8Array = new Uint8Array(excelBuffer);
+      await writeFile(savePath, uint8Array);
+
+      try {
+        let hasPerm = await isTauriNotifGranted();
+        if (!hasPerm) {
+          const perm = await requestTauriNotifPerm();
+          hasPerm = perm === 'granted';
+        }
+        if (hasPerm) {
+          sendNotification({
+            title: 'Export Complete',
+            body: filename,
+          });
+        }
+      } catch (notifErr) {
+        console.warn('Tauri notification error:', notifErr);
+      }
+
+      return { success: true, filename };
+    } else if (Capacitor.isNativePlatform()) {
       // Chunked conversion of Uint8Array to Base64 to prevent call stack / memory overflow on physical devices
       const uint8Array = new Uint8Array(excelBuffer);
       let binaryString = '';
