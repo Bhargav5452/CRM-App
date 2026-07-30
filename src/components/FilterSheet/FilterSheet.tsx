@@ -29,7 +29,7 @@ const TIME_OPTIONS: { id: DateFilterOption; label: string }[] = [
 /**
  * Formats YYYY-MM-DD string to DD/MM/YY
  */
-export const formatToDDMMYY = (dateStr?: string): string => {
+const formatToDDMMYY = (dateStr?: string): string => {
   if (!dateStr) return '';
   const parts = dateStr.split('-');
   if (parts.length !== 3) return dateStr;

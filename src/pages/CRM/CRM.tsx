@@ -49,7 +49,6 @@ const CRM: React.FC = () => {
     setFilterState,
     fetchLeads,
     updateLead,
-    deleteLead,
     deleteLeads,
   } = useLeads();
 
