@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { IonContent, IonPage, IonIcon } from '@ionic/react';
-import { checkmarkCircleOutline, arrowForwardOutline } from 'ionicons/icons';
+import { checkmarkCircleOutline } from 'ionicons/icons';
 import LeadForm from '../../components/LeadForm/LeadForm';
 import ReviewSheet from '../../components/ReviewSheet/ReviewSheet';
 import { LeadFormInput } from '../../types/lead';
@@ -42,12 +41,8 @@ const Home: React.FC = () => {
             <div className="toast-content">
               <div className="toast-left">
                 <IonIcon icon={checkmarkCircleOutline} style={{ fontSize: 20, color: '#16A34A' }} />
-                <span>Lead saved successfully!</span>
+                <span>Lead Saved</span>
               </div>
-              <Link to="/crm" className="toast-link-btn">
-                <span>View in CRM</span>
-                <IonIcon icon={arrowForwardOutline} style={{ fontSize: 13 }} />
-              </Link>
             </div>
           </div>
         )}
