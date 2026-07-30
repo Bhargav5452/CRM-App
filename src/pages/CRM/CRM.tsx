@@ -435,6 +435,7 @@ const CRM: React.FC = () => {
                     name: editingLead.name,
                     phone: editingLead.phone,
                     country_code: editingLead.country_code,
+                    country_iso: editingLead.country_iso,
                     home_type: editingLead.home_type,
                     email: editingLead.email,
                     notes: editingLead.notes,

@@ -11,6 +11,7 @@ import {
   DEFAULT_COUNTRY_CODE,
   CountryCode,
   getCountryByCode,
+  getCountryByIso,
 } from '../../types/lead';
 import './LeadForm.css';
 
@@ -24,7 +25,7 @@ interface LeadFormProps {
 const LeadForm: React.FC<LeadFormProps> = ({
   onSubmit,
   defaultValues,
-  submitButtonText = 'Review & Save',
+  submitButtonText = 'Review Details',
   hideHeader = false,
 }) => {
   const [isHomeTypeOpen, setIsHomeTypeOpen] = useState(false);
@@ -36,6 +37,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const countryPickerRef = useRef<HTMLDivElement>(null);
   const selectedCountryRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+
+  const initialIso = defaultValues?.country_iso || (defaultValues?.country_code ? getCountryByCode(defaultValues.country_code).iso : DEFAULT_COUNTRY_CODE.iso);
 
   const {
     register,
@@ -50,6 +53,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     defaultValues: {
       name: defaultValues?.name || '',
       country_code: defaultValues?.country_code || DEFAULT_COUNTRY_CODE.code,
+      country_iso: initialIso,
       phone: defaultValues?.phone || '',
       home_type: defaultValues?.home_type || '',
       email: defaultValues?.email || '',
@@ -62,9 +66,10 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const notesValue = watch('notes') || '';
   const homeTypeValue = watch('home_type') || '';
   const selectedCountryCode = watch('country_code') || DEFAULT_COUNTRY_CODE.code;
+  const selectedCountryIso = watch('country_iso') || initialIso;
   const phoneValue = watch('phone') || '';
 
-  const activeCountry: CountryCode = getCountryByCode(selectedCountryCode);
+  const activeCountry: CountryCode = getCountryByIso(selectedCountryIso, selectedCountryCode);
 
   // Focus Name input on mount/reset
   useEffect(() => {
@@ -121,6 +126,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const handleSelectCountry = (country: CountryCode) => {
     setValue('country_code', country.code, { shouldValidate: true, shouldTouch: true });
+    setValue('country_iso', country.iso, { shouldValidate: true, shouldTouch: true });
     if (phoneValue.length > country.digits) {
       setValue('phone', phoneValue.slice(0, country.digits), { shouldValidate: true, shouldTouch: true });
     } else if (phoneValue.length > 0) {
