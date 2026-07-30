@@ -123,10 +123,13 @@ class DatabaseService {
         this.isInitialized = true;
       } catch (err) {
         console.error('Database initialization error:', err);
-        if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+        this.initPromise = null;
+        if (!this.isTauri && !this.isNative) {
+          if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+          }
+          this.isInitialized = true;
         }
-        this.isInitialized = true;
       }
     })();
 
