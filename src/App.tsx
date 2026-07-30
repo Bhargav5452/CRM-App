@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import Navigation from './components/Navigation/Navigation';
 import Home from './pages/Home/Home';
 import CRM from './pages/CRM/CRM';
@@ -22,8 +23,12 @@ setupIonicReact();
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Hide splash screen on the very first painted animation frame after React mounts.
     if (Capacitor.isNativePlatform()) {
+      // Apply dark/black status bar text & icons for light app background once on startup
+      StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.warn('StatusBar.setStyle error:', e);
+      });
+
       requestAnimationFrame(() => {
         SplashScreen.hide({ fadeOutDuration: 150 }).catch((e) => {
           console.warn('SplashScreen.hide error:', e);
