@@ -168,7 +168,8 @@ export const exportLeadsToExcel = async (
       return {
         'S.No': index + 1,
         Name: lead.name,
-        'Phone Number': formattedPhone,
+        'Phone Number (with code)': formattedPhone,
+        'Phone Number': phone,
         'Home Type': lead.home_type,
         Email: lead.email || '',
         Notes: lead.notes || '',
@@ -183,7 +184,8 @@ export const exportLeadsToExcel = async (
     const columnWidths = [
       { wch: 6 },  // S.No
       { wch: 22 }, // Name
-      { wch: 20 }, // Phone Number
+      { wch: 24 }, // Phone Number (with code)
+      { wch: 16 }, // Phone Number
       { wch: 14 }, // Home Type
       { wch: 26 }, // Email
       { wch: 32 }, // Notes
