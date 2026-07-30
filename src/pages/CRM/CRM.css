@@ -662,3 +662,9 @@
   outline: 2px solid #09090B;
   outline-offset: 2px;
 }
+
+.toast-error-content {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(239, 68, 68, 0.2) !important;
+  color: #991B1B !important;
+}

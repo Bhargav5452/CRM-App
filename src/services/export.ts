@@ -62,7 +62,13 @@ export const openExportedFile = async (filePath: string, filename: string) => {
 const initNotificationChannel = async () => {
   if (!Capacitor.isNativePlatform() || isChannelInitialized) return;
   try {
-    // 1. Register Action Buttons for Notifications (Open & Share)
+    // 1. Check and request Local Notifications permissions on Android 13+ (API 33+) & iOS
+    const permStatus = await LocalNotifications.checkPermissions();
+    if (permStatus.display !== 'granted') {
+      await LocalNotifications.requestPermissions();
+    }
+
+    // 2. Register Action Buttons for Notifications (Open & Share)
     // foreground: false ensures Lead CRM is NOT reopened when notification actions are tapped
     await LocalNotifications.registerActionTypes({
       types: [
@@ -84,7 +90,7 @@ const initNotificationChannel = async () => {
       ],
     });
 
-    // 2. Create Notification Channel for Lead CRM Exports
+    // 3. Create Notification Channel for Lead CRM Exports
     await LocalNotifications.createChannel({
       id: EXPORT_CHANNEL_ID,
       name: 'Lead CRM - Exports',
@@ -94,7 +100,7 @@ const initNotificationChannel = async () => {
     });
     isChannelInitialized = true;
   } catch (e) {
-    console.warn('Could not initialize notification channel or actions:', e);
+    console.warn('Could not initialize notification channel or permissions:', e);
   }
 };
 
@@ -149,7 +155,7 @@ export const exportLeadsToExcel = async (
     // Dynamically load XLSX library only when user clicks Export
     const XLSX = await import('xlsx');
 
-    // Ensure notification channel is configured
+    // Ensure notification channel and permissions are configured
     await initNotificationChannel();
 
     // 1. Prepare raw row data for Excel worksheet
@@ -197,11 +203,13 @@ export const exportLeadsToExcel = async (
 
     // 4. Save to device filesystem (Native mobile vs Web)
     if (Capacitor.isNativePlatform()) {
-      // Convert ArrayBuffer to Base64 for Capacitor Filesystem
+      // Chunked conversion of Uint8Array to Base64 to prevent call stack / memory overflow on physical devices
       const uint8Array = new Uint8Array(excelBuffer);
       let binaryString = '';
-      for (let i = 0; i < uint8Array.byteLength; i++) {
-        binaryString += String.fromCharCode(uint8Array[i]);
+      const chunkSize = 8192;
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.subarray(i, i + chunkSize);
+        binaryString += String.fromCharCode.apply(null, Array.from(chunk));
       }
       const base64Data = btoa(binaryString);
 
@@ -212,7 +220,12 @@ export const exportLeadsToExcel = async (
         directory: Directory.Cache,
       });
 
-      const filePath = writeResult.uri;
+      // Get canonical file URI for device compatibility
+      const fileUriResult = await Filesystem.getUri({
+        path: filename,
+        directory: Directory.Cache,
+      });
+      const filePath = fileUriResult.uri || writeResult.uri;
 
       // Send Android notification: title "Export Complete", body filename, Open & Share action buttons
       try {

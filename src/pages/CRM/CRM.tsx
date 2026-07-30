@@ -9,6 +9,8 @@ import {
   checkmarkDoneOutline,
   createOutline,
   trashOutline,
+  alertCircleOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons';
 import LeadCard from '../../components/LeadCard/LeadCard';
 import LeadForm from '../../components/LeadForm/LeadForm';
@@ -56,6 +58,12 @@ const CRM: React.FC = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportToast, setExportToast] = useState<{ show: boolean; isError: boolean; message: string }>({
+    show: false,
+    isError: false,
+    message: '',
+  });
   const [isMobile, setIsMobile] = useState<boolean>(
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
   );
@@ -139,8 +147,29 @@ const CRM: React.FC = () => {
     setSelectedIds([]);
   };
 
-  const handleExport = () => {
-    exportLeadsToExcel(filteredLeads);
+  const handleExport = async () => {
+    if (isExporting || filteredLeads.length === 0) return;
+    setIsExporting(true);
+    const res = await exportLeadsToExcel(filteredLeads);
+    setIsExporting(false);
+
+    if (res.success) {
+      setExportToast({
+        show: true,
+        isError: false,
+        message: `Exported ${res.filename || 'file'} successfully!`,
+      });
+    } else {
+      setExportToast({
+        show: true,
+        isError: true,
+        message: res.error || 'Export failed.',
+      });
+    }
+
+    setTimeout(() => {
+      setExportToast((prev) => ({ ...prev, show: false }));
+    }, 5000);
   };
 
   const handleSaveEditedLead = async (input: LeadFormInput) => {
@@ -267,11 +296,13 @@ const CRM: React.FC = () => {
                   type="button"
                   className="btn-export-inline"
                   onClick={handleExport}
-                  disabled={filteredLeads.length === 0}
+                  disabled={filteredLeads.length === 0 || isExporting}
                   title="Export filtered leads to Excel"
                 >
                   <IonIcon icon={downloadOutline} style={{ fontSize: 18 }} />
-                  <span className="action-btn-text">Export</span>
+                  <span className="action-btn-text">
+                    {isExporting ? 'Exporting...' : 'Export'}
+                  </span>
                 </button>
 
                 <button
@@ -443,6 +474,24 @@ const CRM: React.FC = () => {
                   submitButtonText="Save Changes"
                   onSubmit={handleSaveEditedLead}
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Export Status Toast Banner */}
+        {exportToast.show && (
+          <div className="toast-success-banner">
+            <div className={`toast-content ${exportToast.isError ? 'toast-error-content' : ''}`}>
+              <div className="toast-left">
+                <IonIcon
+                  icon={exportToast.isError ? alertCircleOutline : checkmarkCircleOutline}
+                  style={{
+                    fontSize: 20,
+                    color: exportToast.isError ? '#EF4444' : '#16A34A',
+                  }}
+                />
+                <span>{exportToast.message}</span>
               </div>
             </div>
           </div>
