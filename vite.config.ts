@@ -10,6 +10,11 @@ export default defineConfig({
     react(),
     legacy()
   ],
+  server: {
+    watch: {
+      ignored: ['**/src-tauri/**'],
+    },
+  },
   build: {
     rollupOptions: {
       output: {
