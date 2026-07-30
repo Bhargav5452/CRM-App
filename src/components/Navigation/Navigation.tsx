@@ -40,4 +40,4 @@ const Navigation: React.FC = () => {
   );
 };
 
-export default Navigation;
+export default React.memo(Navigation);

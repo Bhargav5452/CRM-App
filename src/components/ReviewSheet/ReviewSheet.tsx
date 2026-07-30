@@ -139,4 +139,4 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
   );
 };
 
-export default ReviewSheet;
+export default React.memo(ReviewSheet);

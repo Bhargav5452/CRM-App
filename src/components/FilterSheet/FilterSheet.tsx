@@ -358,4 +358,4 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
   );
 };
 
-export default FilterSheet;
+export default React.memo(FilterSheet);
