@@ -24,7 +24,7 @@ const Navigation: React.FC = () => {
             className={`nav-link-item ${isHomeActive ? 'active' : ''}`}
           >
             <IonIcon icon={addCircleOutline} style={{ fontSize: 16 }} />
-            <span>Client Info</span>
+            <span>New Lead</span>
           </Link>
 
           <Link
