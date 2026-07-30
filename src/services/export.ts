@@ -13,12 +13,57 @@ const EXPORT_CHANNEL_ID = 'offline_crm_exports';
 let isChannelInitialized = false;
 
 /**
+ * Determine MIME type dynamically based on file extension
+ */
+export const getMimeTypeForFile = (filename: string): string => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'xlsx':
+    case 'xls':
+      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    case 'csv':
+      return 'text/csv';
+    case 'pdf':
+      return 'application/pdf';
+    default:
+      return EXCEL_MIME_TYPE;
+  }
+};
+
+/**
+ * Open an exported document in external viewer or Android app chooser
+ */
+export const openExportedFile = async (filePath: string, filename: string) => {
+  const mimeType = getMimeTypeForFile(filename);
+  try {
+    // Show Android app chooser (Google Sheets, Excel, PDF viewer, etc.)
+    await FileOpener.open({
+      filePath: filePath,
+      contentType: mimeType,
+      openWithDefault: false,
+    });
+  } catch (err) {
+    console.warn('FileOpener with app chooser failed, trying default app:', err);
+    try {
+      await FileOpener.open({
+        filePath: filePath,
+        contentType: mimeType,
+        openWithDefault: true,
+      });
+    } catch (fallbackErr) {
+      console.error('Error opening file from notification:', fallbackErr);
+    }
+  }
+};
+
+/**
  * Initialize Notification Channel & Action Types on Native Android / iOS
  */
 const initNotificationChannel = async () => {
   if (!Capacitor.isNativePlatform() || isChannelInitialized) return;
   try {
     // 1. Register Action Buttons for Notifications (Open & Share)
+    // foreground: false ensures Lead CRM is NOT reopened when notification actions are tapped
     await LocalNotifications.registerActionTypes({
       types: [
         {
@@ -27,12 +72,12 @@ const initNotificationChannel = async () => {
             {
               id: 'open_file',
               title: 'Open',
-              foreground: true,
+              foreground: false,
             },
             {
               id: 'share_file',
               title: 'Share',
-              foreground: true,
+              foreground: false,
             },
           ],
         },
@@ -66,23 +111,17 @@ if (Capacitor.isNativePlatform()) {
       if (actionId === 'share_file') {
         try {
           await Share.share({
-            title: 'Share Exported CRM Leads',
+            title: 'Share Exported File',
             text: `CRM Export: ${extra.filename}`,
             url: extra.filePath,
-            dialogTitle: 'Share Lead Spreadsheet',
+            dialogTitle: 'Share Lead File',
           });
         } catch (err) {
           console.warn('User dismissed or error sharing from notification:', err);
         }
-      } else if (actionId === 'open_file') {
-        try {
-          await FileOpener.open({
-            filePath: extra.filePath,
-            contentType: EXCEL_MIME_TYPE,
-          });
-        } catch (err) {
-          console.warn('Error opening file from notification:', err);
-        }
+      } else if (actionId === 'open_file' || actionId === 'tap') {
+        // Triggered when user taps 'Open' button OR notification card body ('tap')
+        await openExportedFile(extra.filePath, extra.filename || extra.filePath);
       }
     }
   );
