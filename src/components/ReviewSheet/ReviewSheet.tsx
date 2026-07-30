@@ -64,7 +64,7 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
         <div className="sheet-header">
           <h2 className="sheet-title">Review Lead Details</h2>
           <p className="sheet-subtitle">
-            Please verify the customer information before saving.
+            Please verify the Lead information before saving.
           </p>
         </div>
 
