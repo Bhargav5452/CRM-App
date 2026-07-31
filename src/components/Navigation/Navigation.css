@@ -188,3 +188,45 @@
     gap: 4px;
   }
 }
+
+/* ─────────────────────────────────────────
+   Desktop Enhancements (≥1200px)
+   ───────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .app-navbar-inner {
+    max-width: 1400px;
+    height: 72px;
+    padding: 12px 48px;
+    gap: 24px;
+  }
+
+  .app-brand {
+    gap: 12px;
+    font-size: 18px;
+  }
+
+  .app-brand-badge {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .nav-links-group {
+    padding: 4px;
+    border-radius: 12px;
+    gap: 4px;
+  }
+
+  .nav-link-item {
+    height: 42px;
+    padding: 0 18px;
+    font-size: 14px;
+    min-width: 105px;
+    border-radius: 9px;
+  }
+
+  .nav-link-item ion-icon {
+    font-size: 18px !important;
+  }
+}

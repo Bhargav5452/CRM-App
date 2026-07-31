@@ -635,3 +635,117 @@
 .close-popover-icon {
   font-size: 18px;
 }
+
+/* ─────────────────────────────────────────
+   Desktop Enhancements (≥1200px)
+   ───────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .lead-form-wrapper {
+    max-width: 1200px;
+    padding: 36px 32px 64px 32px;
+  }
+
+  .lead-form-card {
+    padding: 44px 40px;
+    border-radius: 24px;
+  }
+
+  .card-header {
+    margin-bottom: 28px;
+  }
+
+  .card-title {
+    font-size: 28px;
+  }
+
+  .card-subtitle {
+    font-size: 15px;
+    margin-top: 6px;
+  }
+
+  .form-grid {
+    gap: 24px 28px;
+  }
+
+  .form-field-group {
+    gap: 6px;
+  }
+
+  .field-label {
+    font-size: 14.5px;
+    margin-bottom: 2px;
+  }
+
+  .custom-input,
+  .custom-dropdown-trigger,
+  .phone-input-container {
+    height: 54px;
+    min-height: 54px;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 15.5px;
+  }
+
+  .country-picker-trigger {
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  .country-flag {
+    font-size: 18px;
+  }
+
+  .country-dial-code {
+    font-size: 14.5px;
+  }
+
+  .phone-number-input {
+    padding: 0 14px;
+    font-size: 15.5px;
+  }
+
+  .select-chevron {
+    font-size: 16px;
+  }
+
+  .custom-dropdown-menu {
+    top: 86px;
+    padding: 6px;
+    border-radius: 14px;
+  }
+
+  .dropdown-option {
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 9px;
+  }
+
+  .option-check {
+    font-size: 18px;
+  }
+
+  .custom-textarea {
+    height: 110px;
+    min-height: 110px;
+    padding: 14px 16px;
+    font-size: 15.5px;
+    border-radius: 12px;
+  }
+
+  .char-counter {
+    font-size: 12.5px;
+  }
+
+  .form-actions {
+    margin-top: 28px;
+  }
+
+  .btn-submit {
+    height: 56px;
+    min-height: 56px;
+    border-radius: 12px;
+    font-size: 16.5px;
+    padding: 0 24px;
+  }
+}
+

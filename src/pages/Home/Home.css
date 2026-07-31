@@ -67,3 +67,23 @@
     transform: translate(-50%, 0);
   }
 }
+
+/* Desktop Enhancements (≥1200px) */
+@media (min-width: 1200px) {
+  .toast-success-banner {
+    bottom: 36px;
+    max-width: 540px;
+  }
+
+  .toast-content {
+    padding: 14px 22px;
+    font-size: 15px;
+    border-radius: 16px;
+  }
+
+  .toast-link-btn {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+}
+

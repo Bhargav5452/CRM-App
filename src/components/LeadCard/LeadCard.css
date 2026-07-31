@@ -141,3 +141,50 @@
   line-height: 1.45;
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
+
+/* Desktop Enhancements (≥1200px) */
+@media (min-width: 1200px) {
+  .lead-card {
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .lead-card-name {
+    font-size: 18px;
+  }
+
+  .lead-card-date {
+    font-size: 13px;
+  }
+
+  .date-icon {
+    font-size: 15px;
+  }
+
+  .home-type-badge {
+    font-size: 13px;
+    padding: 5px 12px;
+  }
+
+  .lead-info-row {
+    font-size: 15px;
+    gap: 10px;
+  }
+
+  .lead-info-row .info-icon {
+    font-size: 18px;
+  }
+
+  .lead-notes-box {
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+
+  .selection-check-badge {
+    width: 22px;
+    height: 22px;
+    font-size: 13px;
+  }
+}
+
