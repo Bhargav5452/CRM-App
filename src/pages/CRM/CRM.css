@@ -791,11 +791,20 @@
   }
 }
 
-/* Wide Desktop Screens (≥1600px): 3 Cards Per Row */
+/* Desktop Lead Grid (1200px - 1599px): 2 Cards Per Row */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .leads-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Large Desktop Lead Grid (≥1600px): 3 Cards Per Row */
 @media (min-width: 1600px) {
   .leads-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
 }
+
 
