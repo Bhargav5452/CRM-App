@@ -1,10 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import LegacyLeadCard from '../components/LegacyLeadCard';
 import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyFilterSheet from '../components/LegacyFilterSheet';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../../src/types/lead';
 import { useLeads } from '../../src/hooks/useLeads';
-import { exportLeadsToExcel } from '../../src/services/export';
+import { exportLeadsToExcel } from '../services/legacyExport';
 import '../../src/pages/CRM/CRM.css';
 
 const getActiveFilterLabel = (filter: FilterState): string | null => {
