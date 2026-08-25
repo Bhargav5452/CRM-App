@@ -1,0 +1,242 @@
+﻿/* =============================================
+   LEGACY GLOBAL CSS — Safari 9 Compatible
+   ============================================= */
+
+/* Reset & Fonts */
+:root {
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg-main: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --text-primary: #09090B;
+  --text-secondary: #52525B;
+  --text-placeholder: #A1A1AA;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-focus: #09090B;
+  --btn-bg: #09090B;
+  --btn-text: #FFFFFF;
+  --btn-hover: #18181B;
+  --color-error: #EF4444;
+  --color-success: #16A34A;
+  --transition-bezier: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *:before, *:after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #FAFAFA;
+  color: #09090B;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+}
+
+/* =============================================
+   App Shell Layout
+   ============================================= */
+.legacy-app-layout {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.legacy-app-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.legacy-app-body {
+  -webkit-flex: 1;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+/* =============================================
+   Navigation (overrides for Safari 9 safe-area)
+   ============================================= */
+.app-navbar-container {
+  width: 100%;
+  background-color: #ffffff;
+  padding-top: 10px;
+}
+
+/* =============================================
+   Page Content Container
+   ============================================= */
+.legacy-page-content {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =============================================
+   Leads Flex Grid (replaces CSS Grid for Safari 9)
+   ============================================= */
+.legacy-leads-flex {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-align-items: stretch;
+  align-items: stretch;
+}
+
+.legacy-leads-flex .lead-card {
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* Two-column on tablets 640px+ */
+@media (min-width: 640px) {
+  .legacy-leads-flex .lead-card {
+    width: calc(50% - 7px);
+    margin-right: 14px;
+    margin-bottom: 14px;
+  }
+  .legacy-leads-flex .lead-card:nth-child(2n) {
+    margin-right: 0;
+  }
+}
+
+/* Three-column on large screens 1200px+ */
+@media (min-width: 1200px) {
+  .legacy-leads-flex .lead-card {
+    width: calc(33.333% - 10px);
+    margin-right: 14px;
+    margin-bottom: 14px;
+  }
+  .legacy-leads-flex .lead-card:nth-child(3n) {
+    margin-right: 0;
+  }
+}
+
+/* Mobile single column */
+@media (max-width: 639px) {
+  .legacy-leads-flex .lead-card {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+}
+
+/* =============================================
+   Legacy Spinner (replaces IonSpinner)
+   ============================================= */
+.legacy-spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(9, 9, 11, 0.12);
+  border-top-color: #09090B;
+  border-radius: 50%;
+  -webkit-animation: legacy-spin 0.8s linear infinite;
+  animation: legacy-spin 0.8s linear infinite;
+  margin: 0 auto 16px auto;
+}
+
+@-webkit-keyframes legacy-spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+@keyframes legacy-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Flex gap fallback (replaces gap: on flex)
+   ============================================= */
+.nav-links-group {
+  gap: 3px; /* Modern browsers */
+}
+
+/* Navigation SVG icon alignment */
+.nav-link-item svg {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   Review Error Banner
+   ============================================= */
+.review-error-banner {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #DC2626;
+}
+
+/* =============================================
+   Icon alignment fixes for SVG icons
+   ============================================= */
+.info-icon {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+.country-trigger-chevron {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.option-check {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.select-chevron {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-transition: -webkit-transform 0.2s ease;
+  transition: transform 0.2s ease;
+}
+
+.select-chevron.open {
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+/* =============================================
+   Tabular nums (partial Safari 9 support)
+   ============================================= */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

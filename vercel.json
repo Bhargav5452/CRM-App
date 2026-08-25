@@ -1,5 +1,17 @@
 {
+  "headers": [
+    {
+      "source": "/legacy/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/legacy/(.*)",
+      "destination": "/legacy/index.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

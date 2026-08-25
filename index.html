@@ -3,6 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <title>Lead CRM</title>
+    <!-- Safari 9 / iOS 9 redirect — runs before any framework code -->
+    <script>
+      (function(){
+        var ua = navigator.userAgent || '';
+        // Safari 9: "Version/9.x Safari" but NOT Chrome/Firefox pretending to be Safari
+        var isSafari9 = /Version\/9\.\d+.*Safari/i.test(ua) && !/Chrome|CriOS|FxiOS/i.test(ua);
+        // iOS 9 WebKit: "OS 9_" in UA (covers all iOS 9.x browsers)
+        var isIOS9 = /OS 9_\d/i.test(ua);
+        if ((isSafari9 || isIOS9) && location.pathname.indexOf('/legacy') !== 0) {
+          location.replace('/legacy/');
+        }
+      })();
+    </script>
     
     <base href="/" />
     
