@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -30,21 +30,23 @@
       .diag-err { color: #f87171 !important; font-weight: bold; }
     </style>
   </head>
-  <body>
+    <script>
+      (function() {
+        window.onerror = function(msg, url, line, col, error) {
+          var el = document.getElementById('diagnostic-log');
+          if (el) {
+            var div = document.createElement('div');
+            div.className = 'diag-err';
+            div.textContent = 'ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')';
+            el.appendChild(div);
+          }
+          return false;
+        };
+      })();
+    </script>
     <div id="diagnostic-log">
       <div>[1/4] Legacy HTML loaded</div>
     </div>
-    <script>
-      window.addEventListener('error', function(e) {
-        var el = document.getElementById('diagnostic-log');
-        if (el) {
-          var div = document.createElement('div');
-          div.className = 'diag-err';
-          div.textContent = 'ERR: ' + (e.message || e.error || 'Unknown error') + (e.filename ? ' (' + e.filename + ':' + e.lineno + ')' : '');
-          el.appendChild(div);
-        }
-      });
-    </script>
     <div id="root"></div>
     <script type="module" src="./main.tsx"></script>
   </body>
