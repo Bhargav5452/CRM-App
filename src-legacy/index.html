@@ -29,21 +29,25 @@
       }
       .diag-err { color: #f87171 !important; font-weight: bold; }
     </style>
-  </head>
     <script>
       (function() {
         window.onerror = function(msg, url, line, col, error) {
           var el = document.getElementById('diagnostic-log');
-          if (el) {
-            var div = document.createElement('div');
-            div.className = 'diag-err';
-            div.textContent = 'ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')';
-            el.appendChild(div);
+          if (!el) {
+            el = document.createElement('div');
+            el.id = 'diagnostic-log';
+            document.body.insertBefore(el, document.body.firstChild);
           }
+          var div = document.createElement('div');
+          div.className = 'diag-err';
+          div.textContent = 'ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')';
+          el.appendChild(div);
           return false;
         };
       })();
     </script>
+  </head>
+  <body>
     <div id="diagnostic-log">
       <div>[1/4] Legacy HTML loaded</div>
     </div>
