@@ -13,12 +13,12 @@ export default defineConfig({
   plugins: [
     react(),
     legacy({
-      // Target Safari 9 / iOS Safari 9 explicitly
-      targets: ["safari >= 9", "ios_saf >= 9"],
+      targets: ["safari 9", "ios_saf 9"],
       polyfills: true,
       additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
       modernPolyfills: false,
       renderLegacyChunks: true,
+      exclude: ["core-js/modules/es.string.replace", "core-js/modules/es.regexp.exec"],
     }),
   ],
   resolve: {
