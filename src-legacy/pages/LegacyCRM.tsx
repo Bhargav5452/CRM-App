@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import LegacyLeadCard from '../components/LegacyLeadCard';
 import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyFilterSheet from '../components/LegacyFilterSheet';
-import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../../src/types/lead';
-import { useLeads } from '../../src/hooks/useLeads';
+import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
+import { useLegacyLeads } from '../hooks/useLegacyLeads';
 import { exportLeadsToExcel } from '../services/legacyExport';
 import '../../src/pages/CRM/CRM.css';
 
@@ -31,7 +31,7 @@ const LegacyCRM: React.FC = () => {
   const {
     filteredLeads, loading, searchQuery, setSearchQuery,
     filterState, setFilterState, fetchLeads, updateLead, deleteLeads,
-  } = useLeads();
+  } = useLegacyLeads();
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);

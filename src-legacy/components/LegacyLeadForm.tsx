@@ -1,10 +1,9 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  leadFormSchema, LeadFormInput, HOME_TYPES, COUNTRY_CODES,
+  LeadFormInput, HOME_TYPES, COUNTRY_CODES,
   DEFAULT_COUNTRY_CODE, CountryCode, getCountryByCode,
-} from '../../src/types/lead';
+  validateLegacyLeadForm
+} from '../types/legacyValidation';
 import '../../src/components/LeadForm/LeadForm.css';
 
 interface LeadFormProps {
@@ -38,6 +37,16 @@ const CloseIcon = () => (
 const LegacyLeadForm: React.FC<LeadFormProps> = ({
   onSubmit, defaultValues, submitButtonText = 'Review Details', hideHeader = false,
 }) => {
+  const [formData, setFormData] = useState<LeadFormInput>({
+    name: (defaultValues && defaultValues.name) || '',
+    country_code: (defaultValues && defaultValues.country_code) || DEFAULT_COUNTRY_CODE.code,
+    phone: (defaultValues && defaultValues.phone) || '',
+    home_type: (defaultValues && defaultValues.home_type) || '',
+    email: (defaultValues && defaultValues.email) || '',
+    notes: (defaultValues && defaultValues.notes) || '',
+  });
+
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isHomeTypeOpen, setIsHomeTypeOpen] = useState(false);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
@@ -52,26 +61,10 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     getCountryByCode((defaultValues && defaultValues.country_code) || DEFAULT_COUNTRY_CODE.code)
   );
 
-  const {
-    register, handleSubmit, setValue, watch, trigger,
-    formState: { errors, isValid },
-  } = useForm<LeadFormInput>({
-    resolver: zodResolver(leadFormSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      name: (defaultValues && defaultValues.name) || '',
-      country_code: (defaultValues && defaultValues.country_code) || DEFAULT_COUNTRY_CODE.code,
-      phone: (defaultValues && defaultValues.phone) || '',
-      home_type: (defaultValues && defaultValues.home_type) || '',
-      email: (defaultValues && defaultValues.email) || '',
-      notes: (defaultValues && defaultValues.notes) || '',
-    },
-  });
+  const validationResult = validateLegacyLeadForm(formData);
+  const errors = validationResult.errors;
+  const isValid = validationResult.isValid;
 
-  const { ref: nameRegisterRef, ...nameRegisterRest } = register('name');
-  const notesValue = watch('notes') || '';
-  const homeTypeValue = watch('home_type') || '';
-  const phoneValue = watch('phone') || '';
   const activeCountry: CountryCode = selectedCountryObj;
 
   useEffect(() => {
@@ -104,22 +97,40 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     if (isCountryOpen && selectedCountryRef.current) selectedCountryRef.current.scrollIntoView({ block: 'nearest' });
   }, [isCountryOpen]);
 
+  const handleChange = (field: keyof LeadFormInput, value: string) => {
+    setFormData((prev) => Object.assign({}, prev, { [field]: value }));
+  };
+
+  const handleBlur = (field: keyof LeadFormInput) => {
+    setTouched((prev) => Object.assign({}, prev, { [field]: true }));
+  };
+
   const handleSelectHomeType = (type: string) => {
-    setValue('home_type', type, { shouldValidate: true, shouldTouch: true });
+    handleChange('home_type', type);
+    setTouched((prev) => Object.assign({}, prev, { home_type: true }));
     setIsHomeTypeOpen(false);
   };
 
   const handleSelectCountry = (country: CountryCode) => {
     setSelectedCountryObj(country);
-    setValue('country_code', country.code, { shouldValidate: true, shouldTouch: true });
-    if (phoneValue.length > country.digits) {
-      setValue('phone', phoneValue.slice(0, country.digits), { shouldValidate: true, shouldTouch: true });
-    } else if (phoneValue.length > 0) {
-      trigger('phone');
+    let newPhone = formData.phone;
+    if (newPhone.length > country.digits) {
+      newPhone = newPhone.slice(0, country.digits);
     }
+    setFormData((prev) => Object.assign({}, prev, { country_code: country.code, phone: newPhone }));
+    setTouched((prev) => Object.assign({}, prev, { country_code: true, phone: true }));
     setIsCountryOpen(false);
     setCountrySearch('');
     setKeyFocusedIdx(-1);
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isValid) {
+      onSubmit(formData);
+    } else {
+      setTouched({ name: true, country_code: true, phone: true, home_type: true, email: true, notes: true });
+    }
   };
 
   const PINNED_ISOS = ['IN', 'US'];
@@ -142,21 +153,23 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
   };
 
   const formContent = (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form onSubmit={handleSubmitForm} noValidate>
       <div className="form-grid">
         <div className="form-field-group">
           <label htmlFor="legacy_name" className="field-label">Full Name <span className="required-asterisk">*</span></label>
           <input id="legacy_name" type="text" placeholder="Enter full name"
-            className={"custom-input" + (errors.name ? ' input-error' : '')}
-            {...nameRegisterRest}
-            ref={(e) => { nameRegisterRef(e); nameInputRef.current = e; }}
+            className={"custom-input" + (touched.name && errors.name ? ' input-error' : '')}
+            value={formData.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            onBlur={() => handleBlur('name')}
+            ref={nameInputRef}
           />
-          {errors.name && <span className="error-message">{errors.name.message}</span>}
+          {touched.name && errors.name && <span className="error-message">{errors.name}</span>}
         </div>
 
         <div className="form-field-group" ref={countryPickerRef}>
           <label htmlFor="legacy_phone" className="field-label">Phone Number <span className="required-asterisk">*</span></label>
-          <div className={"phone-input-container" + (errors.phone || errors.country_code ? ' input-error' : '')}>
+          <div className={"phone-input-container" + (touched.phone && (errors.phone || errors.country_code) ? ' input-error' : '')}>
             <div className="country-picker-trigger" onClick={() => setIsCountryOpen(true)}
               title={"Selected: " + activeCountry.name + " (" + activeCountry.code + ")"}>
               <span className="country-flag">{activeCountry.flag}</span>
@@ -165,24 +178,28 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
             </div>
             <input id="legacy_phone" type="tel" inputMode="numeric" maxLength={activeCountry.digits}
               placeholder={"Enter " + activeCountry.digits + "-digit number"}
-              className="phone-number-input" {...register('phone')} />
+              className="phone-number-input"
+              value={formData.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
+              onBlur={() => handleBlur('phone')}
+            />
           </div>
-          {errors.phone && <span className="error-message">{errors.phone.message || ("Must be " + activeCountry.digits + " digits for " + activeCountry.name)}</span>}
+          {touched.phone && errors.phone && <span className="error-message">{errors.phone}</span>}
         </div>
 
         <div className="form-field-group" ref={homeTypeRef}>
           <label htmlFor="legacy_home_type_trigger" className="field-label">Home Type <span className="required-asterisk">*</span></label>
           <div id="legacy_home_type_trigger" tabIndex={0} role="button" aria-haspopup="listbox" aria-expanded={isHomeTypeOpen}
-            className={"custom-dropdown-trigger" + (isHomeTypeOpen ? ' focused' : '') + (errors.home_type ? ' input-error' : '')}
+            className={"custom-dropdown-trigger" + (isHomeTypeOpen ? ' focused' : '') + (touched.home_type && errors.home_type ? ' input-error' : '')}
             onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsHomeTypeOpen(!isHomeTypeOpen); } }}>
-            {homeTypeValue ? <span className="dropdown-value">{homeTypeValue}</span> : <span className="dropdown-placeholder">Select home type</span>}
+            {formData.home_type ? <span className="dropdown-value">{formData.home_type}</span> : <span className="dropdown-placeholder">Select home type</span>}
             <span className={"select-chevron" + (isHomeTypeOpen ? ' open' : '')}><ChevronDownIcon /></span>
           </div>
           {isHomeTypeOpen && (
             <div className="custom-dropdown-menu" role="listbox">
               {HOME_TYPES.map((type) => {
-                const isSelected = homeTypeValue === type;
+                const isSelected = formData.home_type === type;
                 return (
                   <div key={type} role="option" aria-selected={isSelected}
                     className={"dropdown-option" + (isSelected ? ' selected' : '')}
@@ -194,26 +211,34 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
               })}
             </div>
           )}
-          {errors.home_type && <span className="error-message">{errors.home_type.message}</span>}
+          {touched.home_type && errors.home_type && <span className="error-message">{errors.home_type}</span>}
         </div>
 
         <div className="form-field-group">
           <label htmlFor="legacy_email" className="field-label">Email</label>
           <input id="legacy_email" type="email" placeholder="Enter email (optional)"
-            className={"custom-input" + (errors.email ? ' input-error' : '')} {...register('email')} />
-          {errors.email && <span className="error-message">{errors.email.message}</span>}
+            className={"custom-input" + (touched.email && errors.email ? ' input-error' : '')}
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            onBlur={() => handleBlur('email')}
+          />
+          {touched.email && errors.email && <span className="error-message">{errors.email}</span>}
         </div>
 
         <div className="form-field-group form-field-full">
           <label htmlFor="legacy_notes" className="field-label">Notes</label>
           <div className="textarea-container">
             <textarea id="legacy_notes" maxLength={300} placeholder="Add notes (optional)"
-              className={"custom-textarea" + (errors.notes ? ' input-error' : '')} {...register('notes')} />
+              className={"custom-textarea" + (touched.notes && errors.notes ? ' input-error' : '')}
+              value={formData.notes}
+              onChange={(e) => handleChange('notes', e.target.value)}
+              onBlur={() => handleBlur('notes')}
+            />
             <div className="textarea-footer">
-              <span className={"char-counter" + (notesValue.length === 300 ? ' max-reached' : '')}>{notesValue.length}/300</span>
+              <span className={"char-counter" + (formData.notes.length === 300 ? ' max-reached' : '')}>{formData.notes.length}/300</span>
             </div>
           </div>
-          {errors.notes && <span className="error-message">{errors.notes.message}</span>}
+          {touched.notes && errors.notes && <span className="error-message">{errors.notes}</span>}
         </div>
       </div>
 

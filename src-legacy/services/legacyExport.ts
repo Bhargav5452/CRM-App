@@ -1,4 +1,4 @@
-﻿import { Lead } from '../../src/types/lead';
+import { Lead } from '../types/legacyValidation';
 
 export const exportLeadsToExcel = async (leads: Lead[]): Promise<{ success: boolean; filename?: string; error?: string }> => {
   try {

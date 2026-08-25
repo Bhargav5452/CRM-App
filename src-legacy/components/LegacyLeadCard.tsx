@@ -1,5 +1,5 @@
-﻿import React, { useRef } from 'react';
-import { Lead, getCountryByCode } from '../../src/types/lead';
+import React, { useRef } from 'react';
+import { Lead, getCountryByCode } from '../types/legacyValidation';
 
 interface LeadCardProps {
   lead: Lead;

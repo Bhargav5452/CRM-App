@@ -1,7 +1,7 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyReviewSheet from '../components/LegacyReviewSheet';
-import { LeadFormInput } from '../../src/types/lead';
+import { LeadFormInput } from '../types/legacyValidation';
 import '../../src/pages/Home/Home.css';
 
 const LegacyHome: React.FC = () => {

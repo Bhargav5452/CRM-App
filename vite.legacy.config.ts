@@ -18,7 +18,7 @@ export default defineConfig({
       additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
       modernPolyfills: false,
       renderLegacyChunks: true,
-      exclude: ["core-js/modules/es.string.replace", "core-js/modules/es.regexp.exec"],
+      // exclude: ["core-js/modules/es.string.replace", "core-js/modules/es.regexp.exec"],
     }),
   ],
   resolve: {
@@ -36,7 +36,6 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) return "vendor-react";
           if (id.includes("node_modules/react-router")) return "vendor-router";
-          if (id.includes("node_modules/zod") || id.includes("node_modules/react-hook-form") || id.includes("node_modules/@hookform")) return "vendor-forms";
           if (id.includes("node_modules/xlsx")) return "vendor-xlsx";
         },
       },

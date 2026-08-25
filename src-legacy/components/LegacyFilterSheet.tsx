@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { FilterState, DateFilterOption, DEFAULT_FILTER_STATE } from '../../src/types/lead';
+import React, { useState, useEffect } from 'react';
+import { FilterState, DateFilterOption, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
 
 interface FilterSheetProps {
   isOpen: boolean;
