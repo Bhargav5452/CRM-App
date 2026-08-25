@@ -6,9 +6,22 @@ import LegacyCRM from './pages/LegacyCRM';
 import { databaseService } from '../src/services/database';
 import './styles/legacy-global.css';
 
+const logDiag = (msg: string) => {
+  if (typeof document !== 'undefined') {
+    const el = document.getElementById('diagnostic-log');
+    if (el) {
+      const div = document.createElement('div');
+      div.textContent = msg;
+      el.appendChild(div);
+    }
+  }
+};
+
+logDiag('[3/4] JS bundle loaded');
+
 const LegacyApp: React.FC = () => {
   useEffect(() => {
-    // Defer database initialization
+    logDiag('[4/4] React mounted');
     const timer = setTimeout(() => {
       databaseService.initialize();
     }, 300);
