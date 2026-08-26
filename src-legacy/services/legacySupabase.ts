@@ -1,50 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Lead, LeadFormInput } from '../types/legacyValidation';
 
-var SUPABASE_URL = 'https://jncnsxumaqzipherjtnc.supabase.co';
-var SUPABASE_ANON_KEY = 'sb_publishable_pIAjrJ8BR8PLIT2O_Qa2Yg_giQyeAIm';
-var LOCAL_STORAGE_KEY = 'offline_crm_leads_v1';
+const SUPABASE_URL = 'https://jncnsxumaqzipherjtnc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pIAjrJ8BR8PLIT2O_Qa2Yg_giQyeAIm';
+const LOCAL_STORAGE_KEY = 'offline_crm_leads_v1';
 
 // In-memory token storage (persists during page session, cleared on reload or explicit signout)
-var inMemoryAccessToken: string | null = null;
-
-export interface DiagnosticLog {
-  id: number;
-  time: string;
-  type: 'REQ' | 'RES' | 'ERR';
-  text: string;
-}
-
-var diagnosticLogs: DiagnosticLog[] = [];
-var diagnosticListeners: Array<(logs: DiagnosticLog[]) => void> = [];
-
-export function addDiagnosticLog(type: 'REQ' | 'RES' | 'ERR', text: string): void {
-  var d = new Date();
-  var timeStr = d.toTimeString().split(' ')[0] + '.' + ('00' + d.getMilliseconds()).slice(-3);
-  var logItem: DiagnosticLog = {
-    id: Date.now() + Math.random(),
-    time: timeStr,
-    type: type,
-    text: text,
-  };
-  diagnosticLogs.unshift(logItem);
-  if (diagnosticLogs.length > 20) {
-    diagnosticLogs.pop();
-  }
-  for (var i = 0; i < diagnosticListeners.length; i++) {
-    try {
-      diagnosticListeners[i](diagnosticLogs.slice(0));
-    } catch (e) {}
-  }
-}
-
-export function subscribeDiagnostics(listener: (logs: DiagnosticLog[]) => void): () => void {
-  diagnosticListeners.push(listener);
-  listener(diagnosticLogs.slice(0));
-  return function () {
-    var idx = diagnosticListeners.indexOf(listener);
-    if (idx !== -1) diagnosticListeners.splice(idx, 1);
-  };
-}
+let inMemoryAccessToken: string | null = null;
 
 interface XhrResponse<T = any> {
   status: number;
@@ -60,13 +22,8 @@ function sendXhr<T = any>(
 ): Promise<XhrResponse<T>> {
   return new Promise(function (resolve) {
     try {
-      var xhr = new XMLHttpRequest();
-      var url = SUPABASE_URL + path;
-
-      addDiagnosticLog(
-        'REQ',
-        'SUPABASE REQUEST:\nMETHOD: ' + method + '\nURL: ' + url + (useAuthToken ? '\nAUTH: Bearer (Admin Token Attached)' : '\nAUTH: apikey (anon)')
-      );
+      const xhr = new XMLHttpRequest();
+      const url = SUPABASE_URL + path;
 
       xhr.open(method, url, true);
       xhr.setRequestHeader('apikey', SUPABASE_ANON_KEY);
@@ -80,30 +37,19 @@ function sendXhr<T = any>(
 
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-          var responseData: any = null;
+          let responseData: any = null;
           if (xhr.responseText) {
             try {
               responseData = JSON.parse(xhr.responseText);
-            } catch (e) {
+            } catch {
               responseData = xhr.responseText;
             }
           }
 
           if (xhr.status >= 200 && xhr.status < 300) {
-            var resSummary = xhr.responseText ? (xhr.responseText.length > 120 ? xhr.responseText.substring(0, 120) + '...' : xhr.responseText) : '(empty 201/204)';
-            addDiagnosticLog(
-              'RES',
-              'SUPABASE RESPONSE:\nHTTP STATUS: ' + xhr.status + '\nRESPONSE BODY: ' + resSummary
-            );
             resolve({ status: xhr.status, data: responseData });
           } else {
-            var errSummary = xhr.responseText || xhr.statusText || 'Network failure / CORS blocked';
-            addDiagnosticLog(
-              'ERR',
-              'SUPABASE ERROR:\nHTTP STATUS: ' + xhr.status + '\nERROR BODY: ' + errSummary
-            );
-
-            var errMessage = 'Request failed with status ' + xhr.status;
+            let errMessage = 'Request failed with status ' + xhr.status;
             if (responseData && typeof responseData === 'object') {
               if (responseData.message) errMessage = responseData.message;
               else if (responseData.error_description) errMessage = responseData.error_description;
@@ -118,20 +64,25 @@ function sendXhr<T = any>(
         }
       };
 
+      xhr.onerror = function () {
+        resolve({
+          status: 0,
+          data: null as any,
+          error: 'Network connection failed. Please check internet access.',
+        });
+      };
+
       if (body !== undefined && body !== null) {
         xhr.send(JSON.stringify(body));
       } else {
         xhr.send();
       }
-    } catch (err: any) {
-      addDiagnosticLog(
-        'ERR',
-        'SUPABASE ERROR:\nHTTP STATUS: 0\nERROR BODY: ' + (err && err.message ? err.message : 'Unknown exception')
-      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown XHR error';
       resolve({
         status: 0,
         data: null as any,
-        error: err && err.message ? err.message : 'Unknown XHR error',
+        error: msg,
       });
     }
   });
@@ -139,9 +90,9 @@ function sendXhr<T = any>(
 
 function getLocalCache(): Lead[] {
   try {
-    var data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     return data ? JSON.parse(data) : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -149,10 +100,12 @@ function getLocalCache(): Lead[] {
 function saveLocalCache(leads: Lead[]): void {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leads));
-  } catch (e) {}
+  } catch {
+    // ignore
+  }
 }
 
-export var legacySupabase = {
+export const legacySupabase = {
   /**
    * Check if user is currently authenticated in memory
    */
@@ -182,7 +135,7 @@ export var legacySupabase = {
         return { success: true };
       }
 
-      var msg = 'Incorrect password. Please try again.';
+      let msg = 'Incorrect password. Please try again.';
       if (res.error && res.error.indexOf('Network') !== -1) {
         msg = res.error;
       }
@@ -198,13 +151,14 @@ export var legacySupabase = {
   },
 
   /**
-   * Public lead submission from Lead Form
+   * Public lead submission from Lead Form — Offline First
    */
   createLead: function (
     input: LeadFormInput
-  ): Promise<{ success: boolean; id?: number; error?: string }> {
-    var now = new Date().toISOString();
-    var payload = {
+  ): Promise<{ success: boolean; id?: number; offline?: boolean; message?: string; error?: string }> {
+    const now = new Date().toISOString();
+    const newLead: Lead = {
+      id: Date.now(),
       name: input.name.trim(),
       phone: input.phone.trim(),
       country_code: input.country_code.trim(),
@@ -213,46 +167,93 @@ export var legacySupabase = {
       notes: input.notes ? input.notes.trim() : '',
       created_at: now,
       updated_at: now,
+      sync_status: 'pending_sync',
     };
 
-    var isAuth = legacySupabase.isAuthenticated();
+    // 1. Save locally FIRST
+    const local = getLocalCache();
+    local.unshift(newLead);
+    saveLocalCache(local);
 
-    return sendXhr(
-      'POST',
-      '/rest/v1/leads',
-      payload,
-      isAuth
-    ).then(function (res) {
-      if (res.status === 201 || res.status === 200 || res.status === 204) {
-        var local = getLocalCache();
-        var newLead: Lead = {
-          id: Date.now(),
-          name: input.name,
-          phone: input.phone,
-          country_code: input.country_code,
-          home_type: input.home_type,
-          email: input.email || '',
-          notes: input.notes || '',
-          created_at: now,
-          updated_at: now,
-        };
-        local.unshift(newLead);
-        saveLocalCache(local);
+    // 2. Attempt immediate background sync
+    legacySupabase.syncSingleLead(newLead).catch(function () {
+      // ignore
+    });
 
-        return { success: true, id: newLead.id };
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+    return Promise.resolve({
+      success: true,
+      id: newLead.id,
+      offline: isOffline,
+      message: isOffline ? 'Saved offline — will sync when internet is available.' : undefined,
+    });
+  },
+
+  /**
+   * Sync a single lead to Supabase
+   */
+  syncSingleLead: function (lead: Lead): Promise<boolean> {
+    const payload = {
+      name: lead.name,
+      phone: lead.phone,
+      country_code: lead.country_code || '+91',
+      home_type: lead.home_type,
+      email: lead.email || '',
+      notes: lead.notes || '',
+      created_at: lead.created_at || new Date().toISOString(),
+      updated_at: lead.updated_at || new Date().toISOString(),
+    };
+
+    const isAuth = legacySupabase.isAuthenticated();
+
+    return sendXhr('POST', '/rest/v1/leads', payload, isAuth).then(function (res) {
+      if (
+        res.status === 201 ||
+        res.status === 200 ||
+        res.status === 204 ||
+        res.status === 409 ||
+        (res.error && (res.error.indexOf('duplicate') !== -1 || res.error.indexOf('unique') !== -1 || res.error.indexOf('23505') !== -1))
+      ) {
+        const leads = getLocalCache();
+        for (let i = 0; i < leads.length; i++) {
+          if (leads[i].country_code === lead.country_code && leads[i].phone === lead.phone) {
+            leads[i].sync_status = 'synced';
+            break;
+          }
+        }
+        saveLocalCache(leads);
+        return true;
       }
+      return false;
+    });
+  },
 
-      if (res.status === 409 || (res.error && (res.error.indexOf('duplicate') !== -1 || res.error.indexOf('unique') !== -1 || res.error.indexOf('23505') !== -1))) {
-        return {
-          success: false,
-          error: 'A lead with ' + input.country_code + ' ' + input.phone + ' already exists.',
-        };
-      }
+  /**
+   * Sync all pending offline leads to Supabase
+   */
+  syncPendingLeads: function (): Promise<{ total: number; synced: number }> {
+    const leads = getLocalCache();
+    const pending = leads.filter(function (l) {
+      return l.sync_status === 'pending_sync';
+    });
 
-      return {
-        success: false,
-        error: res.error || 'Failed to save lead to database.',
-      };
+    if (pending.length === 0) {
+      return Promise.resolve({ total: 0, synced: 0 });
+    }
+
+    let syncedCount = 0;
+    let chain = Promise.resolve();
+
+    pending.forEach(function (pLead) {
+      chain = chain.then(function () {
+        return legacySupabase.syncSingleLead(pLead).then(function (ok) {
+          if (ok) syncedCount++;
+        });
+      });
+    });
+
+    return chain.then(function () {
+      return { total: pending.length, synced: syncedCount };
     });
   },
 
@@ -271,7 +272,7 @@ export var legacySupabase = {
       true
     ).then(function (res) {
       if (res.status === 200 && Array.isArray(res.data)) {
-        var leads: Lead[] = res.data.map(function (item: any) {
+        const leads: Lead[] = res.data.map(function (item: any) {
           return {
             id: Number(item.id),
             name: item.name || '',
@@ -282,6 +283,7 @@ export var legacySupabase = {
             notes: item.notes || '',
             created_at: item.created_at || new Date().toISOString(),
             updated_at: item.updated_at || new Date().toISOString(),
+            sync_status: 'synced',
           };
         });
 
@@ -304,8 +306,8 @@ export var legacySupabase = {
       return Promise.resolve({ success: false, error: 'Please unlock CRM to update leads.' });
     }
 
-    var now = new Date().toISOString();
-    var payload = {
+    const now = new Date().toISOString();
+    const payload = {
       name: input.name.trim(),
       phone: input.phone.trim(),
       country_code: input.country_code.trim(),
@@ -322,9 +324,9 @@ export var legacySupabase = {
       true
     ).then(function (res) {
       if (res.status === 204 || res.status === 200) {
-        var leads = getLocalCache();
-        var idx = -1;
-        for (var i = 0; i < leads.length; i++) {
+        const leads = getLocalCache();
+        let idx = -1;
+        for (let i = 0; i < leads.length; i++) {
           if (leads[i].id === id) {
             idx = i;
             break;
@@ -341,6 +343,7 @@ export var legacySupabase = {
             notes: input.notes || '',
             created_at: leads[idx].created_at,
             updated_at: now,
+            sync_status: 'synced',
           };
           saveLocalCache(leads);
         }
@@ -369,7 +372,7 @@ export var legacySupabase = {
       return Promise.resolve({ success: false, error: 'Please unlock CRM to delete leads.' });
     }
 
-    var idList = ids.join(',');
+    const idList = ids.join(',');
     return sendXhr(
       'DELETE',
       '/rest/v1/leads?id=in.(' + idList + ')',
@@ -377,12 +380,12 @@ export var legacySupabase = {
       true
     ).then(function (res) {
       if (res.status === 204 || res.status === 200) {
-        var leads = getLocalCache();
-        var idMap: Record<number, boolean> = {};
-        for (var i = 0; i < ids.length; i++) {
+        const leads = getLocalCache();
+        const idMap: Record<number, boolean> = {};
+        for (let i = 0; i < ids.length; i++) {
           idMap[ids[i]] = true;
         }
-        var filtered = leads.filter(function (l) {
+        const filtered = leads.filter(function (l) {
           return !idMap[l.id];
         });
         saveLocalCache(filtered);
@@ -402,49 +405,24 @@ export var legacySupabase = {
     skipped: number;
     backupKey?: string;
   }> {
-    var localLeads = getLocalCache();
+    const localLeads = getLocalCache();
     if (localLeads.length === 0) {
       return Promise.resolve({ total: 0, inserted: 0, skipped: 0 });
     }
 
     // 1. Save timestamped backup
-    var backupKey = 'offline_crm_leads_backup_' + Date.now();
+    const backupKey = 'offline_crm_leads_backup_' + Date.now();
     try {
       localStorage.setItem(backupKey, JSON.stringify(localLeads));
-    } catch (e) {}
+    } catch {
+      // ignore
+    }
 
-    var inserted = 0;
-    var skipped = 0;
-
-    var promise = Promise.resolve();
-
-    localLeads.forEach(function (lead) {
-      promise = promise.then(function () {
-        var payload = {
-          name: lead.name,
-          phone: lead.phone,
-          country_code: lead.country_code || '+91',
-          home_type: lead.home_type,
-          email: lead.email || '',
-          notes: lead.notes || '',
-          created_at: lead.created_at || new Date().toISOString(),
-        };
-
-        return sendXhr('POST', '/rest/v1/leads', payload, true).then(function (res) {
-          if (res.status === 201 || res.status === 200 || res.status === 204) {
-            inserted++;
-          } else {
-            skipped++;
-          }
-        });
-      });
-    });
-
-    return promise.then(function () {
+    return legacySupabase.syncPendingLeads().then(function (result) {
       return {
         total: localLeads.length,
-        inserted: inserted,
-        skipped: skipped,
+        inserted: result.synced,
+        skipped: result.total - result.synced,
         backupKey: backupKey,
       };
     });
@@ -453,3 +431,17 @@ export var legacySupabase = {
   getLocalCache: getLocalCache,
   saveLocalCache: saveLocalCache,
 };
+
+// Set up automatic listeners for background sync
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', function () {
+    legacySupabase.syncPendingLeads().catch(function () {
+      // ignore
+    });
+  });
+  window.addEventListener('focus', function () {
+    legacySupabase.syncPendingLeads().catch(function () {
+      // ignore
+    });
+  });
+}

@@ -10,6 +10,8 @@ const LegacyHome: React.FC = () => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
+  const [toastMessage, setToastMessage] = useState('Lead Saved');
+
   const handleFormSubmit = (data: LeadFormInput) => {
     setReviewData(data);
     setIsReviewOpen(true);
@@ -17,10 +19,11 @@ const LegacyHome: React.FC = () => {
 
   const handleEdit = () => setIsReviewOpen(false);
 
-  const handleSaveSuccess = () => {
+  const handleSaveSuccess = (message?: string) => {
     setIsReviewOpen(false);
     setReviewData(null);
     setFormKey((prev) => prev + 1);
+    setToastMessage(message || 'Lead Saved');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 5000);
   };
@@ -34,7 +37,7 @@ const LegacyHome: React.FC = () => {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
-              <span>Lead Saved</span>
+              <span>{toastMessage}</span>
             </div>
           </div>
         </div>

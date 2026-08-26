@@ -108,7 +108,9 @@ export const useLegacyLeads = () => {
           ev.initCustomEvent('crm-lead-added', false, false, null);
           window.dispatchEvent(ev);
         }
-      } catch (e) {}
+      } catch {
+        // ignore dispatch error
+      }
     }
     return result;
   };

@@ -28,10 +28,11 @@ export const authService = {
         user: data.user,
         session: data.session,
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to sign in. Please check your credentials.';
       return {
         success: false,
-        error: err?.message || 'Failed to sign in. Please check your credentials.',
+        error: msg,
       };
     }
   },
@@ -51,8 +52,9 @@ export const authService = {
       const { error } = await supabase.auth.signOut();
       if (error) return { success: false, error: error.message };
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err?.message || 'Failed to sign out.' };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to sign out.';
+      return { success: false, error: msg };
     }
   },
 

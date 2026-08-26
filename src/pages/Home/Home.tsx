@@ -30,10 +30,13 @@ const Home: React.FC = () => {
     setIsReviewOpen(false);
   };
 
-  const handleSaveSuccess = () => {
+  const [toastMessage, setToastMessage] = useState('Lead Saved');
+
+  const handleSaveSuccess = (message?: string) => {
     setIsReviewOpen(false);
     setReviewData(null);
     setFormKey((prev) => prev + 1);
+    setToastMessage(message || 'Lead Saved');
     setShowSuccessToast(true);
 
     setTimeout(() => {
@@ -50,7 +53,7 @@ const Home: React.FC = () => {
             <div className="toast-content">
               <div className="toast-left">
                 <IonIcon icon={checkmarkCircleOutline} style={{ fontSize: 20, color: '#16A34A' }} />
-                <span>Lead Saved</span>
+                <span>{toastMessage}</span>
               </div>
             </div>
           </div>

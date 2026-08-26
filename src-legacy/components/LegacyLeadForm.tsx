@@ -99,16 +99,21 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
 
   const handleChange = (field: keyof LeadFormInput, value: string) => {
     setFormData((prev) => {
-      const next = Object.assign({}, prev);
-      (next as any)[field] = value;
+      const next: LeadFormInput = Object.assign({}, prev);
+      if (field === 'name') next.name = value;
+      else if (field === 'phone') next.phone = value;
+      else if (field === 'country_code') next.country_code = value;
+      else if (field === 'home_type') next.home_type = value;
+      else if (field === 'email') next.email = value;
+      else if (field === 'notes') next.notes = value;
       return next;
     });
   };
 
   const handleBlur = (field: keyof LeadFormInput) => {
     setTouched((prev) => {
-      const next = Object.assign({}, prev);
-      (next as any)[field] = true;
+      const next: Record<string, boolean> = Object.assign({}, prev);
+      next[field] = true;
       return next;
     });
   };
@@ -161,15 +166,30 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
   };
 
   const formContent = (
-    <form onSubmit={handleSubmitForm} noValidate>
+    <form
+      onSubmit={handleSubmitForm}
+      noValidate
+      autoComplete="off"
+      data-lpignore="true"
+      data-form-type="other"
+    >
       <div className="form-grid">
         <div className="form-field-group">
           <label htmlFor="legacy_name" className="field-label">Full Name <span className="required-asterisk">*</span></label>
-          <input id="legacy_name" type="text" placeholder="Enter full name"
+          <input
+            id="legacy_name"
+            type="text"
+            placeholder="Enter full name"
             className={"custom-input" + (touched.name && errors.name ? ' input-error' : '')}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             onBlur={() => handleBlur('name')}
+            autoComplete="new-password"
+            autoCorrect="off"
+            autoCapitalize="words"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
             ref={nameInputRef}
           />
           {touched.name && errors.name && <span className="error-message">{errors.name}</span>}
@@ -184,12 +204,22 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
               <span className="country-dial-code">{activeCountry.code}</span>
               <span className="country-trigger-chevron"><ChevronDownIcon /></span>
             </div>
-            <input id="legacy_phone" type="tel" inputMode="numeric" maxLength={activeCountry.digits}
+            <input
+              id="legacy_phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={activeCountry.digits}
               placeholder={"Enter " + activeCountry.digits + "-digit number"}
               className="phone-number-input"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
               onBlur={() => handleBlur('phone')}
+              autoComplete="new-password"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
             />
           </div>
           {touched.phone && errors.phone && <span className="error-message">{errors.phone}</span>}
@@ -224,11 +254,20 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
 
         <div className="form-field-group">
           <label htmlFor="legacy_email" className="field-label">Email</label>
-          <input id="legacy_email" type="email" placeholder="Enter email (optional)"
+          <input
+            id="legacy_email"
+            type="email"
+            placeholder="Enter email (optional)"
             className={"custom-input" + (touched.email && errors.email ? ' input-error' : '')}
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
             onBlur={() => handleBlur('email')}
+            autoComplete="new-password"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
           />
           {touched.email && errors.email && <span className="error-message">{errors.email}</span>}
         </div>
@@ -236,11 +275,20 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
         <div className="form-field-group form-field-full">
           <label htmlFor="legacy_notes" className="field-label">Notes</label>
           <div className="textarea-container">
-            <textarea id="legacy_notes" maxLength={300} placeholder="Add notes (optional)"
+            <textarea
+              id="legacy_notes"
+              maxLength={300}
+              placeholder="Add notes (optional)"
               className={"custom-textarea" + (touched.notes && errors.notes ? ' input-error' : '')}
               value={formData.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
               onBlur={() => handleBlur('notes')}
+              autoComplete="new-password"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
             />
             <div className="textarea-footer">
               <span className={"char-counter" + (formData.notes.length === 300 ? ' max-reached' : '')}>{formData.notes.length}/300</span>

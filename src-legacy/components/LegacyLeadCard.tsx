@@ -18,7 +18,7 @@ const formatDateSafe = (isoStr: string): string => {
     if (isNaN(d.getTime())) return isoStr;
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-  } catch (e) {
+  } catch {
     return isoStr;
   }
 };
@@ -26,9 +26,7 @@ const formatDateSafe = (isoStr: string): string => {
 const LegacyLeadCard: React.FC<LeadCardProps> = ({
   lead,
   isSelected,
-  isSelectionMode,
   onSelectToggle,
-  onLongPress,
   onEdit,
   onDelete,
 }) => {

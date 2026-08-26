@@ -9,7 +9,7 @@ interface ReviewSheetProps {
   data: LeadFormInput | null;
   isOpen: boolean;
   onEdit: () => void;
-  onSaveSuccess: () => void;
+  onSaveSuccess: (message?: string) => void;
 }
 
 const ReviewSheet: React.FC<ReviewSheetProps> = ({
@@ -46,7 +46,7 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
 
     if (result.success) {
       window.dispatchEvent(new CustomEvent('crm-lead-added'));
-      onSaveSuccess();
+      onSaveSuccess(result.message);
     } else {
       setErrorMessage(result.error || 'Failed to save lead.');
     }

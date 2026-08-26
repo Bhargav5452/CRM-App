@@ -1,4 +1,4 @@
-﻿export interface Lead {
+export interface Lead {
   id: number;
   name: string;
   phone: string;
@@ -8,6 +8,7 @@
   notes: string;
   created_at: string;
   updated_at: string;
+  sync_status?: 'synced' | 'pending_sync';
 }
 
 export interface CountryCode {

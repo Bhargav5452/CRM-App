@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LegacyNavigation from './components/LegacyNavigation';
 import LegacyHome from './pages/LegacyHome';
 import LegacyCRM from './pages/LegacyCRM';
-import LegacyDiagnostics from './components/LegacyDiagnostics';
 import './styles/legacy-global.css';
 
 const LegacyApp: React.FC = () => {
@@ -23,7 +22,6 @@ const LegacyApp: React.FC = () => {
             <Redirect to="/home" />
           </Switch>
         </main>
-        <LegacyDiagnostics />
       </div>
     </HashRouter>
   );

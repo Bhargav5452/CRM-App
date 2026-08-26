@@ -120,6 +120,17 @@ class DatabaseService {
           if (!localStorage.getItem(LOCAL_STORAGE_KEY)) {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
           }
+          // Set up automatic background sync when returning online or focusing tab
+          if (typeof window !== 'undefined') {
+            window.addEventListener('online', () => {
+              this.syncPendingLeads().catch(() => {});
+            });
+            window.addEventListener('focus', () => {
+              this.syncPendingLeads().catch(() => {});
+            });
+            // Initial sync attempt
+            this.syncPendingLeads().catch(() => {});
+          }
         }
         this.isInitialized = true;
       } catch (err) {
@@ -198,7 +209,7 @@ class DatabaseService {
 
   public async saveLead(
     input: LeadFormInput
-  ): Promise<{ success: boolean; lead?: Lead; error?: string }> {
+  ): Promise<{ success: boolean; lead?: Lead; offline?: boolean; message?: string; error?: string }> {
     await this.initialize();
 
     try {
@@ -271,53 +282,35 @@ class DatabaseService {
         };
         return { success: true, lead: newLead };
       } else {
-        // Modern Web: Insert directly into Supabase (RLS allows INSERT to anon without SELECT)
-        const { error } = await supabase
-          .from('leads')
-          .insert({
-            name: input.name.trim(),
-            phone: input.phone.trim(),
-            country_code: input.country_code.trim(),
-            home_type: input.home_type,
-            email: input.email ? input.email.trim() : '',
-            notes: input.notes ? input.notes.trim() : '',
-            created_at: now,
-            updated_at: now,
-          });
-
-        if (error) {
-          if (
-            error.code === '23505' ||
-            error.message.includes('unique') ||
-            error.message.includes('duplicate')
-          ) {
-            return {
-              success: false,
-              error: `A lead with ${input.country_code} ${input.phone} already exists.`,
-            };
-          }
-          console.error('Supabase saveLead error:', error);
-          return { success: false, error: error.message };
-        }
-
+        // Modern Web: Offline-First save
         const newLead: Lead = {
           id: Date.now(),
-          name: input.name,
-          phone: input.phone,
-          country_code: input.country_code,
+          name: input.name.trim(),
+          phone: input.phone.trim(),
+          country_code: input.country_code.trim(),
           home_type: input.home_type,
-          email: input.email || '',
-          notes: input.notes || '',
+          email: input.email ? input.email.trim() : '',
+          notes: input.notes ? input.notes.trim() : '',
           created_at: now,
           updated_at: now,
+          sync_status: 'pending_sync',
         };
 
-        // Cache in local storage for offline resiliency
+        // 1. Save locally FIRST
         const local = this.getWebLeads();
         local.unshift(newLead);
         this.saveWebLeads(local);
 
-        return { success: true, lead: newLead };
+        // 2. Attempt background upload to Supabase if online
+        this.syncSingleLead(newLead).catch(() => {});
+
+        const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+        return {
+          success: true,
+          lead: newLead,
+          offline: isOffline,
+          message: isOffline ? 'Saved offline — will sync when internet is available.' : undefined,
+        };
       }
     } catch (err: unknown) {
       console.error('Error saving lead:', err);
@@ -325,6 +318,57 @@ class DatabaseService {
         err instanceof Error ? err.message : 'Failed to save lead to database.';
       return { success: false, error: message };
     }
+  }
+
+  /**
+   * Sync a single lead to Supabase
+   */
+  private async syncSingleLead(lead: Lead): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .insert({
+          name: lead.name,
+          phone: lead.phone,
+          country_code: lead.country_code || '+91',
+          home_type: lead.home_type,
+          email: lead.email || '',
+          notes: lead.notes || '',
+          created_at: lead.created_at,
+          updated_at: lead.updated_at,
+        });
+
+      if (!error || error.code === '23505' || error.message.includes('unique') || error.message.includes('duplicate')) {
+        // Mark synced in local store
+        const leads = this.getWebLeads();
+        const target = leads.find((l) => l.country_code === lead.country_code && l.phone === lead.phone);
+        if (target) {
+          target.sync_status = 'synced';
+          this.saveWebLeads(leads);
+        }
+        return true;
+      }
+    } catch {
+      // offline or upload failed
+    }
+    return false;
+  }
+
+  /**
+   * Sync all pending offline leads to Supabase
+   */
+  public async syncPendingLeads(): Promise<{ total: number; synced: number }> {
+    if (this.isNative || this.isTauri) return { total: 0, synced: 0 };
+    const leads = this.getWebLeads();
+    const pending = leads.filter((l) => l.sync_status === 'pending_sync');
+    if (pending.length === 0) return { total: 0, synced: 0 };
+
+    let count = 0;
+    for (const lead of pending) {
+      const success = await this.syncSingleLead(lead);
+      if (success) count++;
+    }
+    return { total: pending.length, synced: count };
   }
 
   public async updateLead(
@@ -408,21 +452,23 @@ class DatabaseService {
               error: `Another lead with ${input.country_code} ${input.phone} already exists.`,
             };
           }
+          console.error('Supabase updateLead error:', error);
           return { success: false, error: error.message };
         }
 
         // Update local cache
         const leads = this.getWebLeads();
-        const idx = leads.findIndex((l) => l.id === id);
-        if (idx !== -1) {
-          leads[idx] = {
-            ...leads[idx],
+        const index = leads.findIndex((l) => l.id === id);
+        if (index !== -1) {
+          leads[index] = {
+            id,
             name: input.name,
             phone: input.phone,
             country_code: input.country_code,
             home_type: input.home_type,
             email: input.email || '',
             notes: input.notes || '',
+            created_at: leads[index].created_at,
             updated_at: now,
           };
           this.saveWebLeads(leads);
@@ -433,7 +479,7 @@ class DatabaseService {
     } catch (err: unknown) {
       console.error('Error updating lead:', err);
       const message =
-        err instanceof Error ? err.message : 'Failed to update lead in database.';
+        err instanceof Error ? err.message : 'Failed to update lead.';
       return { success: false, error: message };
     }
   }
@@ -452,7 +498,7 @@ class DatabaseService {
 
     try {
       if (this.isTauri && this.tauriDb) {
-        const placeholders = ids.map((_, i) => `$${i + 1}`).join(',');
+        const placeholders = ids.map(() => '?').join(',');
         const query = `DELETE FROM leads WHERE id IN (${placeholders});`;
         await this.tauriDb.execute(query, ids);
         return { success: true };
@@ -462,9 +508,14 @@ class DatabaseService {
         await this.db.run(query, ids);
         return { success: true };
       } else {
-        // Modern Web: Delete from Supabase
-        const { error } = await supabase.from('leads').delete().in('id', ids);
+        // Modern Web: Delete in Supabase
+        const { error } = await supabase
+          .from('leads')
+          .delete()
+          .in('id', ids);
+
         if (error) {
+          console.error('Supabase deleteLeads error:', error);
           return { success: false, error: error.message };
         }
 
@@ -479,7 +530,7 @@ class DatabaseService {
     } catch (err: unknown) {
       console.error('Error deleting leads:', err);
       const message =
-        err instanceof Error ? err.message : 'Failed to delete leads from database.';
+        err instanceof Error ? err.message : 'Failed to delete leads.';
       return { success: false, error: message };
     }
   }
@@ -488,15 +539,26 @@ class DatabaseService {
     await this.initialize();
 
     if (this.isTauri && this.tauriDb) {
-      return await this.tauriDb.select<Lead[]>(
-        'SELECT * FROM leads ORDER BY created_at DESC;'
-      );
+      const query = 'SELECT * FROM leads ORDER BY created_at DESC;';
+      const result = await this.tauriDb.select<Lead[]>(query);
+      return result.map((item) => ({
+        ...item,
+        country_code: item.country_code || '+91',
+        email: item.email || '',
+        notes: item.notes || '',
+      }));
     } else if (this.isNative && this.db) {
-      const res = await this.db.query(
-        'SELECT * FROM leads ORDER BY created_at DESC;'
-      );
-      return (res.values as Lead[]) || [];
+      const query = 'SELECT * FROM leads ORDER BY created_at DESC;';
+      const result = await this.db.query(query);
+      const leads = (result.values || []) as Lead[];
+      return leads.map((item) => ({
+        ...item,
+        country_code: item.country_code || '+91',
+        email: item.email || '',
+        notes: item.notes || '',
+      }));
     } else {
+      // Modern Web: Fetch directly from Supabase (Requires Authenticated CRM Session)
       try {
         const { data, error } = await supabase
           .from('leads')
@@ -509,16 +571,17 @@ class DatabaseService {
         }
 
         if (data) {
-          const leads: Lead[] = data.map((item: any) => ({
+          const leads: Lead[] = (data as Record<string, unknown>[]).map((item) => ({
             id: Number(item.id),
-            name: item.name,
-            phone: item.phone,
-            country_code: item.country_code || '+91',
-            home_type: item.home_type,
-            email: item.email || '',
-            notes: item.notes || '',
-            created_at: item.created_at,
-            updated_at: item.updated_at,
+            name: String(item.name || ''),
+            phone: String(item.phone || ''),
+            country_code: String(item.country_code || '+91'),
+            home_type: String(item.home_type || '2BHK'),
+            email: String(item.email || ''),
+            notes: String(item.notes || ''),
+            created_at: String(item.created_at || new Date().toISOString()),
+            updated_at: String(item.updated_at || new Date().toISOString()),
+            sync_status: 'synced',
           }));
 
           this.saveWebLeads(leads);
@@ -577,7 +640,7 @@ class DatabaseService {
         } else {
           skipped++;
         }
-      } catch (e) {
+      } catch {
         skipped++;
       }
     }

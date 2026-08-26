@@ -10,6 +10,7 @@ export interface Lead {
   notes: string;
   created_at: string;
   updated_at: string;
+  sync_status?: 'synced' | 'pending_sync';
 }
 
 export interface CountryCode {
