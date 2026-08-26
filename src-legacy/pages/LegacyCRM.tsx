@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import LegacyLeadCard from '../components/LegacyLeadCard';
 import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyFilterSheet from '../components/LegacyFilterSheet';
+import LegacyExportModal from '../components/LegacyExportModal';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
 import { useLegacyLeads } from '../hooks/useLegacyLeads';
-import { exportLeadsToExcel } from '../services/legacyExport';
 import '../../src/pages/CRM/CRM.css';
 
 const getActiveFilterLabel = (filter: FilterState): string | null => {
@@ -38,8 +38,7 @@ const LegacyCRM: React.FC = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportToast, setExportToast] = useState<{ show: boolean; isError: boolean; message: string }>({ show: false, isError: false, message: '' });
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
 
   useEffect(() => {
@@ -97,19 +96,6 @@ const LegacyCRM: React.FC = () => {
     setShowBulkDeleteModal(false);
     await deleteLeads(selectedIds);
     setSelectedIds([]);
-  };
-
-  const handleExport = () => {
-    if (isExporting || filteredLeads.length === 0) return;
-    setIsExporting(true);
-    const res = exportLeadsToExcel(filteredLeads);
-    setIsExporting(false);
-    if (res.success) {
-      setExportToast({ show: true, isError: false, message: 'Exported ' + (res.filename || 'file') + ' successfully!' });
-    } else {
-      setExportToast({ show: true, isError: true, message: res.error || 'Export failed.' });
-    }
-    setTimeout(() => setExportToast((prev) => Object.assign({}, prev, { show: false })), 5000);
   };
 
   const handleSaveEditedLead = async (input: LeadFormInput) => {
@@ -186,12 +172,12 @@ const LegacyCRM: React.FC = () => {
               )}
             </div>
             <div className="crm-action-buttons-group">
-              <button type="button" className="btn-export-inline" onClick={handleExport}
-                disabled={filteredLeads.length === 0 || isExporting} title="Export filtered leads to Excel">
+              <button type="button" className="btn-export-inline" onClick={() => setIsExportModalOpen(true)}
+                disabled={filteredLeads.length === 0} title="Export filtered leads">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                <span className="action-btn-text">{isExporting ? 'Exporting...' : 'Export'}</span>
+                <span className="action-btn-text">Export</span>
               </button>
               <button type="button" className={"btn-filter-inline" + (isFilterActive ? ' active' : '')}
                 onClick={() => setIsFilterSheetOpen(true)} title="Open filter options">
@@ -294,23 +280,12 @@ const LegacyCRM: React.FC = () => {
         </div>
       )}
 
-      {/* Export Toast */}
-      {exportToast.show && (
-        <div className="toast-success-banner">
-          <div className={"toast-content" + (exportToast.isError ? ' toast-error-content' : '')}>
-            <div className="toast-left">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={exportToast.isError ? '#EF4444' : '#16A34A'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-                {exportToast.isError ? (
-                  <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
-                ) : (
-                  <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>
-                )}
-              </svg>
-              <span>{exportToast.message}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Export Modal */}
+      <LegacyExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        leads={filteredLeads}
+      />
     </div>
   );
 };
