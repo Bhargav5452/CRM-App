@@ -1,4 +1,4 @@
-﻿/* =============================================
+/* =============================================
    LEGACY GLOBAL CSS — Safari 9 Compatible
    ============================================= */
 
@@ -235,8 +235,98 @@ html, body {
 }
 
 /* =============================================
-   Tabular nums (partial Safari 9 support)
+   Flex Grid Fallbacks for Filter & Date Dialogs
    ============================================= */
+.radio-options-grid {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+}
+
+.radio-option-card {
+  width: calc(50% - 4px) !important;
+  margin-bottom: 8px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.radio-option-card.full-width {
+  width: 100% !important;
+}
+
+.date-pickers-row {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+}
+
+.date-pickers-row .date-field {
+  width: calc(50% - 5px) !important;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* =============================================
+   CRM Page Controls Layout
+   ============================================= */
+.search-export-row {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.crm-search-bar {
+  -webkit-flex: 1;
+  flex: 1;
+  position: relative;
+  margin-right: 8px;
+}
+
+.crm-search-input {
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-left: 36px !important;
+}
+
+.crm-action-buttons-group {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+/* =============================================
+   Modal & Review Sheet Backdrop
+   ============================================= */
+.review-sheet-backdrop,
+.filter-sheet-backdrop,
+.edit-modal-backdrop {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  background-color: rgba(9, 9, 11, 0.6) !important;
+}
+
+.review-sheet-container,
+.filter-sheet-container,
+.edit-modal-card,
+.delete-modal-card {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  background-color: #ffffff !important;
+}
+
+/* Tabular nums */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }

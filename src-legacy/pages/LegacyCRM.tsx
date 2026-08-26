@@ -18,7 +18,8 @@ const getActiveFilterLabel = (filter: FilterState): string | null => {
     if (filter.customFrom && filter.customTo) {
       const fmt = (dateStr: string) => {
         const parts = dateStr.split('-').map(Number);
-        return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return (months[parts[1] - 1] || '') + ' ' + parts[2];
       };
       return 'From ' + fmt(filter.customFrom) + ' to ' + fmt(filter.customTo);
     }

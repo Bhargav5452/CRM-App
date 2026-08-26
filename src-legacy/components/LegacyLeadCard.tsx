@@ -10,6 +10,17 @@ interface LeadCardProps {
   onLongPress: (leadId: number) => void;
 }
 
+const formatDateSafe = (isoStr: string): string => {
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  } catch (e) {
+    return isoStr;
+  }
+};
+
 const LegacyLeadCard: React.FC<LeadCardProps> = ({
   lead, isSelected, isSelectionMode, onSelectToggle, onLongPress,
 }) => {
@@ -18,9 +29,7 @@ const LegacyLeadCard: React.FC<LeadCardProps> = ({
 
   const country = getCountryByCode(lead.country_code);
   const formattedPhone = country.flag + ' ' + lead.country_code + ' ' + lead.phone;
-  const formattedDate = new Date(lead.created_at).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-  });
+  const formattedDate = formatDateSafe(lead.created_at);
 
   const startPressTimer = () => {
     isLongPressRef.current = false;

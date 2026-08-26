@@ -26,11 +26,11 @@ export const useLegacyLeads = () => {
       // 1. Search Query Filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
-        const matchesName = lead.name.toLowerCase().includes(query);
-        const matchesPhone = lead.phone.includes(query);
-        const matchesEmail = lead.email ? lead.email.toLowerCase().includes(query) : false;
-        const matchesNotes = lead.notes ? lead.notes.toLowerCase().includes(query) : false;
-        const matchesHomeType = lead.home_type.toLowerCase().includes(query);
+        const matchesName = (lead.name || '').toLowerCase().indexOf(query) !== -1;
+        const matchesPhone = (lead.phone || '').indexOf(query) !== -1;
+        const matchesEmail = lead.email ? lead.email.toLowerCase().indexOf(query) !== -1 : false;
+        const matchesNotes = lead.notes ? lead.notes.toLowerCase().indexOf(query) !== -1 : false;
+        const matchesHomeType = (lead.home_type || '').toLowerCase().indexOf(query) !== -1;
 
         if (!matchesName && !matchesPhone && !matchesEmail && !matchesNotes && !matchesHomeType) {
           return false;
@@ -97,7 +97,15 @@ export const useLegacyLeads = () => {
     const result = await databaseService.saveLead(input);
     if (result.success) {
       await fetchLeads();
-      window.dispatchEvent(new CustomEvent('crm-lead-added'));
+      try {
+        if (typeof window.CustomEvent === 'function') {
+          window.dispatchEvent(new CustomEvent('crm-lead-added'));
+        } else {
+          const ev = document.createEvent('CustomEvent');
+          ev.initCustomEvent('crm-lead-added', false, false, null);
+          window.dispatchEvent(ev);
+        }
+      } catch (e) {}
     }
     return result;
   };
