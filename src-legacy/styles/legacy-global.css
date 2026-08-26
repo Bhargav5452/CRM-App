@@ -235,8 +235,396 @@ html, body {
 }
 
 /* =============================================
-   Flex Grid Fallbacks for Filter & Date Dialogs
+   Review Details Modal — Refined Safari 9 UI
    ============================================= */
+.review-sheet-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(9, 9, 11, 0.5) !important;
+  z-index: 2000 !important;
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: center !important;
+  justify-content: center !important;
+  padding: 20px 16px !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.review-sheet-container {
+  width: 100% !important;
+  max-width: 520px !important;
+  background-color: #ffffff !important;
+  border-radius: 20px !important;
+  border: 1px solid #E4E4E7 !important;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  padding: 28px 24px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.sheet-handle-bar {
+  display: none !important;
+}
+
+.sheet-header {
+  margin-bottom: 20px !important;
+  text-align: left !important;
+}
+
+.sheet-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #09090B !important;
+  margin: 0 0 6px 0 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.sheet-subtitle {
+  font-size: 13.5px !important;
+  color: #71717A !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.review-summary-card {
+  background-color: #F4F4F5 !important;
+  border: 1px solid #E4E4E7 !important;
+  border-radius: 14px !important;
+  padding: 16px 18px !important;
+  margin-bottom: 22px !important;
+}
+
+.review-item {
+  display: block !important;
+  margin-bottom: 14px !important;
+}
+
+.review-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.review-label {
+  display: block !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #71717A !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 3px !important;
+}
+
+.review-value {
+  display: block !important;
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  color: #09090B !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
+}
+
+.review-value.empty-value {
+  color: #A1A1AA !important;
+  font-weight: 400 !important;
+  font-style: italic !important;
+}
+
+.sheet-actions {
+  display: block !important;
+}
+
+.btn-confirm {
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background-color: #09090B !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: center !important;
+  justify-content: center !important;
+  margin-bottom: 10px !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.btn-edit {
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background-color: #ffffff !important;
+  color: #09090B !important;
+  border: 1px solid #E4E4E7 !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: center !important;
+  justify-content: center !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.btn-confirm svg,
+.btn-edit svg {
+  margin-right: 8px !important;
+}
+
+/* =============================================
+   Navbar Segmented Control Polish
+   ============================================= */
+.app-navbar-inner {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: space-between !important;
+  justify-content: space-between !important;
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  height: 56px !important;
+  padding: 8px 16px !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.app-brand {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  text-decoration: none !important;
+}
+
+.app-brand-badge {
+  margin-right: 8px !important;
+}
+
+.nav-links-group {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+}
+
+.nav-link-item {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: center !important;
+  justify-content: center !important;
+}
+
+.nav-link-item + .nav-link-item {
+  margin-left: 4px !important;
+}
+
+.nav-link-item svg {
+  margin-right: 6px !important;
+}
+
+/* =============================================
+   Lead Form Spacing & Select Dropdown
+   ============================================= */
+.form-field-group {
+  margin-bottom: 16px !important;
+}
+
+.form-label {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #09090B !important;
+  margin-bottom: 6px !important;
+}
+
+.form-input-text,
+.form-textarea {
+  width: 100% !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+  border: 1px solid #E4E4E7 !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  font-size: 14.5px !important;
+  font-family: inherit !important;
+  color: #09090B !important;
+  background-color: #ffffff !important;
+}
+
+.form-input-text:focus,
+.form-textarea:focus {
+  border-color: #09090B !important;
+  outline: none !important;
+}
+
+.phone-input-row {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+}
+
+.country-code-trigger {
+  margin-right: 8px !important;
+  -webkit-flex-shrink: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.phone-input-field {
+  -webkit-flex: 1 !important;
+  flex: 1 !important;
+}
+
+.btn-submit-lead {
+  width: 100% !important;
+  height: 50px !important;
+  background-color: #09090B !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: center !important;
+  justify-content: center !important;
+  margin-top: 24px !important;
+}
+
+.btn-submit-lead svg {
+  margin-right: 8px !important;
+}
+
+/* =============================================
+   CRM Dashboard Spacing & Grid
+   ============================================= */
+.crm-page-wrapper {
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  padding: 20px 16px 60px 16px !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+}
+
+.crm-header-row {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  -webkit-justify-content: space-between !important;
+  justify-content: space-between !important;
+  margin-bottom: 16px !important;
+}
+
+.crm-title-group {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+}
+
+.crm-page-title {
+  margin: 0 !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #09090B !important;
+  margin-right: 10px !important;
+}
+
+.crm-controls-section {
+  margin-bottom: 16px !important;
+}
+
+.btn-export-inline + .btn-filter-inline {
+  margin-left: 6px !important;
+}
+
+.btn-export-inline svg,
+.btn-filter-inline svg {
+  margin-right: 6px !important;
+}
+
+/* =============================================
+   Lead Card Inner Spacing
+   ============================================= */
+.lead-card {
+  padding: 18px 16px !important;
+  border-radius: 16px !important;
+  border: 1px solid #E4E4E7 !important;
+  background-color: #ffffff !important;
+  margin-bottom: 14px !important;
+}
+
+.lead-card-header {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: flex-start !important;
+  align-items: flex-start !important;
+  -webkit-justify-content: space-between !important;
+  justify-content: space-between !important;
+  margin-bottom: 12px !important;
+}
+
+.lead-card-name {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #09090B !important;
+  margin: 0 0 3px 0 !important;
+}
+
+.lead-card-date {
+  font-size: 12px !important;
+  color: #71717A !important;
+}
+
+.lead-info-row {
+  display: -webkit-flex !important;
+  display: flex !important;
+  -webkit-align-items: center !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+  font-size: 13.5px !important;
+  color: #09090B !important;
+}
+
+.lead-info-row svg {
+  margin-right: 8px !important;
+}
+
+.lead-notes-box {
+  background-color: #F4F4F5 !important;
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  font-size: 13px !important;
+  color: #3F3F46 !important;
+  margin-top: 8px !important;
+}
+
+/* Flex Grid Fallbacks for Filter & Date Dialogs */
 .radio-options-grid {
   display: -webkit-flex !important;
   display: flex !important;
@@ -246,9 +634,9 @@ html, body {
 
 .radio-option-card {
   width: calc(50% - 4px) !important;
-  margin-bottom: 8px;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
+  margin-bottom: 8px !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
 }
 
 .radio-option-card.full-width {
@@ -264,69 +652,10 @@ html, body {
 
 .date-pickers-row .date-field {
   width: calc(50% - 5px) !important;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
 }
 
-/* =============================================
-   CRM Page Controls Layout
-   ============================================= */
-.search-export-row {
-  display: -webkit-flex !important;
-  display: flex !important;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.crm-search-bar {
-  -webkit-flex: 1;
-  flex: 1;
-  position: relative;
-  margin-right: 8px;
-}
-
-.crm-search-input {
-  width: 100%;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  padding-left: 36px !important;
-}
-
-.crm-action-buttons-group {
-  display: -webkit-flex !important;
-  display: flex !important;
-  -webkit-align-items: center;
-  align-items: center;
-}
-
-/* =============================================
-   Modal & Review Sheet Backdrop
-   ============================================= */
-.review-sheet-backdrop,
-.filter-sheet-backdrop,
-.edit-modal-backdrop {
-  display: -webkit-flex !important;
-  display: flex !important;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  background-color: rgba(9, 9, 11, 0.6) !important;
-}
-
-.review-sheet-container,
-.filter-sheet-container,
-.edit-modal-card,
-.delete-modal-card {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  background-color: #ffffff !important;
-}
-
-/* Tabular nums */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
