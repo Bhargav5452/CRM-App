@@ -8,11 +8,25 @@ interface ExportModalProps {
   leads: Lead[];
 }
 
+const getSafeArray = (arr: any): Lead[] => {
+  if (Array.isArray(arr)) return arr;
+  if (!arr) return [];
+  if (arr.filteredLeads && Array.isArray(arr.filteredLeads)) return arr.filteredLeads;
+  if (arr.leads && Array.isArray(arr.leads)) return arr.leads;
+  try {
+    return Array.prototype.slice.call(arr);
+  } catch (e) {
+    return [];
+  }
+};
+
 const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads }) => {
   const [copied, setCopied] = useState(false);
   const [diagLogs, setDiagLogs] = useState<{ text: string; isError?: boolean }[]>([]);
 
   if (!isOpen) return null;
+
+  const safeLeads = getSafeArray(leads);
 
   const addDiag = (step: string, isError?: boolean) => {
     setDiagLogs((prev) => prev.concat([{ text: step, isError }]));
@@ -20,11 +34,11 @@ const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads 
 
   const handleExportExcel = () => {
     setDiagLogs([]);
-    exportLeadsToExcel(leads, addDiag);
+    exportLeadsToExcel(safeLeads, addDiag);
   };
 
   const headers = ['S.No', 'Name', 'Phone Number (with code)', 'Phone Number', 'Home Type', 'Email', 'Notes', 'Created Date'];
-  const chronologicalLeads = leads.slice().reverse();
+  const chronologicalLeads = safeLeads.slice().reverse();
   const rows = chronologicalLeads.map((lead, index) => {
     const code = lead.country_code ? lead.country_code.trim() : '';
     const phone = lead.phone ? lead.phone.trim() : '';

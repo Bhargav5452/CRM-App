@@ -5,10 +5,23 @@ export interface ExportDiagLog {
   (step: string, isError?: boolean): void;
 }
 
+const getSafeArray = (arr: any): Lead[] => {
+  if (Array.isArray(arr)) return arr;
+  if (!arr) return [];
+  if (arr.filteredLeads && Array.isArray(arr.filteredLeads)) return arr.filteredLeads;
+  if (arr.leads && Array.isArray(arr.leads)) return arr.leads;
+  try {
+    return Array.prototype.slice.call(arr);
+  } catch (e) {
+    return [];
+  }
+};
+
 export const generateXlsxBase64 = (leads: Lead[], log?: ExportDiagLog): { base64: string; filename: string } => {
   if (log) log('EXPORT: XLSX loaded');
 
-  const chronologicalLeads = leads.slice().reverse();
+  const safeLeads = getSafeArray(leads);
+  const chronologicalLeads = safeLeads.slice().reverse();
   const dataRows = chronologicalLeads.map((lead, index) => {
     const code = lead.country_code ? lead.country_code.trim() : '';
     const phone = lead.phone ? lead.phone.trim() : '';
