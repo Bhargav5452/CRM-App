@@ -9,7 +9,6 @@ interface AdminLoginProps {
 }
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,15 +16,15 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setErrorMessage('Please enter both email and password.');
+    if (!password) {
+      setErrorMessage('Please enter the admin password.');
       return;
     }
 
     setLoading(true);
     setErrorMessage('');
 
-    const res = await authService.signIn(email, password);
+    const res = await authService.signInWithPasswordOnly(password);
 
     if (res.success) {
       // Trigger background local lead migration if any
@@ -34,7 +33,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
       onSuccess();
     } else {
       setLoading(false);
-      setErrorMessage(res.error || 'Authentication failed. Please check your credentials.');
+      setErrorMessage(res.error || 'Incorrect password. Please try again.');
     }
   };
 
@@ -48,9 +47,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </div>
-          <h2 className="admin-login-title">CRM Admin Login</h2>
+          <h2 className="admin-login-title">Protected CRM</h2>
           <p className="admin-login-subtitle">
-            Sign in with your authorized credentials to manage leads and export reports.
+            Enter the admin password to unlock and manage central leads.
           </p>
         </div>
 
@@ -67,36 +66,20 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
 
         <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="admin-form-group">
-            <label className="admin-label" htmlFor="admin-email">
-              Email Address
-            </label>
-            <input
-              id="admin-email"
-              type="email"
-              className="admin-input"
-              placeholder="admin@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              autoComplete="email"
-              required
-            />
-          </div>
-
-          <div className="admin-form-group">
             <label className="admin-label" htmlFor="admin-password">
-              Password
+              Admin Password
             </label>
             <div className="admin-password-wrapper">
               <input
                 id="admin-password"
                 type={showPassword ? 'text' : 'password'}
                 className="admin-input"
-                placeholder="••••••••"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 autoComplete="current-password"
+                autoFocus
                 required
               />
               <button
@@ -129,10 +112,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onCancel }) => {
             {loading ? (
               <span className="admin-spinner-wrap">
                 <span className="admin-spinner"></span>
-                Signing In...
+                Unlocking...
               </span>
             ) : (
-              'Sign In to CRM'
+              'Unlock CRM'
             )}
           </button>
 

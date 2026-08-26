@@ -37,6 +37,13 @@ export const authService = {
   },
 
   /**
+   * Sign in with password only using default admin account
+   */
+  async signInWithPasswordOnly(password: string): Promise<AuthResult> {
+    return this.signIn('admin@crm.local', password);
+  },
+
+  /**
    * Sign out the currently authenticated user
    */
   async signOut(): Promise<{ success: boolean; error?: string }> {
