@@ -36,7 +36,6 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) return "vendor-react";
           if (id.includes("node_modules/react-router")) return "vendor-router";
-          if (id.includes("node_modules/xlsx")) return "vendor-xlsx";
         },
       },
     },

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import LegacyLeadCard from '../components/LegacyLeadCard';
 import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyFilterSheet from '../components/LegacyFilterSheet';
-import LegacyExportModal from '../components/LegacyExportModal';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
 import { useLegacyLeads } from '../hooks/useLegacyLeads';
 import '../../src/pages/CRM/CRM.css';
@@ -38,7 +37,6 @@ const LegacyCRM: React.FC = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
 
   useEffect(() => {
@@ -172,13 +170,6 @@ const LegacyCRM: React.FC = () => {
               )}
             </div>
             <div className="crm-action-buttons-group">
-              <button type="button" className="btn-export-inline" onClick={() => setIsExportModalOpen(true)}
-                disabled={filteredLeads.length === 0} title="Export filtered leads">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                <span className="action-btn-text">Export</span>
-              </button>
               <button type="button" className={"btn-filter-inline" + (isFilterActive ? ' active' : '')}
                 onClick={() => setIsFilterSheetOpen(true)} title="Open filter options">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -280,12 +271,6 @@ const LegacyCRM: React.FC = () => {
         </div>
       )}
 
-      {/* Export Modal */}
-      <LegacyExportModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        leads={filteredLeads}
-      />
     </div>
   );
 };
