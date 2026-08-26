@@ -176,6 +176,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       onSubmit={handleSubmit(onSubmit)}
       className="lead-form-grid"
       autoComplete="off"
+      action="javascript:void(0);"
       data-lpignore="true"
       data-form-type="other"
     >
@@ -189,13 +190,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
           type="text"
           placeholder="Enter full name"
           className={`custom-input ${errors.name ? 'input-error' : ''}`}
-          autoComplete="new-password"
+          autoComplete="off"
           autoCorrect="off"
           autoCapitalize="words"
           spellCheck={false}
           data-lpignore="true"
           data-form-type="other"
           {...nameRegisterRest}
+          name="crm_lead_full_name"
           ref={(e) => {
             nameRegisterRef(e);
             nameInputRef.current = e;
@@ -236,13 +238,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
             maxLength={activeCountry.digits}
             placeholder={`Enter ${activeCountry.digits}-digit number`}
             className="phone-number-input"
-            autoComplete="new-password"
+            autoComplete="off"
             autoCorrect="off"
             autoCapitalize="none"
             spellCheck={false}
             data-lpignore="true"
             data-form-type="other"
             {...register('phone')}
+            name="crm_lead_phone"
           />
         </div>
 
@@ -323,13 +326,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
           type="email"
           placeholder="Enter email (optional)"
           className={`custom-input ${errors.email ? 'input-error' : ''}`}
-          autoComplete="new-password"
+          autoComplete="off"
           autoCorrect="off"
           autoCapitalize="none"
           spellCheck={false}
           data-lpignore="true"
           data-form-type="other"
           {...register('email')}
+          name="crm_lead_email"
         />
         {errors.email && (
           <span className="error-message">{errors.email.message}</span>
@@ -347,13 +351,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
             maxLength={300}
             placeholder="Add notes (optional)"
             className={`custom-textarea ${errors.notes ? 'input-error' : ''}`}
-            autoComplete="new-password"
+            autoComplete="off"
             autoCorrect="off"
             autoCapitalize="none"
             spellCheck={false}
             data-lpignore="true"
             data-form-type="other"
             {...register('notes')}
+            name="crm_lead_notes"
           />
           <div className="textarea-footer">
             <span
@@ -436,6 +441,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
               {/* Live Search Filter Input */}
               <div className="country-search-wrapper">
                 <input
+                  id="crm_country_search"
+                  name="crm_country_search"
                   type="text"
                   className="country-search-input"
                   placeholder="Search country or code..."
@@ -446,7 +453,10 @@ const LeadForm: React.FC<LeadFormProps> = ({
                   }}
                   onKeyDown={handleCountrySearchKeyDown}
                   autoFocus
-                  autoComplete="new-password"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   data-lpignore="true"
                 />
               </div>
