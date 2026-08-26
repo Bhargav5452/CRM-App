@@ -5,6 +5,7 @@ import {
   SQLiteDBConnection,
 } from '@capacitor-community/sqlite';
 import Database from '@tauri-apps/plugin-sql';
+import { supabase } from './supabase';
 import { Lead, LeadFormInput } from '../types/lead';
 
 const DB_NAME = 'offline_crm_db';
@@ -166,6 +167,25 @@ class DatabaseService {
       const count = res.values && res.values[0] ? res.values[0].count : 0;
       return count > 0;
     } else {
+      try {
+        let query = supabase
+          .from('leads')
+          .select('id', { count: 'exact', head: true })
+          .eq('country_code', normalizedCode)
+          .eq('phone', normalizedPhone);
+
+        if (excludeId) {
+          query = query.neq('id', excludeId);
+        }
+
+        const { count, error } = await query;
+        if (!error && count !== null) {
+          return count > 0;
+        }
+      } catch (e) {
+        console.warn('Supabase checkPhoneExists fallback to localStorage:', e);
+      }
+
       const leads = this.getWebLeads();
       return leads.some(
         (lead) =>
@@ -251,20 +271,52 @@ class DatabaseService {
         };
         return { success: true, lead: newLead };
       } else {
-        const leads = this.getWebLeads();
+        // Modern Web: Insert directly into Supabase
+        const { data, error } = await supabase
+          .from('leads')
+          .insert({
+            name: input.name.trim(),
+            phone: input.phone.trim(),
+            country_code: input.country_code.trim(),
+            home_type: input.home_type,
+            email: input.email ? input.email.trim() : '',
+            notes: input.notes ? input.notes.trim() : '',
+          })
+          .select()
+          .single();
+
+        if (error) {
+          if (
+            error.code === '23505' ||
+            error.message.includes('unique') ||
+            error.message.includes('duplicate')
+          ) {
+            return {
+              success: false,
+              error: `A lead with ${input.country_code} ${input.phone} already exists.`,
+            };
+          }
+          console.error('Supabase saveLead error:', error);
+          return { success: false, error: error.message };
+        }
+
         const newLead: Lead = {
-          id: Date.now(),
-          name: input.name,
-          phone: input.phone,
-          country_code: input.country_code,
-          home_type: input.home_type,
-          email: input.email || '',
-          notes: input.notes || '',
-          created_at: now,
-          updated_at: now,
+          id: Number(data.id),
+          name: data.name,
+          phone: data.phone,
+          country_code: data.country_code,
+          home_type: data.home_type,
+          email: data.email || '',
+          notes: data.notes || '',
+          created_at: data.created_at,
+          updated_at: data.updated_at,
         };
-        leads.unshift(newLead);
-        this.saveWebLeads(leads);
+
+        // Cache in local storage for offline resiliency
+        const local = this.getWebLeads();
+        local.unshift(newLead);
+        this.saveWebLeads(local);
+
         return { success: true, lead: newLead };
       }
     } catch (err: unknown) {
@@ -331,6 +383,35 @@ class DatabaseService {
         ]);
         return { success: true };
       } else {
+        // Modern Web: Update in Supabase
+        const { error } = await supabase
+          .from('leads')
+          .update({
+            name: input.name.trim(),
+            phone: input.phone.trim(),
+            country_code: input.country_code.trim(),
+            home_type: input.home_type,
+            email: input.email ? input.email.trim() : '',
+            notes: input.notes ? input.notes.trim() : '',
+            updated_at: now,
+          })
+          .eq('id', id);
+
+        if (error) {
+          if (
+            error.code === '23505' ||
+            error.message.includes('unique') ||
+            error.message.includes('duplicate')
+          ) {
+            return {
+              success: false,
+              error: `Another lead with ${input.country_code} ${input.phone} already exists.`,
+            };
+          }
+          return { success: false, error: error.message };
+        }
+
+        // Update local cache
         const leads = this.getWebLeads();
         const idx = leads.findIndex((l) => l.id === id);
         if (idx !== -1) {
@@ -346,6 +427,7 @@ class DatabaseService {
           };
           this.saveWebLeads(leads);
         }
+
         return { success: true };
       }
     } catch (err: unknown) {
@@ -380,10 +462,18 @@ class DatabaseService {
         await this.db.run(query, ids);
         return { success: true };
       } else {
+        // Modern Web: Delete from Supabase
+        const { error } = await supabase.from('leads').delete().in('id', ids);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        // Update local cache
         const leads = this.getWebLeads();
         const idSet = new Set(ids);
         const filtered = leads.filter((l) => !idSet.has(l.id));
         this.saveWebLeads(filtered);
+
         return { success: true };
       }
     } catch (err: unknown) {
@@ -407,8 +497,72 @@ class DatabaseService {
       );
       return (res.values as Lead[]) || [];
     } else {
+      try {
+        const { data, error } = await supabase
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.warn('Error fetching leads from Supabase, falling back to local cache:', error);
+          return this.getWebLeads();
+        }
+
+        if (data) {
+          const leads: Lead[] = data.map((item: any) => ({
+            id: Number(item.id),
+            name: item.name,
+            phone: item.phone,
+            country_code: item.country_code || '+91',
+            home_type: item.home_type,
+            email: item.email || '',
+            notes: item.notes || '',
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+          }));
+
+          this.saveWebLeads(leads);
+          return leads;
+        }
+      } catch (err) {
+        console.warn('Network error fetching from Supabase, using local cache:', err);
+      }
+
       return this.getWebLeads();
     }
+  }
+
+  /**
+   * Migrate existing leads from localStorage to Supabase (idempotent, skips existing)
+   */
+  public async migrateLocalLeadsToSupabase(): Promise<{ migrated: number; total: number }> {
+    if (this.isNative || this.isTauri) return { migrated: 0, total: 0 };
+    const localLeads = this.getWebLeads();
+    if (localLeads.length === 0) return { migrated: 0, total: 0 };
+
+    let count = 0;
+    for (const lead of localLeads) {
+      try {
+        const { error } = await supabase
+          .from('leads')
+          .insert({
+            name: lead.name,
+            phone: lead.phone,
+            country_code: lead.country_code || '+91',
+            home_type: lead.home_type,
+            email: lead.email || '',
+            notes: lead.notes || '',
+            created_at: lead.created_at || new Date().toISOString(),
+          })
+          .select()
+          .single();
+
+        if (!error) count++;
+      } catch (e) {
+        // Ignore conflict or duplicate errors during migration
+      }
+    }
+    return { migrated: count, total: localLeads.length };
   }
 
   private getWebLeads(): Lead[] {
@@ -426,3 +580,4 @@ class DatabaseService {
 }
 
 export const databaseService = new DatabaseService();
+

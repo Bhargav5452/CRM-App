@@ -47,6 +47,32 @@
   flex-shrink: 0;
 }
 
+.btn-signout-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: transparent;
+  color: #71717A;
+  border: 1px solid #E4E4E7;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-signout-inline:hover {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border-color: #FEE2E2;
+}
+
+.btn-signout-inline ion-icon {
+  font-size: 16px;
+}
+
 /* Selection Toolbar */
 .selection-count-title {
   font-size: 16px;

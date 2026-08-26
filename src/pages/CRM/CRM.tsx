@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { IonContent, IonPage, IonIcon, IonSpinner, useIonViewWillEnter } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { Session } from '@supabase/supabase-js';
 import {
   searchOutline,
   downloadOutline,
@@ -11,14 +14,22 @@ import {
   trashOutline,
   alertCircleOutline,
   checkmarkCircleOutline,
+  logOutOutline,
 } from 'ionicons/icons';
 import LeadCard from '../../components/LeadCard/LeadCard';
 import LeadForm from '../../components/LeadForm/LeadForm';
 import FilterSheet from '../../components/FilterSheet/FilterSheet';
+import AdminLogin from '../../components/AdminLogin/AdminLogin';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../../types/lead';
 import { useLeads } from '../../hooks/useLeads';
 import { exportLeadsToExcel } from '../../services/export';
+import { authService } from '../../services/auth';
 import './CRM.css';
+
+const isTauriPlatform = (): boolean =>
+  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+const isWeb = !Capacitor.isNativePlatform() && !isTauriPlatform();
 
 const getActiveFilterLabel = (filter: FilterState): string | null => {
   if (filter.time === 'all') return null;
@@ -42,6 +53,7 @@ const getActiveFilterLabel = (filter: FilterState): string | null => {
 };
 
 const CRM: React.FC = () => {
+  const history = useHistory();
   const {
     filteredLeads,
     loading,
@@ -54,6 +66,8 @@ const CRM: React.FC = () => {
     deleteLeads,
   } = useLeads();
 
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(isWeb);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -67,6 +81,24 @@ const CRM: React.FC = () => {
   const [isMobile, setIsMobile] = useState<boolean>(
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
   );
+
+  useEffect(() => {
+    if (isWeb) {
+      authService.getSession().then((initialSession) => {
+        setSession(initialSession);
+        setAuthLoading(false);
+      });
+
+      const { data: authListener } = authService.onAuthStateChange((newSession) => {
+        setSession(newSession);
+        setAuthLoading(false);
+      });
+
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    }
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -183,6 +215,11 @@ const CRM: React.FC = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await authService.signOut();
+    setSession(null);
+  };
+
   const handleApplyFilter = (newFilterState: FilterState) => {
     setFilterState(newFilterState);
   };
@@ -193,6 +230,36 @@ const CRM: React.FC = () => {
 
   const activeFilterLabel = getActiveFilterLabel(filterState);
   const isFilterActive = filterState.time !== 'all';
+
+  if (isWeb && authLoading) {
+    return (
+      <IonPage>
+        <IonContent fullscreen className="home-content">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+            <IonSpinner name="crescent" />
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  if (isWeb && !session) {
+    return (
+      <IonPage>
+        <IonContent fullscreen className="home-content">
+          <AdminLogin
+            onSuccess={() => {
+              authService.getSession().then((s) => {
+                setSession(s);
+                fetchLeads();
+              });
+            }}
+            onCancel={() => history.push('/home')}
+          />
+        </IonContent>
+      </IonPage>
+    );
+  }
 
   return (
     <IonPage>
@@ -255,13 +322,26 @@ const CRM: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="crm-title-group">
-                <h1 className="crm-page-title">CRM Dashboard</h1>
-                <span className="crm-count-badge tabular-nums">
-                  {filteredLeads.length}{' '}
-                  {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
-                </span>
-              </div>
+              <>
+                <div className="crm-title-group">
+                  <h1 className="crm-page-title">CRM Dashboard</h1>
+                  <span className="crm-count-badge tabular-nums">
+                    {filteredLeads.length}{' '}
+                    {filteredLeads.length === 1 ? 'Lead' : 'Leads'}
+                  </span>
+                </div>
+                {isWeb && (
+                  <button
+                    type="button"
+                    className="btn-signout-inline"
+                    onClick={handleSignOut}
+                    title="Sign Out of CRM"
+                  >
+                    <IonIcon icon={logOutOutline} />
+                    <span className="action-btn-text">Sign Out</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
 
