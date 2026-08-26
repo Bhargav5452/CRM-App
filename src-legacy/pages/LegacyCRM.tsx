@@ -325,11 +325,19 @@ const LegacyCRM: React.FC = () => {
           <div className="leads-grid legacy-leads-flex">
             {filteredLeads.length > 0 ? (
               filteredLeads.map((lead) => (
-                <LegacyLeadCard key={lead.id} lead={lead}
+                <LegacyLeadCard
+                  key={lead.id}
+                  lead={lead}
                   isSelected={selectedIds.indexOf(lead.id) !== -1}
                   isSelectionMode={isSelectionMode}
                   onSelectToggle={handleToggleSelect}
-                  onLongPress={handleLongPress} />
+                  onLongPress={handleLongPress}
+                  onEdit={(l) => setEditingLead(l)}
+                  onDelete={(l) => {
+                    setSelectedIds([l.id]);
+                    setShowBulkDeleteModal(true);
+                  }}
+                />
               ))
             ) : (
               <div className="empty-leads-card">
