@@ -65,14 +65,47 @@ export const exportLeadsToExcel = (leads: Lead[], log?: ExportDiagLog): { succes
 
     const { base64, filename } = generateXlsxBase64(leads, log);
 
-    // Safari 9 Data URI with XLSX MIME type
+    if (log) log('EXPORT: XLSX binary ready');
+
+    // Method 1: Trigger HTTP Attachment Download via serverless endpoint
+    // This sends 'Content-Disposition: attachment; filename="CRM_..."' which forces iOS Safari to show "Open in Excel / Numbers" prompt
+    try {
+      if (typeof document !== 'undefined') {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/download';
+        form.target = '_blank';
+
+        const base64Input = document.createElement('input');
+        base64Input.type = 'hidden';
+        base64Input.name = 'base64';
+        base64Input.value = base64;
+        form.appendChild(base64Input);
+
+        const filenameInput = document.createElement('input');
+        filenameInput.type = 'hidden';
+        filenameInput.name = 'filename';
+        filenameInput.value = filename;
+        form.appendChild(filenameInput);
+
+        document.body.appendChild(form);
+        form.submit();
+        setTimeout(() => {
+          try { document.body.removeChild(form); } catch (e) {}
+        }, 1500);
+
+        if (log) log('EXPORT: download started (Server attachment)');
+        return { success: true, filename };
+      }
+    } catch (serverErr) {
+      if (log) log('EXPORT: server fallback to local DataURI');
+    }
+
+    // Method 2: Offline Client Fallback
     const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     const dataUri = 'data:' + mimeType + ';base64,' + base64;
-
-    if (log) log('EXPORT: Blob/DataURI created');
-
-    // Attempt 1: anchor download
     const isDownloadSupported = typeof document !== 'undefined' && 'download' in document.createElement('a');
+
     if (isDownloadSupported) {
       const link = document.createElement('a');
       link.href = dataUri;
@@ -85,11 +118,7 @@ export const exportLeadsToExcel = (leads: Lead[], log?: ExportDiagLog): { succes
       }, 1000);
       if (log) log('EXPORT: download started (a.download)');
     } else {
-      // Safari 9 / iOS 9: navigate to data URI directly
-      const win = window.open(dataUri, '_blank');
-      if (!win) {
-        window.location.href = dataUri;
-      }
+      window.location.href = dataUri;
       if (log) log('EXPORT: download started (iOS DataURI)');
     }
 

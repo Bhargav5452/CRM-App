@@ -19,7 +19,7 @@
       "destination": "/legacy/index.html"
     },
     {
-      "source": "/((?!legacy|assets/).*)",
+      "source": "/((?!legacy|assets|api).*)",
       "destination": "/index.html"
     }
   ]
