@@ -1,27 +1,13 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LegacyNavigation from './components/LegacyNavigation';
 import LegacyHome from './pages/LegacyHome';
 import LegacyCRM from './pages/LegacyCRM';
 import { databaseService } from './services/legacyDatabase';
 import './styles/legacy-global.css';
 
-const logDiag = (msg: string) => {
-  if (typeof document !== 'undefined') {
-    const el = document.getElementById('diagnostic-log');
-    if (el) {
-      const div = document.createElement('div');
-      div.textContent = msg;
-      el.appendChild(div);
-    }
-  }
-};
-
-logDiag('[3/4] JS bundle loaded');
-
 const LegacyApp: React.FC = () => {
   useEffect(() => {
-    logDiag('[4/4] React mounted');
     const timer = setTimeout(() => {
       databaseService.initialize();
     }, 300);
@@ -29,7 +15,7 @@ const LegacyApp: React.FC = () => {
   }, []);
 
   return (
-    <BrowserRouter basename="/legacy">
+    <HashRouter>
       <div className="legacy-app-layout">
         <header className="legacy-app-header">
           <LegacyNavigation />
@@ -41,10 +27,11 @@ const LegacyApp: React.FC = () => {
             <Route exact path="/">
               <Redirect to="/home" />
             </Route>
+            <Redirect to="/home" />
           </Switch>
         </main>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
