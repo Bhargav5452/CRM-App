@@ -128,16 +128,17 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const searchLower = countrySearch.toLowerCase().trim();
 
-  // Pinned countries: India, US, UK, UAE, Singapore, Canada, Australia
-  const PINNED_ISOS = ['IN', 'US', 'GB', 'AE', 'SG', 'CA', 'AU'];
+  // Pinned countries in priority order: India, US, Canada, UK, Australia, UAE, Singapore
+  const PINNED_ISOS = ['IN', 'US', 'CA', 'GB', 'AU', 'AE', 'SG'];
 
-  const filteredPinned = COUNTRY_CODES.filter(
-    (c) =>
-      PINNED_ISOS.includes(c.iso) &&
-      (c.name.toLowerCase().includes(searchLower) ||
+  const filteredPinned = PINNED_ISOS.map((iso) => COUNTRY_CODES.find((c) => c.iso === iso))
+    .filter((c): c is CountryCode => Boolean(c))
+    .filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchLower) ||
         c.code.includes(searchLower) ||
-        c.iso.toLowerCase().includes(searchLower))
-  );
+        c.iso.toLowerCase().includes(searchLower)
+    );
 
   // Alphabetical list excluding pinned countries
   const filteredOthers = COUNTRY_CODES.filter(
@@ -470,15 +471,17 @@ const LeadForm: React.FC<LeadFormProps> = ({
                     } ${isKeyFocused ? 'key-focused' : ''}`}
                     onClick={() => handleSelectCountry(country)}
                   >
-                    <span className="country-item-flag">{country.flag}</span>
+                    <span className="country-item-iso">{country.iso}</span>
                     <span className="country-item-name">{country.name}</span>
                     <span className="country-item-code">{country.code}</span>
-                    {isSelected && (
-                      <IonIcon
-                        icon={checkmarkOutline}
-                        className="country-check"
-                      />
-                    )}
+                    <span className="country-item-check">
+                      {isSelected && (
+                        <IonIcon
+                          icon={checkmarkOutline}
+                          className="country-check-icon"
+                        />
+                      )}
+                    </span>
                   </div>
                 );
               })}
@@ -503,21 +506,21 @@ const LeadForm: React.FC<LeadFormProps> = ({
                         } ${isKeyFocused ? 'key-focused' : ''}`}
                         onClick={() => handleSelectCountry(country)}
                       >
-                        <span className="country-item-flag">
-                          {country.flag}
-                        </span>
+                        <span className="country-item-iso">{country.iso}</span>
                         <span className="country-item-name">
                           {country.name}
                         </span>
                         <span className="country-item-code">
                           {country.code}
                         </span>
-                        {isSelected && (
-                          <IonIcon
-                            icon={checkmarkOutline}
-                            className="country-check"
-                          />
-                        )}
+                        <span className="country-item-check">
+                          {isSelected && (
+                            <IonIcon
+                              icon={checkmarkOutline}
+                              className="country-check-icon"
+                            />
+                          )}
+                        </span>
                       </div>
                     );
                   })}
