@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Lead, getCountryByCode } from '../types/legacyValidation';
+import '../../src/components/LeadCard/LeadCard.css';
 
 interface LeadCardProps {
   lead: Lead;

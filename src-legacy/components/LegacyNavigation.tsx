@@ -1,5 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import '../../src/components/Navigation/Navigation.css';
 
 const LegacyNavigation: React.FC = () => {
   const location = useLocation();
