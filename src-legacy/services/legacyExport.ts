@@ -1,3 +1,18 @@
+// Safari 9 TypedArray & ArrayBuffer .slice() Polyfills
+if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.slice) {
+  Uint8Array.prototype.slice = function (start?: number, end?: number) {
+    return new (this.constructor as any)(this.subarray(start, end));
+  };
+}
+if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
+  ArrayBuffer.prototype.slice = function (start?: number, end?: number) {
+    const src = new Uint8Array(this).subarray(start, end);
+    const dst = new Uint8Array(src.byteLength);
+    dst.set(src);
+    return dst.buffer;
+  };
+}
+
 import * as XLSX from 'xlsx';
 import { Lead } from '../types/legacyValidation';
 
@@ -65,6 +80,7 @@ export const generateXlsxBase64 = (leads: Lead[], log?: ExportDiagLog): { base64
 
   const base64Data = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
   if (log) log('EXPORT: binary generated');
+  if (log) log('EXPORT: binary type = Base64 (' + (base64Data ? base64Data.length : 0) + ' chars)');
 
   const dateStr = new Date().toISOString().split('T')[0];
   const filename = 'CRM_' + dateStr + '.xlsx';
@@ -78,7 +94,7 @@ export const exportLeadsToExcel = (leads: Lead[], log?: ExportDiagLog): { succes
 
     const { base64, filename } = generateXlsxBase64(leads, log);
 
-    if (log) log('EXPORT: XLSX binary ready');
+    if (log) log('EXPORT: Blob created');
 
     // Method 1: Trigger HTTP Attachment Download via serverless endpoint
     // This sends 'Content-Disposition: attachment; filename="CRM_..."' which forces iOS Safari to show "Open in Excel / Numbers" prompt

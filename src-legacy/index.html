@@ -27,6 +27,37 @@
           }
           window.CustomEvent = CustomEvent;
         }
+
+        // Safari 9 TypedArray & ArrayBuffer .slice() Polyfill
+        var typedConstructors = [
+          typeof Uint8Array !== 'undefined' ? Uint8Array : null,
+          typeof Uint8ClampedArray !== 'undefined' ? Uint8ClampedArray : null,
+          typeof Int8Array !== 'undefined' ? Int8Array : null,
+          typeof Uint16Array !== 'undefined' ? Uint16Array : null,
+          typeof Int16Array !== 'undefined' ? Int16Array : null,
+          typeof Uint32Array !== 'undefined' ? Uint32Array : null,
+          typeof Int32Array !== 'undefined' ? Int32Array : null,
+          typeof Float32Array !== 'undefined' ? Float32Array : null,
+          typeof Float64Array !== 'undefined' ? Float64Array : null
+        ];
+
+        for (var i = 0; i < typedConstructors.length; i++) {
+          var ctor = typedConstructors[i];
+          if (ctor && !ctor.prototype.slice) {
+            ctor.prototype.slice = function(start, end) {
+              return new this.constructor(this.subarray(start, end));
+            };
+          }
+        }
+
+        if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
+          ArrayBuffer.prototype.slice = function(start, end) {
+            var src = new Uint8Array(this).subarray(start, end);
+            var dst = new Uint8Array(src.byteLength);
+            dst.set(src);
+            return dst.buffer;
+          };
+        }
       })();
     </script>
   </head>
