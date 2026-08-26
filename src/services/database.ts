@@ -533,14 +533,29 @@ class DatabaseService {
   }
 
   /**
-   * Migrate existing leads from localStorage to Supabase (idempotent, skips existing)
+   * Migrate existing leads from localStorage to Supabase (idempotent, skips existing, preserves local backup)
    */
-  public async migrateLocalLeadsToSupabase(): Promise<{ migrated: number; total: number }> {
-    if (this.isNative || this.isTauri) return { migrated: 0, total: 0 };
+  public async migrateLocalLeadsToSupabase(): Promise<{
+    total: number;
+    inserted: number;
+    skipped: number;
+    backupKey?: string;
+  }> {
+    if (this.isNative || this.isTauri) return { total: 0, inserted: 0, skipped: 0 };
     const localLeads = this.getWebLeads();
-    if (localLeads.length === 0) return { migrated: 0, total: 0 };
+    if (localLeads.length === 0) return { total: 0, inserted: 0, skipped: 0 };
 
-    let count = 0;
+    // 1. Keep a local backup until migration is confirmed
+    const backupKey = `offline_crm_leads_backup_${Date.now()}`;
+    try {
+      localStorage.setItem(backupKey, JSON.stringify(localLeads));
+    } catch (e) {
+      console.warn('Could not save localStorage backup:', e);
+    }
+
+    let inserted = 0;
+    let skipped = 0;
+
     for (const lead of localLeads) {
       try {
         const { error } = await supabase
@@ -557,12 +572,26 @@ class DatabaseService {
           .select()
           .single();
 
-        if (!error) count++;
+        if (!error) {
+          inserted++;
+        } else {
+          skipped++;
+        }
       } catch (e) {
-        // Ignore conflict or duplicate errors during migration
+        skipped++;
       }
     }
-    return { migrated: count, total: localLeads.length };
+
+    console.log(
+      `[Migration] Found: ${localLeads.length}, Inserted: ${inserted}, Skipped/Duplicate: ${skipped}. Backup preserved at ${backupKey}`
+    );
+
+    return {
+      total: localLeads.length,
+      inserted,
+      skipped,
+      backupKey,
+    };
   }
 
   private getWebLeads(): Lead[] {
