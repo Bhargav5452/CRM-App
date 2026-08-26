@@ -7,6 +7,45 @@ var LOCAL_STORAGE_KEY = 'offline_crm_leads_v1';
 // In-memory token storage (persists during page session, cleared on reload or explicit signout)
 var inMemoryAccessToken: string | null = null;
 
+export interface DiagnosticLog {
+  id: number;
+  time: string;
+  type: 'REQ' | 'RES' | 'ERR';
+  text: string;
+}
+
+var diagnosticLogs: DiagnosticLog[] = [];
+var diagnosticListeners: Array<(logs: DiagnosticLog[]) => void> = [];
+
+export function addDiagnosticLog(type: 'REQ' | 'RES' | 'ERR', text: string): void {
+  var d = new Date();
+  var timeStr = d.toTimeString().split(' ')[0] + '.' + ('00' + d.getMilliseconds()).slice(-3);
+  var logItem: DiagnosticLog = {
+    id: Date.now() + Math.random(),
+    time: timeStr,
+    type: type,
+    text: text,
+  };
+  diagnosticLogs.unshift(logItem);
+  if (diagnosticLogs.length > 20) {
+    diagnosticLogs.pop();
+  }
+  for (var i = 0; i < diagnosticListeners.length; i++) {
+    try {
+      diagnosticListeners[i](diagnosticLogs.slice(0));
+    } catch (e) {}
+  }
+}
+
+export function subscribeDiagnostics(listener: (logs: DiagnosticLog[]) => void): () => void {
+  diagnosticListeners.push(listener);
+  listener(diagnosticLogs.slice(0));
+  return function () {
+    var idx = diagnosticListeners.indexOf(listener);
+    if (idx !== -1) diagnosticListeners.splice(idx, 1);
+  };
+}
+
 interface XhrResponse<T = any> {
   status: number;
   data: T;
@@ -24,6 +63,11 @@ function sendXhr<T = any>(
       var xhr = new XMLHttpRequest();
       var url = SUPABASE_URL + path;
 
+      addDiagnosticLog(
+        'REQ',
+        'SUPABASE REQUEST:\nMETHOD: ' + method + '\nURL: ' + url + (useAuthToken ? '\nAUTH: Bearer (Admin Token Attached)' : '\nAUTH: apikey (anon)')
+      );
+
       xhr.open(method, url, true);
       xhr.setRequestHeader('apikey', SUPABASE_ANON_KEY);
       xhr.setRequestHeader('Content-Type', 'application/json');
@@ -34,39 +78,44 @@ function sendXhr<T = any>(
         xhr.setRequestHeader('Authorization', 'Bearer ' + SUPABASE_ANON_KEY);
       }
 
-      xhr.onload = function () {
-        var responseData: any = null;
-        if (xhr.responseText) {
-          try {
-            responseData = JSON.parse(xhr.responseText);
-          } catch (e) {
-            responseData = xhr.responseText;
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          var responseData: any = null;
+          if (xhr.responseText) {
+            try {
+              responseData = JSON.parse(xhr.responseText);
+            } catch (e) {
+              responseData = xhr.responseText;
+            }
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            var resSummary = xhr.responseText ? (xhr.responseText.length > 120 ? xhr.responseText.substring(0, 120) + '...' : xhr.responseText) : '(empty 201/204)';
+            addDiagnosticLog(
+              'RES',
+              'SUPABASE RESPONSE:\nHTTP STATUS: ' + xhr.status + '\nRESPONSE BODY: ' + resSummary
+            );
+            resolve({ status: xhr.status, data: responseData });
+          } else {
+            var errSummary = xhr.responseText || xhr.statusText || 'Network failure / CORS blocked';
+            addDiagnosticLog(
+              'ERR',
+              'SUPABASE ERROR:\nHTTP STATUS: ' + xhr.status + '\nERROR BODY: ' + errSummary
+            );
+
+            var errMessage = 'Request failed with status ' + xhr.status;
+            if (responseData && typeof responseData === 'object') {
+              if (responseData.message) errMessage = responseData.message;
+              else if (responseData.error_description) errMessage = responseData.error_description;
+              else if (responseData.msg) errMessage = responseData.msg;
+            }
+            resolve({
+              status: xhr.status,
+              data: responseData,
+              error: errMessage,
+            });
           }
         }
-
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve({ status: xhr.status, data: responseData });
-        } else {
-          var errMessage = 'Request failed with status ' + xhr.status;
-          if (responseData && typeof responseData === 'object') {
-            if (responseData.message) errMessage = responseData.message;
-            else if (responseData.error_description) errMessage = responseData.error_description;
-            else if (responseData.msg) errMessage = responseData.msg;
-          }
-          resolve({
-            status: xhr.status,
-            data: responseData,
-            error: errMessage,
-          });
-        }
-      };
-
-      xhr.onerror = function () {
-        resolve({
-          status: 0,
-          data: null as any,
-          error: 'Network connection failed. Please check internet access.',
-        });
       };
 
       if (body !== undefined && body !== null) {
@@ -75,6 +124,10 @@ function sendXhr<T = any>(
         xhr.send();
       }
     } catch (err: any) {
+      addDiagnosticLog(
+        'ERR',
+        'SUPABASE ERROR:\nHTTP STATUS: 0\nERROR BODY: ' + (err && err.message ? err.message : 'Unknown exception')
+      );
       resolve({
         status: 0,
         data: null as any,

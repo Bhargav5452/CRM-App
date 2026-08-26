@@ -3,17 +3,10 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LegacyNavigation from './components/LegacyNavigation';
 import LegacyHome from './pages/LegacyHome';
 import LegacyCRM from './pages/LegacyCRM';
-import { databaseService } from './services/legacyDatabase';
+import LegacyDiagnostics from './components/LegacyDiagnostics';
 import './styles/legacy-global.css';
 
 const LegacyApp: React.FC = () => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      databaseService.initialize();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <HashRouter>
       <div className="legacy-app-layout">
@@ -30,6 +23,7 @@ const LegacyApp: React.FC = () => {
             <Redirect to="/home" />
           </Switch>
         </main>
+        <LegacyDiagnostics />
       </div>
     </HashRouter>
   );
