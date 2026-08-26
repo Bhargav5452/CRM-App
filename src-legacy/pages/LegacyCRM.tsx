@@ -4,6 +4,7 @@ import LegacyLeadForm from '../components/LegacyLeadForm';
 import LegacyFilterSheet from '../components/LegacyFilterSheet';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
 import { useLegacyLeads } from '../hooks/useLegacyLeads';
+import { legacySupabase } from '../services/legacySupabase';
 import '../../src/pages/CRM/CRM.css';
 
 const getActiveFilterLabel = (filter: FilterState): string | null => {
@@ -33,28 +34,41 @@ const LegacyCRM: React.FC = () => {
     filterState, setFilterState, fetchLeads, updateLead, deleteLeads,
   } = useLegacyLeads();
 
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(legacySupabase.isAuthenticated());
   const [adminPassword, setAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
 
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminPassword === 'Kishoreapn@888') {
-      setLoginError('');
+    if (!adminPassword) {
+      setLoginError('Please enter the admin password.');
+      return;
+    }
+    setIsSubmitting(true);
+    setLoginError('');
+
+    const res = await legacySupabase.signInWithPassword(adminPassword);
+    setIsSubmitting(false);
+
+    if (res.success) {
       setIsUnlocked(true);
+      setAdminPassword('');
+      legacySupabase.migrateLocalLeadsToSupabase().catch(() => {});
       fetchLeads();
     } else {
-      setLoginError('Incorrect password. Please try again.');
+      setLoginError(res.error || 'Incorrect password. Please try again.');
     }
   };
 
   const handleSignOut = () => {
+    legacySupabase.signOut();
     setIsUnlocked(false);
     setAdminPassword('');
     setLoginError('');
@@ -200,8 +214,9 @@ const LegacyCRM: React.FC = () => {
               <button
                 type="submit"
                 className="admin-submit-btn"
+                disabled={isSubmitting}
               >
-                Unlock CRM
+                {isSubmitting ? 'Unlocking...' : 'Unlock CRM'}
               </button>
             </form>
           </div>

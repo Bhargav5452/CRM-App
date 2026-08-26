@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
-import { databaseService } from '../services/legacyDatabase';
+import { legacySupabase } from '../services/legacySupabase';
 
 export const useLegacyLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -10,15 +10,18 @@ export const useLegacyLeads = () => {
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
-    const data = await databaseService.getLeads();
+    const data = await legacySupabase.getLeads();
     setLeads(data);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     fetchLeads();
-    window.addEventListener('crm-lead-added', fetchLeads);
-    return () => window.removeEventListener('crm-lead-added', fetchLeads);
+    const handleLeadAdded = () => {
+      fetchLeads();
+    };
+    window.addEventListener('crm-lead-added', handleLeadAdded);
+    return () => window.removeEventListener('crm-lead-added', handleLeadAdded);
   }, [fetchLeads]);
 
   const filteredLeads = useMemo(() => {
@@ -94,7 +97,7 @@ export const useLegacyLeads = () => {
   }, [leads, searchQuery, filterState]);
 
   const addLead = async (input: LeadFormInput) => {
-    const result = await databaseService.saveLead(input);
+    const result = await legacySupabase.createLead(input);
     if (result.success) {
       await fetchLeads();
       try {
@@ -111,7 +114,7 @@ export const useLegacyLeads = () => {
   };
 
   const updateLead = async (id: number, input: LeadFormInput) => {
-    const result = await databaseService.updateLead(id, input);
+    const result = await legacySupabase.updateLead(id, input);
     if (result.success) {
       await fetchLeads();
     }
@@ -119,7 +122,7 @@ export const useLegacyLeads = () => {
   };
 
   const deleteLeads = async (ids: number[]) => {
-    const result = await databaseService.deleteLeads(ids);
+    const result = await legacySupabase.deleteLeads(ids);
     if (result.success) {
       await fetchLeads();
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeadFormInput, getCountryByCode } from '../types/legacyValidation';
-import { databaseService } from '../services/legacyDatabase';
+import { legacySupabase } from '../services/legacySupabase';
 import '../../src/components/ReviewSheet/ReviewSheet.css';
 
 interface ReviewSheetProps {
@@ -28,10 +28,18 @@ const LegacyReviewSheet: React.FC<ReviewSheetProps> = ({ data, isOpen, onEdit, o
   const handleConfirmSave = async () => {
     setIsSaving(true);
     setErrorMessage(null);
-    const result = await databaseService.saveLead(data);
+    const result = await legacySupabase.createLead(data);
     setIsSaving(false);
     if (result.success) {
-      window.dispatchEvent(new CustomEvent('crm-lead-added'));
+      try {
+        if (typeof window.CustomEvent === 'function') {
+          window.dispatchEvent(new CustomEvent('crm-lead-added'));
+        } else {
+          const ev = document.createEvent('CustomEvent');
+          ev.initCustomEvent('crm-lead-added', false, false, null);
+          window.dispatchEvent(ev);
+        }
+      } catch (e) {}
       onSaveSuccess();
     } else {
       setErrorMessage(result.error || 'Failed to save lead.');
