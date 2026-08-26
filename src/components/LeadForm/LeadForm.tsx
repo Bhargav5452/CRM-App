@@ -197,7 +197,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
           data-lpignore="true"
           data-form-type="other"
           {...nameRegisterRest}
-          name="crm_lead_full_name"
           ref={(e) => {
             nameRegisterRef(e);
             nameInputRef.current = e;
@@ -245,7 +244,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
             data-lpignore="true"
             data-form-type="other"
             {...register('phone')}
-            name="crm_lead_phone"
           />
         </div>
 
@@ -333,7 +331,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
           data-lpignore="true"
           data-form-type="other"
           {...register('email')}
-          name="crm_lead_email"
         />
         {errors.email && (
           <span className="error-message">{errors.email.message}</span>
@@ -358,7 +355,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
             data-lpignore="true"
             data-form-type="other"
             {...register('notes')}
-            name="crm_lead_notes"
           />
           <div className="textarea-footer">
             <span
