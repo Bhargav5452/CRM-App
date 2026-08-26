@@ -1,7 +1,7 @@
 import { Lead } from '../types/legacyValidation';
 import '../../src/components/ReviewSheet/ReviewSheet.css';
 
-export const exportLeadsToExcel = async (leads: Lead[]): Promise<{ success: boolean; filename?: string; error?: string }> => {
+export const exportLeadsToExcel = (leads: Lead[]): { success: boolean; filename?: string; error?: string } => {
   try {
     const headers = ['Full Name', 'Phone Number', 'Home Type', 'Email', 'Notes', 'Created Date'];
     const rows = leads.map((lead) => {
@@ -20,29 +20,47 @@ export const exportLeadsToExcel = async (leads: Lead[]): Promise<{ success: bool
     const dateStr = new Date().toISOString().split('T')[0];
     const filename = 'leads_export_' + dateStr + '.csv';
 
-    const isDownloadSupported = typeof document !== 'undefined' && 'download' in document.createElement('a');
+    let downloaded = false;
 
-    if (isDownloadSupported && typeof Blob !== 'undefined' && typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+    // 1. Try Blob + link download (Desktop / modern mobile)
+    try {
+      if (typeof Blob !== 'undefined' && typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        if (typeof window !== 'undefined' && (window.navigator as any) && (window.navigator as any).msSaveOrOpenBlob) {
+          (window.navigator as any).msSaveOrOpenBlob(blob, filename);
+          return { success: true, filename };
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        downloaded = true;
+        setTimeout(() => {
+          try {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          } catch (e) {}
+        }, 1500);
+      }
+    } catch (blobErr) {
+      downloaded = false;
+    }
+
+    // 2. iOS 9 Mobile Safari fallback: Data URI navigation
+    if (!downloaded) {
+      const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
       const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
+      link.href = encodedUri;
+      link.download = filename;
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       setTimeout(() => {
-        try {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } catch (e) {}
+        try { document.body.removeChild(link); } catch (e) {}
       }, 1500);
-    } else {
-      // iOS 9 Safari fallback: Data URI navigation
-      const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-      const win = window.open(encodedUri, '_blank');
-      if (!win) {
-        window.location.href = encodedUri;
-      }
     }
 
     return { success: true, filename };

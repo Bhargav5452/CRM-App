@@ -99,10 +99,10 @@ const LegacyCRM: React.FC = () => {
     setSelectedIds([]);
   };
 
-  const handleExport = async () => {
+  const handleExport = () => {
     if (isExporting || filteredLeads.length === 0) return;
     setIsExporting(true);
-    const res = await exportLeadsToExcel(filteredLeads);
+    const res = exportLeadsToExcel(filteredLeads);
     setIsExporting(false);
     if (res.success) {
       setExportToast({ show: true, isError: false, message: 'Exported ' + (res.filename || 'file') + ' successfully!' });
