@@ -20,11 +20,16 @@ const TIME_OPTIONS: { id: DateFilterOption; label: string }[] = [
   { id: 'custom', label: 'Custom Date Range' },
 ];
 
+const pad2 = (n: number | string): string => {
+  const s = String(n);
+  return s.length < 2 ? '0' + s : s;
+};
+
 const getTodayStr = (): string => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const month = pad2(now.getMonth() + 1);
+  const day = pad2(now.getDate());
   return year + '-' + month + '-' + day;
 };
 
@@ -34,7 +39,7 @@ const formatToDDMMYY = (dateStr?: string): string => {
   if (parts.length !== 3) return dateStr;
   const y = parts[0]; const m = parts[1]; const d = parts[2];
   const yy = y.slice(-2);
-  return d.padStart(2,'0') + '/' + m.padStart(2,'0') + '/' + yy;
+  return pad2(d) + '/' + pad2(m) + '/' + yy;
 };
 
 const LegacyFilterSheet: React.FC<FilterSheetProps> = ({ isOpen, onClose, filterState, onApply, onReset }) => {
