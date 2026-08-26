@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lead } from '../types/legacyValidation';
+import { exportLeadsToExcel, generateXlsxBase64 } from '../services/legacyExport';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -9,25 +10,34 @@ interface ExportModalProps {
 
 const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads }) => {
   const [copied, setCopied] = useState(false);
+  const [diagLogs, setDiagLogs] = useState<{ text: string; isError?: boolean }[]>([]);
 
   if (!isOpen) return null;
 
-  const headers = ['Full Name', 'Phone Number', 'Home Type', 'Email', 'Notes', 'Created Date'];
-  const rows = leads.map((lead) => {
-    const countryCode = lead.country_code || '+91';
-    const phone = lead.phone || '';
+  const addDiag = (step: string, isError?: boolean) => {
+    setDiagLogs((prev) => prev.concat([{ text: step, isError }]));
+  };
+
+  const handleExportExcel = () => {
+    setDiagLogs([]);
+    exportLeadsToExcel(leads, addDiag);
+  };
+
+  const headers = ['S.No', 'Name', 'Phone Number (with code)', 'Phone Number', 'Home Type', 'Email', 'Notes', 'Created Date'];
+  const chronologicalLeads = leads.slice().reverse();
+  const rows = chronologicalLeads.map((lead, index) => {
+    const code = lead.country_code ? lead.country_code.trim() : '';
+    const phone = lead.phone ? lead.phone.trim() : '';
+    const fullPhone = code ? (code + ' ' + phone) : phone;
     const name = (lead.name || '').replace(/"/g, '""');
-    const fullPhone = (countryCode + ' ' + phone).replace(/"/g, '""');
     const homeType = (lead.home_type || '').replace(/"/g, '""');
     const email = (lead.email || '').replace(/"/g, '""');
     const notes = (lead.notes || '').replace(/"/g, '""');
     const date = (lead.created_at || '').replace(/"/g, '""');
-    return ['"' + name + '"', '"' + fullPhone + '"', '"' + homeType + '"', '"' + email + '"', '"' + notes + '"', '"' + date + '"'].join(',');
+    return [index + 1, '"' + name + '"', '"' + fullPhone + '"', '"' + phone + '"', '"' + homeType + '"', '"' + email + '"', '"' + notes + '"', '"' + date + '"'].join(',');
   });
 
-  const csvText = [headers.join(',')].concat(rows).join('\r\n');
-  const dateStr = new Date().toISOString().split('T')[0];
-  const filename = 'leads_export_' + dateStr + '.csv';
+  const csvText = headers.join(',') + '\r\n' + rows.join('\r\n');
 
   const handleCopy = () => {
     try {
@@ -50,24 +60,8 @@ const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads 
     }
   };
 
-  const handleDownload = () => {
-    try {
-      const encodedUri = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csvText);
-      const link = document.createElement('a');
-      link.href = encodedUri;
-      link.download = filename;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        try { document.body.removeChild(link); } catch (e) {}
-      }, 1000);
-    } catch (e) {
-      window.open('data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csvText), '_blank');
-    }
-  };
-
   const handleEmail = () => {
+    const dateStr = new Date().toISOString().split('T')[0];
     const subject = encodeURIComponent('Leads Export - ' + dateStr);
     const body = encodeURIComponent('Leads Data Export (' + leads.length + ' leads):\n\n' + csvText);
     window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
@@ -78,9 +72,9 @@ const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads 
       <div className="review-sheet-container" style={{ maxWidth: 540 }} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h2 className="sheet-title" style={{ margin: 0 }}>Export Leads</h2>
+            <h2 className="sheet-title" style={{ margin: 0 }}>Export Leads (.xlsx)</h2>
             <p className="sheet-subtitle" style={{ marginTop: 4 }}>
-              {leads.length} {leads.length === 1 ? 'lead' : 'leads'} ready to export
+              {leads.length} {leads.length === 1 ? 'lead' : 'leads'} (Chronological order)
             </p>
           </div>
           <button
@@ -96,55 +90,41 @@ const LegacyExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, leads 
           </button>
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#71717A', textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.04em' }}>
-            CSV Data Preview
-          </label>
-          <textarea
-            id="legacy_export_textarea"
-            readOnly
-            value={csvText}
-            rows={5}
-            style={{
-              width: '100%',
-              boxSizing: 'border-box',
-              fontFamily: 'monospace',
-              fontSize: 12,
-              padding: '10px 12px',
-              backgroundColor: '#F4F4F5',
-              border: '1px solid #E4E4E7',
-              borderRadius: 10,
-              color: '#09090B',
-              resize: 'none',
-            }}
-          />
-        </div>
+        {diagLogs.length > 0 && (
+          <div style={{ backgroundColor: '#18181B', borderRadius: 10, padding: '10px 12px', marginBottom: 16, fontFamily: 'monospace', fontSize: 11 }}>
+            {diagLogs.map((log, idx) => (
+              <div key={idx} style={{ color: log.isError ? '#F87171' : '#4ADE80', margin: '2px 0' }}>
+                {log.text}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="sheet-actions">
           <button
             type="button"
             className="btn-confirm"
-            onClick={handleCopy}
-            style={{ backgroundColor: copied ? '#16A34A' : '#09090B' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            <span>{copied ? 'Copied to Clipboard!' : 'Copy CSV to Clipboard'}</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn-edit"
-            onClick={handleDownload}
+            onClick={handleExportExcel}
+            style={{ backgroundColor: '#16A34A' }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span>Download / Open CSV File</span>
+            <span>Download Excel (.xlsx)</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-edit"
+            onClick={handleCopy}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span>{copied ? 'Copied to Clipboard!' : 'Copy to Clipboard (CSV)'}</span>
           </button>
 
           <button

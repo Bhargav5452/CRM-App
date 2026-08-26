@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   LeadFormInput, HOME_TYPES, COUNTRY_CODES,
   DEFAULT_COUNTRY_CODE, CountryCode, getCountryByCode,
@@ -98,11 +98,19 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
   }, [isCountryOpen]);
 
   const handleChange = (field: keyof LeadFormInput, value: string) => {
-    setFormData((prev) => Object.assign({}, prev, { [field]: value }));
+    setFormData((prev) => {
+      const next = Object.assign({}, prev);
+      (next as any)[field] = value;
+      return next;
+    });
   };
 
   const handleBlur = (field: keyof LeadFormInput) => {
-    setTouched((prev) => Object.assign({}, prev, { [field]: true }));
+    setTouched((prev) => {
+      const next = Object.assign({}, prev);
+      (next as any)[field] = true;
+      return next;
+    });
   };
 
   const handleSelectHomeType = (type: string) => {
