@@ -271,8 +271,8 @@ class DatabaseService {
         };
         return { success: true, lead: newLead };
       } else {
-        // Modern Web: Insert directly into Supabase
-        const { data, error } = await supabase
+        // Modern Web: Insert directly into Supabase (RLS allows INSERT to anon without SELECT)
+        const { error } = await supabase
           .from('leads')
           .insert({
             name: input.name.trim(),
@@ -281,9 +281,9 @@ class DatabaseService {
             home_type: input.home_type,
             email: input.email ? input.email.trim() : '',
             notes: input.notes ? input.notes.trim() : '',
-          })
-          .select()
-          .single();
+            created_at: now,
+            updated_at: now,
+          });
 
         if (error) {
           if (
@@ -301,15 +301,15 @@ class DatabaseService {
         }
 
         const newLead: Lead = {
-          id: Number(data.id),
-          name: data.name,
-          phone: data.phone,
-          country_code: data.country_code,
-          home_type: data.home_type,
-          email: data.email || '',
-          notes: data.notes || '',
-          created_at: data.created_at,
-          updated_at: data.updated_at,
+          id: Date.now(),
+          name: input.name,
+          phone: input.phone,
+          country_code: input.country_code,
+          home_type: input.home_type,
+          email: input.email || '',
+          notes: input.notes || '',
+          created_at: now,
+          updated_at: now,
         };
 
         // Cache in local storage for offline resiliency
