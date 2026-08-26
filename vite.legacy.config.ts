@@ -14,11 +14,11 @@ export default defineConfig({
     react(),
     legacy({
       targets: ["safari 9", "ios_saf 9"],
-      polyfills: true,
+      polyfills: false,
       additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
       modernPolyfills: false,
       renderLegacyChunks: true,
-      // exclude: ["core-js/modules/es.string.replace", "core-js/modules/es.regexp.exec"],
+      renderModernChunks: false,
     }),
   ],
   resolve: {
