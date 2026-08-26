@@ -12,19 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      #diagnostic-log {
-        position: relative;
-        background: #18181b;
-        color: #4ade80;
-        font-family: monospace;
-        font-size: 11px;
-        padding: 6px 12px;
-        z-index: 999999;
-        border-bottom: 2px solid #22c55e;
-      }
-      .diag-err { color: #f87171 !important; font-weight: bold; }
-    </style>
     <script>
       (function() {
         if (!window.location.origin) {
@@ -40,60 +27,10 @@
           }
           window.CustomEvent = CustomEvent;
         }
-
-        function appendDiag(text, isErr) {
-          var el = document.getElementById('diagnostic-log');
-          if (!el) {
-            el = document.createElement('div');
-            el.id = 'diagnostic-log';
-            if (document.body) document.body.insertBefore(el, document.body.firstChild);
-          }
-          if (el) {
-            var div = document.createElement('div');
-            if (isErr) div.className = 'diag-err';
-            div.textContent = text;
-            el.appendChild(div);
-          }
-        }
-        window.__logDiag = appendDiag;
-
-        window.onerror = function(msg, url, line, col, error) {
-          appendDiag('ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')', true);
-          return false;
-        };
-
-        window.addEventListener('unhandledrejection', function(e) {
-          var reason = e.reason || {};
-          appendDiag('PROMISE ERR: ' + (reason.message || reason) + (reason.stack ? ' | ' + reason.stack : ''), true);
-        });
-
-        var polyfillCheck = setInterval(function() {
-          if (window.System && typeof window.System.import === 'function') {
-            clearInterval(polyfillCheck);
-            appendDiag('[2/4] Polyfills & SystemJS ready');
-
-            var originalImport = window.System.import;
-            window.System.import = function() {
-              return originalImport.apply(this, arguments).catch(function(err) {
-                appendDiag('SYSTEM.IMPORT ERR: ' + (err && (err.message || err.stack) ? (err.message || err.stack) : err), true);
-                throw err;
-              });
-            };
-          }
-        }, 50);
-
-        setTimeout(function() {
-          if (!window.System) {
-            appendDiag('BOOTSTRAP TIMEOUT: polyfills-legacy.js did not initialize window.System after 8s', true);
-          }
-        }, 8000);
       })();
     </script>
   </head>
   <body>
-    <div id="diagnostic-log">
-      <div>[1/4] Legacy HTML loaded</div>
-    </div>
     <div id="root"></div>
     <script type="module" src="./main.tsx"></script>
   </body>
