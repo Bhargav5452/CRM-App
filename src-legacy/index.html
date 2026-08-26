@@ -31,19 +31,56 @@
     </style>
     <script>
       (function() {
-        window.onerror = function(msg, url, line, col, error) {
+        if (!window.location.origin) {
+          window.location.origin = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+        }
+
+        function appendDiag(text, isErr) {
           var el = document.getElementById('diagnostic-log');
           if (!el) {
             el = document.createElement('div');
             el.id = 'diagnostic-log';
-            document.body.insertBefore(el, document.body.firstChild);
+            if (document.body) document.body.insertBefore(el, document.body.firstChild);
           }
-          var div = document.createElement('div');
-          div.className = 'diag-err';
-          div.textContent = 'ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')';
-          el.appendChild(div);
+          if (el) {
+            var div = document.createElement('div');
+            if (isErr) div.className = 'diag-err';
+            div.textContent = text;
+            el.appendChild(div);
+          }
+        }
+        window.__logDiag = appendDiag;
+
+        window.onerror = function(msg, url, line, col, error) {
+          appendDiag('ERR: ' + msg + ' (at ' + (url ? url.split('/').pop() : 'inline') + ':' + line + ':' + (col || 0) + ')', true);
           return false;
         };
+
+        window.addEventListener('unhandledrejection', function(e) {
+          var reason = e.reason || {};
+          appendDiag('PROMISE ERR: ' + (reason.message || reason) + (reason.stack ? ' | ' + reason.stack : ''), true);
+        });
+
+        var polyfillCheck = setInterval(function() {
+          if (window.System && typeof window.System.import === 'function') {
+            clearInterval(polyfillCheck);
+            appendDiag('[2/4] Polyfills & SystemJS ready');
+
+            var originalImport = window.System.import;
+            window.System.import = function() {
+              return originalImport.apply(this, arguments).catch(function(err) {
+                appendDiag('SYSTEM.IMPORT ERR: ' + (err && (err.message || err.stack) ? (err.message || err.stack) : err), true);
+                throw err;
+              });
+            };
+          }
+        }, 50);
+
+        setTimeout(function() {
+          if (!window.System) {
+            appendDiag('BOOTSTRAP TIMEOUT: polyfills-legacy.js did not initialize window.System after 8s', true);
+          }
+        }, 8000);
       })();
     </script>
   </head>
