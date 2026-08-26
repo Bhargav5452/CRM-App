@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonContent, IonPage, IonIcon, IonSpinner, useIonViewWillEnter } from '@ionic/react';
+import { IonContent, IonPage, IonIcon, IonSpinner, useIonViewWillEnter, useIonViewDidLeave } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Session } from '@supabase/supabase-js';
@@ -114,6 +114,14 @@ const CRM: React.FC = () => {
   useIonViewWillEnter(() => {
     setSelectedIds([]);
     fetchLeads();
+  });
+
+  // Automatically lock session when leaving the CRM page
+  useIonViewDidLeave(() => {
+    if (isWeb) {
+      authService.signOut().catch(() => {});
+      setSession(null);
+    }
   });
 
   // Body scroll lock when modal is open
