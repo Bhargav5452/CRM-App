@@ -1,6 +1,6 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Lead, LeadFormInput, FilterState, DEFAULT_FILTER_STATE } from '../types/legacyValidation';
-import { databaseService } from '../../src/services/database';
+import { databaseService } from '../services/legacyDatabase';
 
 export const useLegacyLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);

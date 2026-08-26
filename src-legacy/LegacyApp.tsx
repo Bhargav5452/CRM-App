@@ -1,9 +1,9 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LegacyNavigation from './components/LegacyNavigation';
 import LegacyHome from './pages/LegacyHome';
 import LegacyCRM from './pages/LegacyCRM';
-import { databaseService } from '../src/services/database';
+import { databaseService } from './services/legacyDatabase';
 import './styles/legacy-global.css';
 
 const logDiag = (msg: string) => {

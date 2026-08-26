@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeadFormInput, getCountryByCode } from '../types/legacyValidation';
-import { databaseService } from '../../src/services/database';
+import { databaseService } from '../services/legacyDatabase';
 
 interface ReviewSheetProps {
   data: LeadFormInput | null;
