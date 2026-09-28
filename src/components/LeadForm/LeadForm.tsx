@@ -213,9 +213,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
           Phone Number <span className="required-asterisk">*</span>
         </label>
         <div
-          className={`phone-input-container ${
-            errors.phone || errors.country_code ? 'input-error' : ''
-          }`}
+          className={`phone-input-container ${errors.phone || errors.country_code ? 'input-error' : ''
+            }`}
         >
           <div
             className="country-picker-trigger"
@@ -265,9 +264,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
           role="button"
           aria-haspopup="listbox"
           aria-expanded={isHomeTypeOpen}
-          className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${
-            errors.home_type ? 'input-error' : ''
-          }`}
+          className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${errors.home_type ? 'input-error' : ''
+            }`}
           onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -358,9 +356,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
           />
           <div className="textarea-footer">
             <span
-              className={`char-counter ${
-                notesValue.length === 300 ? 'max-reached' : ''
-              }`}
+              className={`char-counter ${notesValue.length === 300 ? 'max-reached' : ''
+                }`}
             >
               {notesValue.length}/300
             </span>
@@ -397,12 +394,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
             <div className="card-header">
               <div className="header-text">
                 <h1 className="card-title">
-                  {defaultValues ? 'Edit Client' : 'Client Info'}
+                  {defaultValues ? 'Edit client details' : 'Fill your details to get project info'}
                 </h1>
                 <p className="card-subtitle">
                   {defaultValues
-                    ? 'Update client details below'
-                    : 'Enter the details of your client'}
+                    ? 'Update details below'
+                    : 'Enter your details below'}
                 </p>
               </div>
             </div>
@@ -472,9 +469,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
                   <div
                     key={`pinned-${country.iso}`}
                     ref={isSelected ? selectedCountryRef : null}
-                    className={`country-list-item ${
-                      isSelected ? 'selected' : ''
-                    } ${isKeyFocused ? 'key-focused' : ''}`}
+                    className={`country-list-item ${isSelected ? 'selected' : ''
+                      } ${isKeyFocused ? 'key-focused' : ''}`}
                     onClick={() => handleSelectCountry(country)}
                   >
                     <span className="country-item-iso">{country.iso}</span>
@@ -507,9 +503,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
                       <div
                         key={country.iso}
                         ref={isSelected ? selectedCountryRef : null}
-                        className={`country-list-item ${
-                          isSelected ? 'selected' : ''
-                        } ${isKeyFocused ? 'key-focused' : ''}`}
+                        className={`country-list-item ${isSelected ? 'selected' : ''
+                          } ${isKeyFocused ? 'key-focused' : ''}`}
                         onClick={() => handleSelectCountry(country)}
                       >
                         <span className="country-item-iso">{country.iso}</span>
