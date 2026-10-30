@@ -288,12 +288,14 @@ class DatabaseService {
           name: input.name.trim(),
           phone: input.phone.trim(),
           country_code: input.country_code.trim(),
-          home_type: input.home_type,
+          home_type: input.home_type || '2BHK',
           email: input.email ? input.email.trim() : '',
           notes: input.notes ? input.notes.trim() : '',
           created_at: now,
           updated_at: now,
           sync_status: 'pending_sync',
+          form_config_id: input.form_config_id || null,
+          custom_data: input.custom_data || {},
         };
 
         // 1. Save locally FIRST
@@ -325,18 +327,27 @@ class DatabaseService {
    */
   private async syncSingleLead(lead: Lead): Promise<boolean> {
     try {
+      const payload: Record<string, unknown> = {
+        name: lead.name,
+        phone: lead.phone,
+        country_code: lead.country_code || '+91',
+        home_type: lead.home_type,
+        email: lead.email || '',
+        notes: lead.notes || '',
+        created_at: lead.created_at,
+        updated_at: lead.updated_at,
+      };
+
+      if (lead.form_config_id) {
+        payload.form_config_id = lead.form_config_id;
+      }
+      if (lead.custom_data && Object.keys(lead.custom_data).length > 0) {
+        payload.custom_data = lead.custom_data;
+      }
+
       const { error } = await supabase
         .from('leads')
-        .insert({
-          name: lead.name,
-          phone: lead.phone,
-          country_code: lead.country_code || '+91',
-          home_type: lead.home_type,
-          email: lead.email || '',
-          notes: lead.notes || '',
-          created_at: lead.created_at,
-          updated_at: lead.updated_at,
-        });
+        .insert(payload);
 
       if (!error || error.code === '23505' || error.message.includes('unique') || error.message.includes('duplicate')) {
         // Mark synced in local store
@@ -582,6 +593,8 @@ class DatabaseService {
             created_at: String(item.created_at || new Date().toISOString()),
             updated_at: String(item.updated_at || new Date().toISOString()),
             sync_status: 'synced',
+            form_config_id: item.form_config_id ? Number(item.form_config_id) : null,
+            custom_data: (typeof item.custom_data === 'object' && item.custom_data !== null) ? item.custom_data as Record<string, unknown> : {},
           }));
 
           this.saveWebLeads(leads);

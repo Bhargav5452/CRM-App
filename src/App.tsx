@@ -8,6 +8,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import Navigation from './components/Navigation/Navigation';
 import Home from './pages/Home/Home';
 import CRM from './pages/CRM/CRM';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 import { databaseService } from './services/database';
 
 /* Core CSS required for Ionic components */
@@ -63,6 +64,7 @@ const App: React.FC = () => {
             <IonRouterOutlet id="main-content" animated={false}>
               <Route exact path="/home" component={Home} />
               <Route exact path="/crm" component={CRM} />
+              <Route exact path="/admin" component={AdminDashboard} />
               <Route exact path="/">
                 <Redirect to="/home" />
               </Route>

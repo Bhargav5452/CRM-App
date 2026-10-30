@@ -12,6 +12,8 @@ import {
   CountryCode,
   getCountryByCode,
 } from '../../types/lead';
+import { FormConfig, DEFAULT_FORM_CONFIG } from '../../types/formConfig';
+import { formConfigService } from '../../services/formConfigService';
 import './LeadForm.css';
 
 interface LeadFormProps {
@@ -19,14 +21,43 @@ interface LeadFormProps {
   defaultValues?: Partial<LeadFormInput>;
   submitButtonText?: string;
   hideHeader?: boolean;
+  config?: FormConfig;
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({
   onSubmit,
   defaultValues,
-  submitButtonText = 'Review Details',
+  submitButtonText,
   hideHeader = false,
+  config,
 }) => {
+  const [formConfig, setFormConfig] = useState<FormConfig>(
+    () => config || formConfigService.getCachedConfig()
+  );
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>(
+    () => (defaultValues?.custom_data as Record<string, unknown>) || {}
+  );
+
+  useEffect(() => {
+    if (config) {
+      setFormConfig(config);
+    } else {
+      formConfigService.getPublishedConfig().then((c) => {
+        setFormConfig(c);
+      });
+    }
+  }, [config]);
+
+  const nameConfig = formConfig.fields.find((f) => f.key === 'name');
+  const phoneConfig = formConfig.fields.find((f) => f.key === 'phone');
+  const homeTypeConfig = formConfig.fields.find((f) => f.key === 'home_type');
+  const emailConfig = formConfig.fields.find((f) => f.key === 'email');
+  const notesConfig = formConfig.fields.find((f) => f.key === 'notes');
+  const customFields = formConfig.fields.filter((f) => !f.is_core && f.is_visible);
+  const availableHomeTypes =
+    homeTypeConfig?.options && homeTypeConfig.options.length > 0
+      ? homeTypeConfig.options
+      : HOME_TYPES;
   const [isHomeTypeOpen, setIsHomeTypeOpen] = useState(false);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
@@ -171,9 +202,22 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   };
 
+  const handleCustomChange = (key: string, val: unknown) => {
+    setCustomValues((prev) => ({ ...prev, [key]: val }));
+  };
+
+  const handleInternalSubmit = (data: LeadFormInput) => {
+    const finalData: LeadFormInput = {
+      ...data,
+      form_config_id: formConfig.id || null,
+      custom_data: customValues,
+    };
+    onSubmit(finalData);
+  };
+
   const formContent = (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleInternalSubmit)}
       className="lead-form-grid"
       autoComplete="off"
       action="javascript:void(0);"
@@ -183,12 +227,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
       {/* Full Name */}
       <div className="form-field-group">
         <label htmlFor="lead_full_name" className="field-label">
-          Full Name <span className="required-asterisk">*</span>
+          {nameConfig?.label || 'Full Name'} <span className="required-asterisk">*</span>
         </label>
         <input
           id="lead_full_name"
           type="text"
-          placeholder="Enter full name"
+          placeholder={nameConfig?.placeholder || 'Enter full name'}
           className={`custom-input ${errors.name ? 'input-error' : ''}`}
           autoComplete="off"
           autoCorrect="off"
@@ -210,7 +254,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       {/* Phone Number with Country Code Selector */}
       <div className="form-field-group" ref={countryPickerRef}>
         <label htmlFor="lead_phone" className="field-label">
-          Phone Number <span className="required-asterisk">*</span>
+          {phoneConfig?.label || 'Phone Number'} <span className="required-asterisk">*</span>
         </label>
         <div
           className={`phone-input-container ${errors.phone || errors.country_code ? 'input-error' : ''
@@ -234,7 +278,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             type="tel"
             inputMode="numeric"
             maxLength={activeCountry.digits}
-            placeholder={`Enter ${activeCountry.digits}-digit number`}
+            placeholder={phoneConfig?.placeholder || `Enter ${activeCountry.digits}-digit number`}
             className="phone-number-input"
             autoComplete="off"
             autoCorrect="off"
@@ -254,119 +298,183 @@ const LeadForm: React.FC<LeadFormProps> = ({
       </div>
 
       {/* Home Type */}
-      <div className="form-field-group" ref={homeTypeRef}>
-        <label htmlFor="home_type_trigger" className="field-label">
-          Home Type <span className="required-asterisk">*</span>
-        </label>
-        <div
-          id="home_type_trigger"
-          tabIndex={0}
-          role="button"
-          aria-haspopup="listbox"
-          aria-expanded={isHomeTypeOpen}
-          className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${errors.home_type ? 'input-error' : ''
-            }`}
-          onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setIsHomeTypeOpen(!isHomeTypeOpen);
-            }
-          }}
-        >
-          {homeTypeValue ? (
-            <span className="dropdown-value">{homeTypeValue}</span>
-          ) : (
-            <span className="dropdown-placeholder">Select home type</span>
-          )}
-          <IonIcon
-            icon={chevronDownOutline}
-            className={`select-chevron ${isHomeTypeOpen ? 'open' : ''}`}
-          />
-        </div>
-
-        {isHomeTypeOpen && (
-          <div className="custom-dropdown-menu" role="listbox">
-            {HOME_TYPES.map((type) => {
-              const isSelected = homeTypeValue === type;
-              return (
-                <div
-                  key={type}
-                  role="option"
-                  aria-selected={isSelected}
-                  className={`dropdown-option ${isSelected ? 'selected' : ''}`}
-                  onClick={() => handleSelectHomeType(type)}
-                >
-                  <span>{type}</span>
-                  {isSelected && (
-                    <IonIcon icon={checkmarkOutline} className="option-check" />
-                  )}
-                </div>
-              );
-            })}
+      {homeTypeConfig?.is_visible !== false && (
+        <div className="form-field-group" ref={homeTypeRef}>
+          <label htmlFor="home_type_trigger" className="field-label">
+            {homeTypeConfig?.label || 'Home Type'} {homeTypeConfig?.required && <span className="required-asterisk">*</span>}
+          </label>
+          <div
+            id="home_type_trigger"
+            tabIndex={0}
+            role="button"
+            aria-haspopup="listbox"
+            aria-expanded={isHomeTypeOpen}
+            className={`custom-dropdown-trigger ${isHomeTypeOpen ? 'focused' : ''} ${errors.home_type ? 'input-error' : ''
+              }`}
+            onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setIsHomeTypeOpen(!isHomeTypeOpen);
+              }
+            }}
+          >
+            {homeTypeValue ? (
+              <span className="dropdown-value">{homeTypeValue}</span>
+            ) : (
+              <span className="dropdown-placeholder">{homeTypeConfig?.placeholder || 'Select home type'}</span>
+            )}
+            <IonIcon
+              icon={chevronDownOutline}
+              className={`select-chevron ${isHomeTypeOpen ? 'open' : ''}`}
+            />
           </div>
-        )}
 
-        {errors.home_type && (
-          <span className="error-message">{errors.home_type.message}</span>
-        )}
-      </div>
+          {isHomeTypeOpen && (
+            <div className="custom-dropdown-menu" role="listbox">
+              {availableHomeTypes.map((type) => {
+                const isSelected = homeTypeValue === type;
+                return (
+                  <div
+                    key={type}
+                    role="option"
+                    aria-selected={isSelected}
+                    className={`dropdown-option ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleSelectHomeType(type)}
+                  >
+                    <span>{type}</span>
+                    {isSelected && (
+                      <IonIcon icon={checkmarkOutline} className="option-check" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {errors.home_type && (
+            <span className="error-message">{errors.home_type.message}</span>
+          )}
+        </div>
+      )}
 
       {/* Email */}
-      <div className="form-field-group">
-        <label htmlFor="lead_email" className="field-label">
-          Email
-        </label>
-        <input
-          id="lead_email"
-          type="email"
-          placeholder="Enter email (optional)"
-          className={`custom-input ${errors.email ? 'input-error' : ''}`}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          data-lpignore="true"
-          data-form-type="other"
-          {...register('email')}
-        />
-        {errors.email && (
-          <span className="error-message">{errors.email.message}</span>
-        )}
-      </div>
-
-      {/* Notes */}
-      <div className="form-field-group form-field-full">
-        <label htmlFor="lead_notes" className="field-label">
-          Notes
-        </label>
-        <div className="textarea-container">
-          <textarea
-            id="lead_notes"
-            maxLength={300}
-            placeholder="Add notes (optional)"
-            className={`custom-textarea ${errors.notes ? 'input-error' : ''}`}
+      {emailConfig?.is_visible !== false && (
+        <div className="form-field-group">
+          <label htmlFor="lead_email" className="field-label">
+            {emailConfig?.label || 'Email'} {emailConfig?.required && <span className="required-asterisk">*</span>}
+          </label>
+          <input
+            id="lead_email"
+            type="email"
+            placeholder={emailConfig?.placeholder || 'Enter email (optional)'}
+            className={`custom-input ${errors.email ? 'input-error' : ''}`}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="none"
             spellCheck={false}
             data-lpignore="true"
             data-form-type="other"
-            {...register('notes')}
+            {...register('email')}
           />
-          <div className="textarea-footer">
-            <span
-              className={`char-counter ${notesValue.length === 300 ? 'max-reached' : ''
-                }`}
-            >
-              {notesValue.length}/300
-            </span>
-          </div>
+          {errors.email && (
+            <span className="error-message">{errors.email.message}</span>
+          )}
         </div>
-        {errors.notes && (
-          <span className="error-message">{errors.notes.message}</span>
-        )}
-      </div>
+      )}
+
+      {/* Notes */}
+      {notesConfig?.is_visible !== false && (
+        <div className="form-field-group form-field-full">
+          <label htmlFor="lead_notes" className="field-label">
+            {notesConfig?.label || 'Notes'} {notesConfig?.required && <span className="required-asterisk">*</span>}
+          </label>
+          <div className="textarea-container">
+            <textarea
+              id="lead_notes"
+              maxLength={300}
+              placeholder={notesConfig?.placeholder || 'Add notes (optional)'}
+              className={`custom-textarea ${errors.notes ? 'input-error' : ''}`}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
+              {...register('notes')}
+            />
+            <div className="textarea-footer">
+              <span
+                className={`char-counter ${notesValue.length === 300 ? 'max-reached' : ''
+                  }`}
+              >
+                {notesValue.length}/300
+              </span>
+            </div>
+          </div>
+          {errors.notes && (
+            <span className="error-message">{errors.notes.message}</span>
+          )}
+        </div>
+      )}
+
+      {/* Dynamic Custom Fields */}
+      {customFields.map((cf) => (
+        <div
+          key={cf.id}
+          className={`form-field-group ${cf.type === 'textarea' ? 'form-field-full' : ''}`}
+        >
+          <label htmlFor={`custom_${cf.key}`} className="field-label">
+            {cf.label} {cf.required && <span className="required-asterisk">*</span>}
+          </label>
+          {cf.type === 'textarea' ? (
+            <textarea
+              id={`custom_${cf.key}`}
+              className="custom-textarea"
+              placeholder={cf.placeholder || `Enter ${cf.label}`}
+              value={String(customValues[cf.key] || '')}
+              onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+            />
+          ) : cf.type === 'dropdown' ? (
+            <select
+              id={`custom_${cf.key}`}
+              className="custom-input"
+              value={String(customValues[cf.key] || '')}
+              onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+              style={{ appearance: 'auto' }}
+            >
+              <option value="">{cf.placeholder || `Select ${cf.label}`}</option>
+              {(cf.options || []).map((opt, i) => (
+                <option key={i} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          ) : cf.type === 'checkbox' ? (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, fontSize: 14.5, cursor: 'pointer' }}>
+              <input
+                id={`custom_${cf.key}`}
+                type="checkbox"
+                checked={Boolean(customValues[cf.key])}
+                onChange={(e) => handleCustomChange(cf.key, e.target.checked)}
+              />
+              <span>{cf.placeholder || cf.label}</span>
+            </label>
+          ) : (
+            <input
+              id={`custom_${cf.key}`}
+              type={cf.type === 'number' ? 'number' : cf.type === 'email' ? 'email' : 'text'}
+              className="custom-input"
+              placeholder={cf.placeholder || `Enter ${cf.label}`}
+              value={String(customValues[cf.key] || '')}
+              onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+            />
+          )}
+          {cf.description && (
+            <span style={{ fontSize: 12, color: '#71717A' }}>{cf.description}</span>
+          )}
+        </div>
+      ))}
 
       {/* Form Action */}
       <div className="form-actions">
@@ -376,7 +484,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           className="btn-submit"
           title={!isValid ? 'Fill required fields (*)' : undefined}
         >
-          <span>{submitButtonText}</span>
+          <span>{submitButtonText || formConfig.submit_button_text || 'Review Details'}</span>
           <IonIcon icon={arrowForwardOutline} />
         </button>
       </div>
@@ -394,12 +502,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
             <div className="card-header">
               <div className="header-text">
                 <h1 className="card-title">
-                  {defaultValues ? 'Edit client details' : 'Fill your details to get project info'}
+                  {defaultValues ? 'Edit client details' : formConfig.title}
                 </h1>
                 <p className="card-subtitle">
                   {defaultValues
                     ? 'Update details below'
-                    : 'Enter your details below'}
+                    : formConfig.subtitle}
                 </p>
               </div>
             </div>

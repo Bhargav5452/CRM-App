@@ -9,6 +9,8 @@ export interface Lead {
   created_at: string;
   updated_at: string;
   sync_status?: 'synced' | 'pending_sync';
+  form_config_id?: number | null;
+  custom_data?: any;
 }
 
 export interface CountryCode {
@@ -91,6 +93,8 @@ export interface LeadFormInput {
   home_type: string;
   email: string;
   notes: string;
+  form_config_id?: number | null;
+  custom_data?: any;
 }
 
 export type DateFilterOption =

@@ -88,6 +88,14 @@ const LegacyReviewSheet: React.FC<ReviewSheetProps> = ({ data, isOpen, onEdit, o
             <span className="review-label">Notes</span>
             <span className={"review-value" + (!data.notes ? ' empty-value' : '')}>{data.notes || 'No notes added'}</span>
           </div>
+          {data.custom_data && Object.keys(data.custom_data).map(function (k) {
+            return (
+              <div key={k} className="review-item">
+                <span className="review-label">{k}</span>
+                <span className="review-value">{String(data.custom_data![k])}</span>
+              </div>
+            );
+          })}
         </div>
 
         <div className="sheet-actions">

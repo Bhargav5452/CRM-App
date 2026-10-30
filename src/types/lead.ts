@@ -11,6 +11,8 @@ export interface Lead {
   created_at: string;
   updated_at: string;
   sync_status?: 'synced' | 'pending_sync';
+  form_config_id?: number | null;
+  custom_data?: Record<string, unknown>;
 }
 
 export interface CountryCode {
@@ -98,10 +100,11 @@ export const leadFormSchema = z
       .string()
       .min(1, 'Phone is required')
       .regex(/^[0-9]+$/, 'Phone must contain only numbers'),
-    home_type: z.string().min(1, 'Home type is required'),
-    email: z.string().email('Enter a valid email').or(z.literal('')),
-    notes: z.string().max(300, 'Notes must be under 300 characters'),
+    home_type: z.string().optional(),
+    email: z.string().email('Enter a valid email').or(z.literal('')).optional(),
+    notes: z.string().max(300, 'Notes must be under 300 characters').optional(),
   })
+  .passthrough()
   .refine(
     (data) => {
       const country = getCountryByCode(data.country_code);
@@ -114,7 +117,11 @@ export const leadFormSchema = z
     }
   );
 
-export type LeadFormInput = z.infer<typeof leadFormSchema>;
+export type LeadFormInput = z.infer<typeof leadFormSchema> & {
+  form_config_id?: number | null;
+  custom_data?: Record<string, unknown>;
+  [key: string]: unknown;
+};
 
 // ─────────────────────────────────────────────────────────────
 // Advanced Filter System Types

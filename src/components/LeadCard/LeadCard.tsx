@@ -101,6 +101,26 @@ const LeadCardComponent: React.FC<LeadCardProps> = ({
         )}
 
         {lead.notes && <div className="lead-notes-box">{lead.notes}</div>}
+
+        {lead.custom_data && Object.keys(lead.custom_data).length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            {Object.entries(lead.custom_data).map(([k, v]) => (
+              <span
+                key={k}
+                style={{
+                  fontSize: 11.5,
+                  backgroundColor: '#F4F4F5',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  color: '#52525B',
+                  fontWeight: 500,
+                }}
+              >
+                {k}: {String(v)}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -110,6 +110,14 @@ const ReviewSheet: React.FC<ReviewSheetProps> = ({
               {data.notes || 'No notes added'}
             </span>
           </div>
+
+          {data.custom_data &&
+            Object.entries(data.custom_data).map(([key, val]) => (
+              <div key={key} className="review-item">
+                <span className="review-label">{key.replace(/_/g, ' ')}</span>
+                <span className="review-value">{String(val || '—')}</span>
+              </div>
+            ))}
         </div>
 
         {/* Action Buttons */}

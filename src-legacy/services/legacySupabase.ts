@@ -165,6 +165,8 @@ export const legacySupabase = {
       home_type: input.home_type,
       email: input.email ? input.email.trim() : '',
       notes: input.notes ? input.notes.trim() : '',
+      form_config_id: input.form_config_id || undefined,
+      custom_data: input.custom_data || {},
       created_at: now,
       updated_at: now,
       sync_status: 'pending_sync',
@@ -193,7 +195,7 @@ export const legacySupabase = {
    * Sync a single lead to Supabase
    */
   syncSingleLead: function (lead: Lead): Promise<boolean> {
-    const payload = {
+    const payload: any = {
       name: lead.name,
       phone: lead.phone,
       country_code: lead.country_code || '+91',
@@ -202,6 +204,8 @@ export const legacySupabase = {
       notes: lead.notes || '',
       created_at: lead.created_at || new Date().toISOString(),
       updated_at: lead.updated_at || new Date().toISOString(),
+      form_config_id: lead.form_config_id || null,
+      custom_data: lead.custom_data || {},
     };
 
     const isAuth = legacySupabase.isAuthenticated();
@@ -281,6 +285,8 @@ export const legacySupabase = {
             home_type: item.home_type || '2BHK',
             email: item.email || '',
             notes: item.notes || '',
+            form_config_id: item.form_config_id || undefined,
+            custom_data: item.custom_data || {},
             created_at: item.created_at || new Date().toISOString(),
             updated_at: item.updated_at || new Date().toISOString(),
             sync_status: 'synced',
@@ -292,6 +298,36 @@ export const legacySupabase = {
       }
 
       return getLocalCache();
+    });
+  },
+
+  /**
+   * Fetch active published form configuration using explicit column selection
+   */
+  getPublishedFormConfig: function (): Promise<any> {
+    const columns = 'id,version,title,subtitle,submit_button_text,success_message,fields,appearance,published_at';
+    return sendXhr<any[]>(
+      'GET',
+      '/rest/v1/form_configs?is_active=eq.true&status=eq.published&select=' + columns + '&limit=1',
+      null,
+      false
+    ).then(function (res) {
+      if (res.status === 200 && Array.isArray(res.data) && res.data.length > 0) {
+        try {
+          localStorage.setItem('cached_form_config_v1', JSON.stringify(res.data[0]));
+        } catch {
+          // ignore
+        }
+        return res.data[0];
+      }
+
+      try {
+        const cached = localStorage.getItem('cached_form_config_v1');
+        if (cached) return JSON.parse(cached);
+      } catch {
+        // ignore
+      }
+      return null;
     });
   },
 
