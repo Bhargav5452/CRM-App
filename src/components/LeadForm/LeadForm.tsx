@@ -218,14 +218,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const formContent = (
     <form
       onSubmit={handleSubmit(handleInternalSubmit)}
-      className="lead-form-grid"
       autoComplete="off"
       action="javascript:void(0);"
       data-lpignore="true"
       data-form-type="other"
     >
-      {/* Full Name */}
-      <div className="form-field-group">
+      <div className="form-grid">
+        {/* Full Name */}
+        <div className="form-field-group">
         <label htmlFor="lead_full_name" className="field-label">
           {nameConfig?.label || 'Full Name'} <span className="required-asterisk">*</span>
         </label>
@@ -475,6 +475,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           )}
         </div>
       ))}
+      </div>
 
       {/* Form Action */}
       <div className="form-actions">
