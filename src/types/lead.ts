@@ -83,10 +83,10 @@ export const getCountryByCode = (code: string): CountryCode => {
 export const HOME_TYPES = [
   '2BHK',
   '3BHK',
-  '4BHK',
-  'Villa',
-  'Open Land',
-  'Commercial Properties',
+  // '4BHK',
+  // 'Villa',
+  // 'Open Land',
+  // 'Commercial Properties',
 ] as const;
 
 export const leadFormSchema = z

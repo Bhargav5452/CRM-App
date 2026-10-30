@@ -12,7 +12,7 @@ import {
   CountryCode,
   getCountryByCode,
 } from '../../types/lead';
-import { FormConfig, DEFAULT_FORM_CONFIG } from '../../types/formConfig';
+import { FormConfig } from '../../types/formConfig';
 import { formConfigService } from '../../services/formConfigService';
 import './LeadForm.css';
 

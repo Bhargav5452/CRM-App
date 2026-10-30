@@ -10,7 +10,7 @@ export interface Lead {
   updated_at: string;
   sync_status?: 'synced' | 'pending_sync';
   form_config_id?: number | null;
-  custom_data?: any;
+  custom_data?: Record<string, unknown>;
 }
 
 export interface CountryCode {
@@ -80,10 +80,10 @@ export const getCountryByCode = (code: string): CountryCode => {
 export const HOME_TYPES = [
   '2BHK',
   '3BHK',
-  '4BHK',
-  'Villa',
-  'Open Land',
-  'Commercial Properties',
+  // '4BHK',
+  // 'Villa',
+  // 'Open Land',
+  // 'Commercial Properties',
 ] as const;
 
 export interface LeadFormInput {
@@ -94,7 +94,7 @@ export interface LeadFormInput {
   email: string;
   notes: string;
   form_config_id?: number | null;
-  custom_data?: any;
+  custom_data?: Record<string, unknown>;
 }
 
 export type DateFilterOption =
