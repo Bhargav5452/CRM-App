@@ -4,7 +4,30 @@ import {
   DEFAULT_COUNTRY_CODE, CountryCode, getCountryByCode,
   validateLegacyLeadForm
 } from '../types/legacyValidation';
+import { legacySupabase } from '../services/legacySupabase';
 import '../../src/components/LeadForm/LeadForm.css';
+
+interface LegacyFormField {
+  id: string;
+  key: string;
+  type: string;
+  label: string;
+  placeholder?: string;
+  description?: string;
+  options?: string[];
+  required?: boolean;
+  is_core?: boolean;
+  is_visible?: boolean;
+}
+
+interface LegacyFormConfig {
+  id: string;
+  version: number;
+  title: string;
+  subtitle: string;
+  submit_button_text: string;
+  fields: LegacyFormField[];
+}
 
 interface LeadFormProps {
   onSubmit: (data: LeadFormInput) => void;
@@ -37,6 +60,11 @@ const CloseIcon = () => (
 const LegacyLeadForm: React.FC<LeadFormProps> = ({
   onSubmit, defaultValues, submitButtonText = 'Review Details', hideHeader = false,
 }) => {
+  const [activeConfig, setActiveConfig] = useState<LegacyFormConfig | null>(null);
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>(
+    (defaultValues && defaultValues.custom_data) || {}
+  );
+
   const [formData, setFormData] = useState<LeadFormInput>({
     name: (defaultValues && defaultValues.name) || '',
     country_code: (defaultValues && defaultValues.country_code) || DEFAULT_COUNTRY_CODE.code,
@@ -45,6 +73,26 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     email: (defaultValues && defaultValues.email) || '',
     notes: (defaultValues && defaultValues.notes) || '',
   });
+
+  useEffect(() => {
+    legacySupabase.getPublishedFormConfig().then((cfg: LegacyFormConfig | null) => {
+      if (cfg) setActiveConfig(cfg);
+    }).catch(() => {});
+  }, []);
+
+  const nameConfig = activeConfig && activeConfig.fields && activeConfig.fields.find((f) => f.key === 'name');
+  const phoneConfig = activeConfig && activeConfig.fields && activeConfig.fields.find((f) => f.key === 'phone');
+  const homeTypeConfig = activeConfig && activeConfig.fields && activeConfig.fields.find((f) => f.key === 'home_type');
+  const emailConfig = activeConfig && activeConfig.fields && activeConfig.fields.find((f) => f.key === 'email');
+  const notesConfig = activeConfig && activeConfig.fields && activeConfig.fields.find((f) => f.key === 'notes');
+  const customFields = (activeConfig && activeConfig.fields)
+    ? activeConfig.fields.filter((f) => !f.is_core && f.is_visible)
+    : [];
+
+  const availableHomeTypes =
+    homeTypeConfig && homeTypeConfig.options && homeTypeConfig.options.length > 0
+      ? homeTypeConfig.options
+      : HOME_TYPES;
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isHomeTypeOpen, setIsHomeTypeOpen] = useState(false);
@@ -137,10 +185,22 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     setCountrySearch('');
   };
 
+  const handleCustomChange = (key: string, val: unknown) => {
+    setCustomValues((prev) => {
+      const next = Object.assign({}, prev);
+      next[key] = val;
+      return next;
+    });
+  };
+
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (isValid) {
-      onSubmit(formData);
+      const submissionData: LeadFormInput = Object.assign({}, formData, {
+        form_config_id: activeConfig ? Number(activeConfig.id) : undefined,
+        custom_data: customValues,
+      });
+      onSubmit(submissionData);
     } else {
       setTouched({ name: true, country_code: true, phone: true, home_type: true, email: true, notes: true });
     }
@@ -167,6 +227,17 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     else if (e.key === 'Enter') { e.preventDefault(); if (allFilteredCountries[keyFocusedIdx]) handleSelectCountry(allFilteredCountries[keyFocusedIdx]); }
   };
 
+  const headerTitle = defaultValues
+    ? 'Edit Client'
+    : (activeConfig && activeConfig.title) || 'Client Info';
+  const headerSubtitle = defaultValues
+    ? 'Update client details below'
+    : (activeConfig && activeConfig.subtitle) || 'Enter the details of your client';
+  const effectiveSubmitButtonText =
+    (activeConfig && activeConfig.submit_button_text) ||
+    submitButtonText ||
+    'Review Details';
+
   const formContent = (
     <form
       onSubmit={handleSubmitForm}
@@ -178,124 +249,120 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
     >
       <div className="form-grid">
         {/* Full Name */}
-        <div className="form-field-group">
-          <label htmlFor="crm_client_name" className="field-label">Full Name <span className="required-asterisk">*</span></label>
-          <input
-            id="crm_client_name"
-            name="crm_client_name_val"
-            type="text"
-            placeholder="Enter full name"
-            className={"custom-input" + (touched.name && errors.name ? ' input-error' : '')}
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
-            onBlur={() => handleBlur('name')}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="words"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-            ref={nameInputRef}
-          />
-          {touched.name && errors.name && <span className="error-message">{errors.name}</span>}
-        </div>
+        {(!nameConfig || nameConfig.is_visible !== false) && (
+          <div className="form-field-group">
+            <label htmlFor="crm_client_name" className="field-label">
+              {(nameConfig && nameConfig.label) || 'Full Name'} <span className="required-asterisk">*</span>
+            </label>
+            <input
+              id="crm_client_name"
+              name="crm_client_name_val"
+              type="text"
+              placeholder={(nameConfig && nameConfig.placeholder) || 'Enter full name'}
+              className={"custom-input" + (touched.name && errors.name ? ' input-error' : '')}
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              onBlur={() => handleBlur('name')}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
+              ref={nameInputRef}
+            />
+            {touched.name && errors.name && <span className="error-message">{errors.name}</span>}
+          </div>
+        )}
 
         {/* Phone Number */}
-        <div className="form-field-group" ref={countryPickerRef}>
-          <label htmlFor="crm_client_phone" className="field-label">Phone Number <span className="required-asterisk">*</span></label>
-          <div className={"phone-input-container" + (touched.phone && (errors.phone || errors.country_code) ? ' input-error' : '')}>
-            <div className="country-picker-trigger" onClick={() => setIsCountryOpen(true)}
-              title={"Selected: " + activeCountry.name + " (" + activeCountry.code + ")"}>
-              <span className="country-flag">{activeCountry.flag}</span>
-              <span className="country-dial-code">{activeCountry.code}</span>
-              <span className="country-trigger-chevron"><ChevronDownIcon /></span>
+        {(!phoneConfig || phoneConfig.is_visible !== false) && (
+          <div className="form-field-group" ref={countryPickerRef}>
+            <label htmlFor="crm_client_phone" className="field-label">
+              {(phoneConfig && phoneConfig.label) || 'Phone Number'} <span className="required-asterisk">*</span>
+            </label>
+            <div className={"phone-input-container" + (touched.phone && (errors.phone || errors.country_code) ? ' input-error' : '')}>
+              <div className="country-picker-trigger" onClick={() => setIsCountryOpen(true)}
+                title={"Selected: " + activeCountry.name + " (" + activeCountry.code + ")"}>
+                <span className="country-flag">{activeCountry.flag}</span>
+                <span className="country-dial-code">{activeCountry.code}</span>
+                <span className="country-trigger-chevron"><ChevronDownIcon /></span>
+              </div>
+              <input
+                id="crm_client_phone"
+                name="crm_client_phone_val"
+                type="tel"
+                inputMode="numeric"
+                maxLength={activeCountry.digits}
+                placeholder={(phoneConfig && phoneConfig.placeholder) || ("Enter " + activeCountry.digits + "-digit number")}
+                className="phone-number-input"
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                onBlur={() => handleBlur('phone')}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                data-lpignore="true"
+                data-form-type="other"
+              />
             </div>
-            <input
-              id="crm_client_phone"
-              name="crm_client_phone_val"
-              type="tel"
-              inputMode="numeric"
-              maxLength={activeCountry.digits}
-              placeholder={"Enter " + activeCountry.digits + "-digit number"}
-              className="phone-number-input"
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              onBlur={() => handleBlur('phone')}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              data-lpignore="true"
-              data-form-type="other"
-            />
+            {touched.phone && errors.phone && <span className="error-message">{errors.phone}</span>}
           </div>
-          {touched.phone && errors.phone && <span className="error-message">{errors.phone}</span>}
-        </div>
+        )}
 
         {/* Home Type */}
-        <div className="form-field-group" ref={homeTypeRef}>
-          <label htmlFor="legacy_home_type_trigger" className="field-label">Home Type <span className="required-asterisk">*</span></label>
-          <div id="legacy_home_type_trigger" tabIndex={0} role="button" aria-haspopup="listbox" aria-expanded={isHomeTypeOpen}
-            className={"custom-dropdown-trigger" + (isHomeTypeOpen ? ' focused' : '') + (touched.home_type && errors.home_type ? ' input-error' : '')}
-            onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsHomeTypeOpen(!isHomeTypeOpen); } }}>
-            {formData.home_type ? <span className="dropdown-value">{formData.home_type}</span> : <span className="dropdown-placeholder">Select home type</span>}
-            <span className={"select-chevron" + (isHomeTypeOpen ? ' open' : '')}><ChevronDownIcon /></span>
-          </div>
-          {isHomeTypeOpen && (
-            <div className="custom-dropdown-menu" role="listbox">
-              {HOME_TYPES.map((type) => {
-                const isSelected = formData.home_type === type;
-                return (
-                  <div key={type} role="option" aria-selected={isSelected}
-                    className={"dropdown-option" + (isSelected ? ' selected' : '')}
-                    onClick={() => handleSelectHomeType(type)}>
-                    <span>{type}</span>
-                    {isSelected && <span className="option-check"><CheckIcon /></span>}
-                  </div>
-                );
-              })}
+        {(!homeTypeConfig || homeTypeConfig.is_visible !== false) && (
+          <div className="form-field-group" ref={homeTypeRef}>
+            <label htmlFor="legacy_home_type_trigger" className="field-label">
+              {(homeTypeConfig && homeTypeConfig.label) || 'Home Type'} {(!homeTypeConfig || homeTypeConfig.required) && <span className="required-asterisk">*</span>}
+            </label>
+            <div id="legacy_home_type_trigger" tabIndex={0} role="button" aria-haspopup="listbox" aria-expanded={isHomeTypeOpen}
+              className={"custom-dropdown-trigger" + (isHomeTypeOpen ? ' focused' : '') + (touched.home_type && errors.home_type ? ' input-error' : '')}
+              onClick={() => setIsHomeTypeOpen(!isHomeTypeOpen)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsHomeTypeOpen(!isHomeTypeOpen); } }}>
+              {formData.home_type ? (
+                <span className="dropdown-value">{formData.home_type}</span>
+              ) : (
+                <span className="dropdown-placeholder">{(homeTypeConfig && homeTypeConfig.placeholder) || 'Select home type'}</span>
+              )}
+              <span className={"select-chevron" + (isHomeTypeOpen ? ' open' : '')}><ChevronDownIcon /></span>
             </div>
-          )}
-          {touched.home_type && errors.home_type && <span className="error-message">{errors.home_type}</span>}
-        </div>
+            {isHomeTypeOpen && (
+              <div className="custom-dropdown-menu" role="listbox">
+                {availableHomeTypes.map((type) => {
+                  const isSelected = formData.home_type === type;
+                  return (
+                    <div key={type} role="option" aria-selected={isSelected}
+                      className={"dropdown-option" + (isSelected ? ' selected' : '')}
+                      onClick={() => handleSelectHomeType(type)}>
+                      <span>{type}</span>
+                      {isSelected && <span className="option-check"><CheckIcon /></span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {touched.home_type && errors.home_type && <span className="error-message">{errors.home_type}</span>}
+          </div>
+        )}
 
         {/* Email */}
-        <div className="form-field-group">
-          <label htmlFor="crm_client_email" className="field-label">Email</label>
-          <input
-            id="crm_client_email"
-            name="crm_client_email_val"
-            type="text"
-            inputMode="email"
-            placeholder="Enter email (optional)"
-            className={"custom-input" + (touched.email && errors.email ? ' input-error' : '')}
-            value={formData.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            onBlur={() => handleBlur('email')}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-          />
-          {touched.email && errors.email && <span className="error-message">{errors.email}</span>}
-        </div>
-
-        {/* Notes */}
-        <div className="form-field-group form-field-full">
-          <label htmlFor="crm_client_notes" className="field-label">Notes</label>
-          <div className="textarea-container">
-            <textarea
-              id="crm_client_notes"
-              name="crm_client_notes_val"
-              maxLength={300}
-              placeholder="Add notes (optional)"
-              className={"custom-textarea" + (touched.notes && errors.notes ? ' input-error' : '')}
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              onBlur={() => handleBlur('notes')}
+        {(!emailConfig || emailConfig.is_visible !== false) && (
+          <div className="form-field-group">
+            <label htmlFor="crm_client_email" className="field-label">
+              {(emailConfig && emailConfig.label) || 'Email'} {emailConfig && emailConfig.required && <span className="required-asterisk">*</span>}
+            </label>
+            <input
+              id="crm_client_email"
+              name="crm_client_email_val"
+              type="text"
+              inputMode="email"
+              placeholder={(emailConfig && emailConfig.placeholder) || 'Enter email (optional)'}
+              className={"custom-input" + (touched.email && errors.email ? ' input-error' : '')}
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              onBlur={() => handleBlur('email')}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="none"
@@ -303,17 +370,99 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
               data-lpignore="true"
               data-form-type="other"
             />
-            <div className="textarea-footer">
-              <span className={"char-counter" + (formData.notes.length === 300 ? ' max-reached' : '')}>{formData.notes.length}/300</span>
-            </div>
+            {touched.email && errors.email && <span className="error-message">{errors.email}</span>}
           </div>
-          {touched.notes && errors.notes && <span className="error-message">{errors.notes}</span>}
-        </div>
+        )}
+
+        {/* Notes */}
+        {(!notesConfig || notesConfig.is_visible !== false) && (
+          <div className="form-field-group form-field-full">
+            <label htmlFor="crm_client_notes" className="field-label">
+              {(notesConfig && notesConfig.label) || 'Notes'} {notesConfig && notesConfig.required && <span className="required-asterisk">*</span>}
+            </label>
+            <div className="textarea-container">
+              <textarea
+                id="crm_client_notes"
+                name="crm_client_notes_val"
+                maxLength={300}
+                placeholder={(notesConfig && notesConfig.placeholder) || 'Add notes (optional)'}
+                className={"custom-textarea" + (touched.notes && errors.notes ? ' input-error' : '')}
+                value={formData.notes}
+                onChange={(e) => handleChange('notes', e.target.value)}
+                onBlur={() => handleBlur('notes')}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                data-lpignore="true"
+                data-form-type="other"
+              />
+              <div className="textarea-footer">
+                <span className={"char-counter" + (formData.notes.length === 300 ? ' max-reached' : '')}>{formData.notes.length}/300</span>
+              </div>
+            </div>
+            {touched.notes && errors.notes && <span className="error-message">{errors.notes}</span>}
+          </div>
+        )}
+
+        {/* Dynamic Custom Fields */}
+        {customFields.map((cf) => (
+          <div key={cf.id} className={"form-field-group" + (cf.type === 'textarea' ? ' form-field-full' : '')}>
+            <label htmlFor={"legacy_custom_" + cf.key} className="field-label">
+              {cf.label} {cf.required && <span className="required-asterisk">*</span>}
+            </label>
+            {cf.type === 'textarea' ? (
+              <textarea
+                id={"legacy_custom_" + cf.key}
+                className="custom-textarea"
+                placeholder={cf.placeholder || ("Enter " + cf.label)}
+                value={String(customValues[cf.key] || '')}
+                onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+              />
+            ) : cf.type === 'dropdown' ? (
+              <select
+                id={"legacy_custom_" + cf.key}
+                className="custom-input"
+                value={String(customValues[cf.key] || '')}
+                onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+                style={{ appearance: 'auto' }}
+              >
+                <option value="">{cf.placeholder || ("Select " + cf.label)}</option>
+                {(cf.options || []).map((opt, i) => (
+                  <option key={i} value={opt}>{opt}</option>
+                ))}
+              </select>
+            ) : cf.type === 'checkbox' ? (
+              <label style={{ display: 'flex', alignItems: 'center', marginTop: 6, fontSize: 14.5, cursor: 'pointer' }}>
+                <input
+                  id={"legacy_custom_" + cf.key}
+                  type="checkbox"
+                  style={{ marginRight: 8 }}
+                  checked={Boolean(customValues[cf.key])}
+                  onChange={(e) => handleCustomChange(cf.key, e.target.checked)}
+                />
+                <span>{cf.placeholder || cf.label}</span>
+              </label>
+            ) : (
+              <input
+                id={"legacy_custom_" + cf.key}
+                type={cf.type === 'number' ? 'number' : cf.type === 'email' ? 'email' : 'text'}
+                className="custom-input"
+                placeholder={cf.placeholder || ("Enter " + cf.label)}
+                value={String(customValues[cf.key] || '')}
+                onChange={(e) => handleCustomChange(cf.key, e.target.value)}
+              />
+            )}
+            {cf.description && (
+              <span style={{ fontSize: 12, color: '#71717A' }}>{cf.description}</span>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="form-actions">
         <button type="submit" disabled={!isValid} className="btn-submit" title={!isValid ? 'Fill required fields (*)' : undefined}>
-          <span>{submitButtonText}</span>
+          <span>{effectiveSubmitButtonText}</span>
           <ArrowRightIcon />
         </button>
       </div>
@@ -329,8 +478,8 @@ const LegacyLeadForm: React.FC<LeadFormProps> = ({
           <div className="lead-form-card">
             <div className="card-header">
               <div className="header-text">
-                <h1 className="card-title">{defaultValues ? 'Edit Client' : 'Client Info'}</h1>
-                <p className="card-subtitle">{defaultValues ? 'Update client details below' : 'Enter the details of your client'}</p>
+                <h1 className="card-title">{headerTitle}</h1>
+                <p className="card-subtitle">{headerSubtitle}</p>
               </div>
             </div>
             {formContent}
