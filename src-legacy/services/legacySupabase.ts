@@ -7,6 +7,7 @@ const LOCAL_STORAGE_KEY = 'offline_crm_leads_v1';
 
 // In-memory token storage (persists during page session, cleared on reload or explicit signout)
 let inMemoryAccessToken: string | null = null;
+let lastSyncError: string = '';
 
 interface XhrResponse<T = any> {
   status: number;
@@ -195,17 +196,33 @@ export const legacySupabase = {
    * Sync a single lead to Supabase
    */
   syncSingleLead: function (lead: Lead): Promise<boolean> {
+    var notesText = lead.notes || '';
+    if (lead.custom_data && typeof lead.custom_data === 'object') {
+      var customKeys = Object.keys(lead.custom_data);
+      if (customKeys.length > 0) {
+        var extraDetails: string[] = [];
+        for (var k = 0; k < customKeys.length; k++) {
+          var cKey = customKeys[k];
+          var cVal = (lead.custom_data as any)[cKey];
+          if (cVal !== undefined && cVal !== null && cVal !== '') {
+            extraDetails.push(cKey + ': ' + cVal);
+          }
+        }
+        if (extraDetails.length > 0) {
+          notesText = notesText ? (notesText + ' | ' + extraDetails.join(', ')) : extraDetails.join(', ');
+        }
+      }
+    }
+
     const payload: any = {
       name: lead.name,
       phone: lead.phone,
       country_code: lead.country_code || '+91',
       home_type: lead.home_type,
       email: lead.email || '',
-      notes: lead.notes || '',
+      notes: notesText,
       created_at: lead.created_at || new Date().toISOString(),
       updated_at: lead.updated_at || new Date().toISOString(),
-      form_config_id: lead.form_config_id || null,
-      custom_data: lead.custom_data || {},
     };
 
     const isAuth = legacySupabase.isAuthenticated();
@@ -228,8 +245,15 @@ export const legacySupabase = {
         saveLocalCache(leads);
         return true;
       }
+      if (res.error) {
+        lastSyncError = res.error;
+      }
       return false;
     });
+  },
+
+  getLastSyncError: function (): string {
+    return lastSyncError;
   },
 
   /**

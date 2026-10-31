@@ -327,23 +327,27 @@ class DatabaseService {
    */
   private async syncSingleLead(lead: Lead): Promise<boolean> {
     try {
+      let notesText = lead.notes || '';
+      if (lead.custom_data && Object.keys(lead.custom_data).length > 0) {
+        const extra = Object.entries(lead.custom_data)
+          .filter(([, v]) => v !== undefined && v !== null && v !== '')
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(', ');
+        if (extra) {
+          notesText = notesText ? `${notesText} | ${extra}` : extra;
+        }
+      }
+
       const payload: Record<string, unknown> = {
         name: lead.name,
         phone: lead.phone,
         country_code: lead.country_code || '+91',
         home_type: lead.home_type,
         email: lead.email || '',
-        notes: lead.notes || '',
+        notes: notesText,
         created_at: lead.created_at,
         updated_at: lead.updated_at,
       };
-
-      if (lead.form_config_id) {
-        payload.form_config_id = lead.form_config_id;
-      }
-      if (lead.custom_data && Object.keys(lead.custom_data).length > 0) {
-        payload.custom_data = lead.custom_data;
-      }
 
       const { error } = await supabase
         .from('leads')

@@ -54,9 +54,14 @@ const LegacyDebug: React.FC = () => {
       setLeads(readLocalLeads());
       if (result.total === 0) {
         setSyncResult('No pending leads to sync — all leads are already synced.');
-      } else {
+      } else if (result.synced === result.total) {
         setSyncResult(
-          'Sync complete: ' + result.synced + ' of ' + result.total + ' pending lead(s) uploaded to Supabase.'
+          'Sync complete: All ' + result.synced + ' pending lead(s) uploaded to Supabase!'
+        );
+      } else {
+        const errDetail = (legacySupabase as any).getLastSyncError ? (legacySupabase as any).getLastSyncError() : '';
+        setSyncResult(
+          'Sync finished: ' + result.synced + ' of ' + result.total + ' uploaded.' + (errDetail ? ' (Last error: ' + errDetail + ')' : '')
         );
       }
     }).catch(function () {
