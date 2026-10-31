@@ -262,42 +262,65 @@ export const legacySupabase = {
   },
 
   /**
-   * Fetch all central leads from Supabase
+   * Fetch all central leads from Supabase.
+   * Syncs pending local leads first, then merges any still-pending ones
+   * so locally saved leads are never silently destroyed by a Supabase overwrite.
    */
   getLeads: function (): Promise<Lead[]> {
     if (!legacySupabase.isAuthenticated()) {
       return Promise.resolve(getLocalCache());
     }
 
-    return sendXhr<any[]>(
-      'GET',
-      '/rest/v1/leads?select=*&order=created_at.desc',
-      null,
-      true
-    ).then(function (res) {
-      if (res.status === 200 && Array.isArray(res.data)) {
-        const leads: Lead[] = res.data.map(function (item: any) {
-          return {
-            id: Number(item.id),
-            name: item.name || '',
-            phone: item.phone || '',
-            country_code: item.country_code || '+91',
-            home_type: item.home_type || '2BHK',
-            email: item.email || '',
-            notes: item.notes || '',
-            form_config_id: item.form_config_id || undefined,
-            custom_data: item.custom_data || {},
-            created_at: item.created_at || new Date().toISOString(),
-            updated_at: item.updated_at || new Date().toISOString(),
-            sync_status: 'synced',
-          };
-        });
+    // Step 1: Upload any pending local leads to Supabase BEFORE fetching,
+    // so they appear in the Supabase result and are not lost on overwrite.
+    return legacySupabase.syncPendingLeads().then(function () {
+      return sendXhr<any[]>(
+        'GET',
+        '/rest/v1/leads?select=*&order=created_at.desc',
+        null,
+        true
+      ).then(function (res) {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          const supabaseLeads: Lead[] = res.data.map(function (item: any) {
+            return {
+              id: Number(item.id),
+              name: item.name || '',
+              phone: item.phone || '',
+              country_code: item.country_code || '+91',
+              home_type: item.home_type || '2BHK',
+              email: item.email || '',
+              notes: item.notes || '',
+              form_config_id: item.form_config_id || undefined,
+              custom_data: item.custom_data || {},
+              created_at: item.created_at || new Date().toISOString(),
+              updated_at: item.updated_at || new Date().toISOString(),
+              sync_status: 'synced',
+            };
+          });
 
-        saveLocalCache(leads);
-        return leads;
-      }
+          // Step 2: Preserve leads still pending_sync (sync failed — no internet,
+          // RLS rejection, etc.) so they are never overwritten and destroyed.
+          const localLeads = getLocalCache();
+          const stillPending = localLeads.filter(function (l) {
+            if (l.sync_status !== 'pending_sync') return false;
+            const key = (l.country_code || '') + l.phone;
+            for (let i = 0; i < supabaseLeads.length; i++) {
+              if ((supabaseLeads[i].country_code || '') + supabaseLeads[i].phone === key) {
+                return false;
+              }
+            }
+            return true;
+          });
 
-      return getLocalCache();
+          // Step 3: Merge — still-pending leads at top, Supabase leads below
+          const merged = stillPending.concat(supabaseLeads);
+          saveLocalCache(merged);
+          return merged;
+        }
+
+        // Supabase fetch failed — return local cache completely untouched
+        return getLocalCache();
+      });
     });
   },
 

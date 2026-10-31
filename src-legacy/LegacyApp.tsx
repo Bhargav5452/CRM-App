@@ -3,6 +3,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LegacyNavigation from './components/LegacyNavigation';
 import LegacyHome from './pages/LegacyHome';
 import LegacyCRM from './pages/LegacyCRM';
+import LegacyDebug from './pages/LegacyDebug';
 import './styles/legacy-global.css';
 
 const LegacyApp: React.FC = () => {
@@ -16,6 +17,7 @@ const LegacyApp: React.FC = () => {
           <Switch>
             <Route exact path="/home" component={LegacyHome} />
             <Route exact path="/crm" component={LegacyCRM} />
+            <Route exact path="/debug" component={LegacyDebug} />
             <Route exact path="/">
               <Redirect to="/home" />
             </Route>
